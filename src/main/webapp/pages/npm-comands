@@ -1,0 +1,3 @@
+npm install element-ui -S
+npm install vue
+npm install bootstrap@3
