@@ -36,8 +36,11 @@ public class Controler {
     }
 
     @RequestMapping(value = {"/cash-balance"}, method = RequestMethod.GET)
-    public ModelAndView cashBalance(HttpServletResponse response) throws ParseException {
+    public ModelAndView cashBalance(
+            @RequestParam(value = "filial", required = true) final int filial,
+            HttpServletResponse response) throws ParseException {
         ModelAndView res = new ModelAndView("cash-balance");
+        res.addObject("filial", filial);
         return res;
     }
 
@@ -71,7 +74,7 @@ public class Controler {
 
     @RequestMapping(value = {"/get-all-data"}, method = RequestMethod.GET)
     public String get_all_data(HttpServletResponse response) throws ParseException {
-        return dataService.getAllData();
+        return dataService.getFilialData(99);
     }
 
     @RequestMapping(value = {"/save-filial"}, method = RequestMethod.POST)
@@ -98,6 +101,6 @@ public class Controler {
     public String get_filial_data(
             @PathVariable Integer id,
             HttpServletResponse response) throws ParseException {
-        return ""; //dataService.getFilialData();
+        return dataService.getFilialData(id);
     }
 }

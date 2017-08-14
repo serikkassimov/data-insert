@@ -22,8 +22,12 @@
 <div id="el">
     <el-menu :default-active="activeIndex2" class="el-menu-demo" mode="horizontal" @select="handleSelect">
         <el-menu-item index="1"><a href="/data-insert/cash-balance-all">Сводные данные</a></el-menu-item>
-        <el-menu-item index="2"><a href="/data-insert/cash-balance">Данные по филиалу</a></el-menu-item>
         <el-menu-item index="3"><a href="/data-insert/settings">Настройка</a></el-menu-item>
+        <el-submenu index="2">
+            <template slot="title">Филиалы</template>
+            <el-menu-item v-for="(item, index) in filials" v-bind:index="'2'+index" ><a target="_blank" v-bind:href="'/data-insert/cash-balance?filial='+item.id">Данные по филиалу {{item.name}}</a></el-menu-item>
+
+        </el-submenu>
     </el-menu>
     <div>
         <el-collapse v-model="activeNames" @change="handleChange">
@@ -68,6 +72,7 @@
         data: {
             activeIndex2: '3',
             activeNames: [],
+            filials:[],
             options: [{
                 value: '1',
                 label: 'Актобе'
@@ -86,12 +91,23 @@
             data: []
         },
         methods: {
+            loadFilials() {
+                this.$http.get("get-filials").then(
+                        function (response) {
+                            this.filials = JSON.parse(response.data);
+                        }, function (error) {
+                            console.log("Error load filials")
+                        })
+            },
             handleSelect(key, keyPath) {
                 console.log(key, keyPath);
             },
             handleChange(key, keyPath) {
                 console.log(key, keyPath);
             },
+        },
+        mounted: function(){
+            this.loadFilials();
         }
     });
 </script>

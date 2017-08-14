@@ -19,33 +19,25 @@
 <body>
 <div id="el">
     <el-menu :default-active="activeIndex2" class="el-menu-demo" mode="horizontal" @select="handleSelect">
-        <el-menu-item index="1"><a href="/data-insert/cash-balance-all">Сводные данные</a></el-menu-item>
-        <el-menu-item index="2"><a href="/data-insert/cash-balance">Данные по филиалу</a></el-menu-item>
+        <el-menu-item index="2"><a href="#">Данные по филиалу</a></el-menu-item>
     </el-menu>
     <div style="font-family:  Arial, sans-serif">
         <el-form label-width="400px" :label-position="'left'" :rules="rules" :model="formData" ref="formRef">
-            <el-form-item label="Филиал">
-                <el-select v-model="formData.filial" placeholder="Выбирите филиал" @change="changeFilial">
-                    <el-option
-                            v-for="item in filials"
-                            :key="item.code"
-                            :label="item.name"
-                            :value="item.code">
-                    </el-option>
-                </el-select>
-            </el-form-item>
+
             <el-table
                     :data="dataAll"
                     height="250"
                     border
-                    style="width: 80%; margin-bottom: 20px">
+                    style="width: 80%; margin-bottom: 20px"
+                    @row-dblclick="editData">
+            >
                 <el-table-column
                         prop="date"
                         label="Дата"
                         width="180">
                 </el-table-column>
                 <el-table-column
-                        prop="filial"
+                        prop="filialName"
                         label="Филиал"
                         width="180">
                 </el-table-column>
@@ -93,25 +85,42 @@
             activeIndex2: '2',
             indicators: [],
             filials:[],
-            dataAll: [{
-                date: '2016-05-03',
-                filial: 'Tom',
-                1: 'No. 189, Grove St, Los Angeles',
-                2: 'No. 189, Grove St, Los Angeles',
-                3: 'No. 189, Grove St, Los Angeles'
-            }],
+            dataAll: [],
             formData: {
-                filial: '1',
+                filial: ${filial},
                 date: "",
                 datas: []
             }
         },
         methods: {
+
+            editData(row){
+                var dat = [];
+                this.indicators.forEach(function(item){
+                    dat[item.id] = row[item.id];
+                })
+                var parts =row.date.split('-');
+                this.formData = {
+                    filial: ${filial},
+                    date: new Date(parts[0],parts[1]-1,parts[2]),
+                datas: dat
+                };
+            },
             changeFilial() {
                 this.loadDatas();
             },
             handleSelect(key, keyPath) {
                 console.log(key, keyPath);
+            },
+            filialName: function(id) {
+                var name = ""
+                this.filials.forEach(function(item){
+                    if (item.id==id) {
+                        name = item.name;
+                        return item.name;
+                    }
+                })
+                return name;
             },
             loadFilials() {
                 this.$http.get("get-filials").then(
@@ -155,9 +164,15 @@
                         })
             },
             loadDatas() {
-                this.$http.get("get-filial-data/"+this.filial).then(
+                this.$http.get("get-filial-data/"+this.formData.filial).then(
                         function (response) {
                             this.dataAll = JSON.parse(response.data);
+                            var that = this
+                            this.dataAll.forEach(function(item) {
+                                var name = that.filialName(item.filial);
+                                console.log(name)
+                                item.filialName =  name;
+                            })
                         }, function (error) {
                             console.log("Error load indicators")
                         })

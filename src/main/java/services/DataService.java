@@ -1,6 +1,5 @@
 package services;
 
-import com.google.gson.Gson;
 import entity.EntityDatas;
 import entityes.DataRow;
 import org.hibernate.Criteria;
@@ -47,7 +46,7 @@ public class DataService {
                 double value;
                 if (datas.get(i) instanceof Integer) {
                     value = ((Integer) datas.get(i)).doubleValue();
-                }  else {
+                } else {
                     value = ((Double) datas.get(i)).doubleValue();
                 }
                 entityDatas.setValue(value);
@@ -57,13 +56,13 @@ public class DataService {
         }
     }
 
-    private EntityDatas saveEntityDatas (EntityDatas entityDatas) {
+    private EntityDatas saveEntityDatas(EntityDatas entityDatas) {
         Session session = sessionFactory.openSession();
         Criteria criteria = session.createCriteria(EntityDatas.class);
         criteria.add(Restrictions.eq("id", entityDatas.getId()));
         EntityDatas datas = (EntityDatas) criteria.uniqueResult();
-        if (datas==null) {
-            datas =new EntityDatas();
+        if (datas == null) {
+            datas = new EntityDatas();
         }
         datas.setFilial(entityDatas.getFilial());
         datas.setIndicator(entityDatas.getIndicator());
@@ -102,8 +101,60 @@ public class DataService {
         return jsonArray.toString();
     }
 
-    public String getFilialData() {
-        return getAllData();
+    class Value {
+        int ind_id;
+        double value;
+    }
+
+    class Row {
+        Date date;
+        int filail;
+        ArrayList<Value> values = new ArrayList<>();
+    }
+
+    private void addToRes(ArrayList<Row> rows, EntityDatas datas) {
+        Row findRow = null;
+        for (Row row : rows) {
+            if ((row.date.equals(datas.getDate()) & (row.filail == datas.getFilial()))) {
+                findRow = row;
+                break;
+            }
+        }
+        if (findRow == null) {
+            findRow = new Row();
+            rows.add(findRow);
+        }
+        findRow.date = datas.getDate();
+        findRow.filail = datas.getFilial();
+        Value val = new Value();
+        val.ind_id = datas.getIndicator();
+        val.value = datas.getValue();
+        findRow.values.add(val);
+    }
+
+    public String getFilialData(int id) {
+        Session session = sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(EntityDatas.class);
+        if (id!=99) {
+            criteria.add(Restrictions.eq("filial", id));
+        }
+        ArrayList<EntityDatas> entityDatases = (ArrayList<EntityDatas>) criteria.list();
+        session.close();
+        ArrayList<Row> res = new ArrayList<>();
+        for (EntityDatas datas : entityDatases) {
+            addToRes(res, datas);
+        }
+        JSONArray resJson = new JSONArray();
+        for (Row r : res) {
+            JSONObject object = new JSONObject();
+            object.put("date", r.date);
+            object.put("filial", r.filail);
+            for (Value value : r.values) {
+                object.put(""+value.ind_id, value.value);
+            }
+            resJson.put(object);
+        }
+        return resJson.toString();
     }
 }
 
