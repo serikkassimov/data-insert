@@ -68,10 +68,10 @@
             filials:[],
             dataAll: [{
                 date: '2016-05-03',
-                filial: 'Tom',
-                1: 'No. 189, Grove St, Los Angeles',
-                2: 'No. 189, Grove St, Los Angeles',
-                3: 'No. 189, Grove St, Los Angeles'
+                filial: 'Астана',
+                1: '123',
+                2: '234',
+                3: '456'
             }],
         },
         methods: {

@@ -14,7 +14,7 @@ public class EntityDatas {
     private Date date;
     private int filial;
     private int indicator;
-    private int value;
+    private double value;
     private String note;
     private java.util.Date updateTime;
     private String user;
@@ -62,11 +62,11 @@ public class EntityDatas {
 
     @Basic
     @Column(name = "value")
-    public int getValue() {
+    public double getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(double value) {
         this.value = value;
     }
 
@@ -126,10 +126,24 @@ public class EntityDatas {
         result = 31 * result + (date != null ? date.hashCode() : 0);
         result = 31 * result + filial;
         result = 31 * result + indicator;
-        result = 31 * result + value;
+        result = (int) (31 * result + Math.round(value))        ;
         result = 31 * result + (note != null ? note.hashCode() : 0);
         result = 31 * result + (updateTime != null ? updateTime.hashCode() : 0);
         result = 31 * result + (user != null ? user.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "EntityDatas{" +
+                "id=" + id +
+                ", date=" + date +
+                ", filial=" + filial +
+                ", indicator=" + indicator +
+                ", value=" + value +
+                ", note='" + note + '\'' +
+                ", updateTime=" + updateTime +
+                ", user='" + user + '\'' +
+                '}';
     }
 }

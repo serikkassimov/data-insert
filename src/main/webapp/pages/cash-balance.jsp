@@ -155,7 +155,7 @@
                         })
             },
             loadDatas() {
-                this.$http.get("get-filial-data/"+filial).then(
+                this.$http.get("get-filial-data/"+this.filial).then(
                         function (response) {
                             this.dataAll = JSON.parse(response.data);
                         }, function (error) {

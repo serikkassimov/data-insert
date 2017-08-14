@@ -26,29 +26,60 @@ public class DataService {
     ArrayList<DataRow> dataRows = new ArrayList<>();
     @Autowired
     SessionFactory sessionFactory;
-    
+
     public void addNewDataRow(Map data) {
         Date date = null;
-        int id = Integer.parseInt(data.get("id").toString());
-        int datas = Integer.parseInt(data.get("datas").toString());
+        int filial = Integer.parseInt(data.get("filial").toString());
         try {
             date = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")).parse(data.get("date").toString().replaceAll("Z$", "+0000"));
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        DataRow row = findRow(datas, date);
-        if (row == null) {
-            row = new DataRow();
-            saveData(id, filial, data, )
-            dataRows.add(row);
+        ArrayList<Object> datas = (ArrayList<Object>) data.get("datas");
+        for (int i = 0; i < datas.size(); i++) {
+            if (datas.get(i) != null) {
+                EntityDatas entityDatas = new EntityDatas();
+                entityDatas.setFilial(filial);
+                entityDatas.setDate(new java.sql.Date(date.getTime()));
+                entityDatas.setIndicator(i);
+                entityDatas.setUpdateTime(new Date());
+                entityDatas.setUser("admin");
+                double value;
+                if (datas.get(i) instanceof Integer) {
+                    value = ((Integer) datas.get(i)).doubleValue();
+                }  else {
+                    value = ((Double) datas.get(i)).doubleValue();
+                }
+                entityDatas.setValue(value);
+                saveEntityDatas(entityDatas);
+                System.out.println(entityDatas);
+            }
         }
-
     }
 
+    private EntityDatas saveEntityDatas (EntityDatas entityDatas) {
+        Session session = sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(EntityDatas.class);
+        criteria.add(Restrictions.eq("id", entityDatas.getId()));
+        EntityDatas datas = (EntityDatas) criteria.uniqueResult();
+        if (datas==null) {
+            datas =new EntityDatas();
+        }
+        datas.setFilial(entityDatas.getFilial());
+        datas.setIndicator(entityDatas.getIndicator());
+        datas.setDate(entityDatas.getDate());
+        datas.setValue(entityDatas.getValue());
+        datas.setUser(entityDatas.getUser());
+        datas.setNote(entityDatas.getNote());
+        datas.setUpdateTime(new Date());
+        session.saveOrUpdate(datas);
+        session.flush();
+        return datas;
+    }
 
-    private DataRow findRow(int datas, Date date) {
+    private DataRow findRow(int filial, Date date) {
         for (DataRow dataRow : dataRows) {
-            if ((dataRow.getdatas() == datas) & (dataRow.getDate().equals(date))) {
+            if ((dataRow.getFilial() == filial) & (dataRow.getDate().equals(date))) {
                 return dataRow;
             }
         }
@@ -61,17 +92,17 @@ public class DataService {
             JSONObject data = new JSONObject();
             SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
             data.put("date", format.format(dataRow.getDate()));
-            data.put("datas", dataRow.getdatas());
+            data.put("filial", dataRow.getFilial());
             Object[] datas = dataRow.getDatas();
             for (int i = 0; i < datas.length; i++) {
-                data.put(""+(i), datas[i]);
+                data.put("" + (i), datas[i]);
             }
             jsonArray.put(data);
         }
         return jsonArray.toString();
     }
 
-    public String getdatasData() {
+    public String getFilialData() {
         return getAllData();
     }
 }
