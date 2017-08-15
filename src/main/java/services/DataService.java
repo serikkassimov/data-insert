@@ -73,6 +73,7 @@ public class DataService {
         datas.setUpdateTime(new Date());
         session.saveOrUpdate(datas);
         session.flush();
+        session.close();
         return datas;
     }
 

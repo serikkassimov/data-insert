@@ -29,7 +29,7 @@ public class Controler {
     @Autowired
     DataService dataService;
 
-    @RequestMapping(value = {"/", "/index"}, method = RequestMethod.GET)
+    @RequestMapping(value = { "/index"}, method = RequestMethod.GET)
     public ModelAndView index(HttpServletResponse response) throws ParseException {
         ModelAndView res = new ModelAndView("index");
         return res;
@@ -44,7 +44,7 @@ public class Controler {
         return res;
     }
 
-    @RequestMapping(value = {"/cash-balance-all"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/", "/cash-balance-all"}, method = RequestMethod.GET)
     public ModelAndView cashBalanceAll(HttpServletResponse response) throws ParseException {
         ModelAndView res = new ModelAndView("cash-balance-all");
         return res;
