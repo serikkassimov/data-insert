@@ -40,7 +40,7 @@ public class DataService {
                 EntityDatas entityDatas = new EntityDatas();
                 entityDatas.setFilial(filial);
                 entityDatas.setDate(new java.sql.Date(date.getTime()));
-                entityDatas.setIndicator(i);
+                entityDatas.setDim1(i);
                 entityDatas.setUpdateTime(new Date());
                 entityDatas.setUser("admin");
                 double value;
@@ -65,7 +65,7 @@ public class DataService {
             datas = new EntityDatas();
         }
         datas.setFilial(entityDatas.getFilial());
-        datas.setIndicator(entityDatas.getIndicator());
+        datas.setDim1(entityDatas.getDim1());
         datas.setDate(entityDatas.getDate());
         datas.setValue(entityDatas.getValue());
         datas.setUser(entityDatas.getUser());
@@ -128,7 +128,7 @@ public class DataService {
         findRow.date = datas.getDate();
         findRow.filail = datas.getFilial();
         Value val = new Value();
-        val.ind_id = datas.getIndicator();
+        val.ind_id = datas.getDim1();
         val.value = datas.getValue();
         findRow.values.add(val);
     }
