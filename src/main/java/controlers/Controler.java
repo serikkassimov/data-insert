@@ -11,6 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 import services.DataService;
 import services.FilialService;
 import services.IndicatorSevice;
+import services.UtilService;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
@@ -28,10 +29,18 @@ public class Controler {
     IndicatorSevice indicatorSevice;
     @Autowired
     DataService dataService;
+    @Autowired
+    UtilService utilService;
 
     @RequestMapping(value = { "/index"}, method = RequestMethod.GET)
     public ModelAndView index(HttpServletResponse response) throws ParseException {
         ModelAndView res = new ModelAndView("index");
+        return res;
+    }
+
+    @RequestMapping(value = { "/main"}, method = RequestMethod.GET)
+    public ModelAndView main(HttpServletResponse response) throws ParseException {
+        ModelAndView res = new ModelAndView("main");
         return res;
     }
 
@@ -50,6 +59,13 @@ public class Controler {
         return res;
     }
 
+    @RequestMapping(value = {"/incomes"}, method = RequestMethod.GET)
+    public ModelAndView incomes(HttpServletResponse response) throws ParseException {
+        ModelAndView res = new ModelAndView("incomes");
+        res.addObject("filial", 1);
+        return res;
+    }
+
     @RequestMapping(value = {"/settings"}, method = RequestMethod.GET)
     public ModelAndView settings(HttpServletResponse response) throws ParseException {
         ModelAndView res = new ModelAndView("settings");
@@ -64,6 +80,21 @@ public class Controler {
     @RequestMapping(value = {"/get-indicators"}, method = RequestMethod.GET)
     public String get_indicators(HttpServletResponse response) throws ParseException {
         return indicatorSevice.getAllFilials();
+    }
+
+    @RequestMapping(value = {"/get-columns"}, method = RequestMethod.GET)
+    public String get_columns(HttpServletResponse response) throws ParseException {
+        return indicatorSevice.getElementsGson(3);
+    }
+
+    @RequestMapping(value = {"/get-income-types"}, method = RequestMethod.GET)
+    public String get_income_types(HttpServletResponse response) throws ParseException {
+        return indicatorSevice.getElementsGson(2);
+    }
+
+    @RequestMapping(value = {"/get-months"}, method = RequestMethod.GET)
+    public String get_months(HttpServletResponse response) throws ParseException {
+        return utilService.getMonths();
     }
 
     @RequestMapping(value = {"/save-data"}, method = RequestMethod.POST)
@@ -102,5 +133,11 @@ public class Controler {
             @PathVariable Integer id,
             HttpServletResponse response) throws ParseException {
         return dataService.getFilialData(id);
+    }
+    @RequestMapping(value = {"/get-month-data/{filial}/{month}/{type}"}, method = RequestMethod.GET)
+    public String get_month_data(
+            @PathVariable Integer filial,@PathVariable Integer month,@PathVariable Integer type,
+            HttpServletResponse response) throws ParseException {
+        return dataService.getIncomesData(filial, month, type);
     }
 }

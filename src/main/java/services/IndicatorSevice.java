@@ -1,6 +1,7 @@
 package services;
 
 import com.google.gson.Gson;
+import entity.EntityDimensionElement;
 import entity.EntityIndicators;
 import entity.EntityIndicators;
 import entity.EntityIndicators;
@@ -74,5 +75,20 @@ public class IndicatorSevice {
         session.flush();
         session.close();
         return filial;
+    }
+
+    public String getElementsGson(int sp_id){
+        List elements = getElements(sp_id);
+        Gson gson = new Gson();
+        return gson.toJson(elements);
+    }
+
+    public List<EntityDimensionElement> getElements(int sp_id) {
+        Session session = sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(EntityDimensionElement.class);
+        criteria.add(Restrictions.eq("spId", sp_id));
+        List<EntityDimensionElement> elements = criteria.list();
+        session.close();
+        return elements;
     }
 }

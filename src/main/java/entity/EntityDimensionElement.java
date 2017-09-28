@@ -9,9 +9,9 @@ import java.sql.Date;
 @Entity
 @Table(name = "dimension_elements", schema = "worlddata", catalog = "")
 public class EntityDimensionElement {
-    private int id;
-    private int parId;
-    private int spId;
+    private Integer id;
+    private Integer parId;
+    private Integer spId;
     private String code;
     private String name;
     private Date begDate;
@@ -21,31 +21,31 @@ public class EntityDimensionElement {
     @Id
     @Column(name = "id")
     @GeneratedValue
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
     @Basic
     @Column(name = "par_id")
-    public int getParId() {
+    public Integer getParId() {
         return parId;
     }
 
-    public void setParId(int parId) {
+    public void setParId(Integer parId) {
         this.parId = parId;
     }
 
     @Basic
     @Column(name = "sp_id")
-    public int getSpId() {
+    public Integer getSpId() {
         return spId;
     }
 
-    public void setSpId(int spId) {
+    public void setSpId(Integer spId) {
         this.spId = spId;
     }
 
@@ -119,7 +119,7 @@ public class EntityDimensionElement {
 
     @Override
     public int hashCode() {
-        int result = id;
+        Integer result = id;
         result = 31 * result + parId;
         result = 31 * result + spId;
         result = 31 * result + (code != null ? code.hashCode() : 0);

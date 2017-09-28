@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
@@ -71,9 +72,9 @@ public class DataService {
         datas.setUser(entityDatas.getUser());
         datas.setNote(entityDatas.getNote());
         datas.setUpdateTime(new Date());
-        session.saveOrUpdate(datas);
-        session.flush();
-        session.close();
+       // session.saveOrUpdate(datas);
+       // session.flush();
+       // session.close();
         return datas;
     }
 
@@ -97,6 +98,29 @@ public class DataService {
             for (int i = 0; i < datas.length; i++) {
                 data.put("" + (i), datas[i]);
             }
+            jsonArray.put(data);
+        }
+        return jsonArray.toString();
+    }
+
+    public String getIncomesData(Integer filial, Integer month, Integer type) {
+        JSONArray jsonArray = new JSONArray();
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+        while (month-1==cal.get(Calendar.MONTH)) {
+            JSONObject data = new JSONObject();
+            data.put("date", format.format(cal.getTime()));
+            data.put("01", 1231);
+            data.put("02", 1232);
+            data.put("03", 1233);
+            data.put("04", 1234);
+            data.put("05", 1235);
+            data.put("06", 1236);
+            data.put("07", 1237);
+            data.put("08", 1238);
+            System.out.println(cal.getTime());
+            cal.add(Calendar.DAY_OF_MONTH, 1);
             jsonArray.put(data);
         }
         return jsonArray.toString();

@@ -19,7 +19,7 @@
 <body>
 <div id="el">
     <el-menu :default-active="activeIndex2" class="el-menu-demo" mode="horizontal" @select="handleSelect">
-        <el-menu-item index="1"><a href="/data-insert/cash-balance-all">Сводные данные</a></el-menu-item>
+        <el-menu-item index="1"><a href="/data-insert/main">Мониторинг</a></el-menu-item>
         <el-menu-item index="3"><a href="/data-insert/settings">Настройка</a></el-menu-item>
         <el-submenu index="2">
             <template slot="title">Филиалы</template>
