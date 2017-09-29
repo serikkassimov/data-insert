@@ -27,9 +27,7 @@ import java.util.Properties;
 public class WebAppConfig extends WebMvcConfigurerAdapter {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/pages/css/**").addResourceLocations("/pages/css/");
-        registry.addResourceHandler("/pages/js/**").addResourceLocations("/pages/js/");
-        registry.addResourceHandler("/node_modules/**").addResourceLocations("/pages/node_modules/");
+        registry.addResourceHandler("/js/**").addResourceLocations("/pages/js/");
     }
     @Bean
     public UrlBasedViewResolver setupViewResolver() {

@@ -9,10 +9,10 @@
 <html>
 <head>
     <title>Сбор данных по филиалам</title>
-    <link rel="stylesheet" href="node_modules/element-ui/lib/theme-default/index.css">
+    <link rel="stylesheet" href="./js/element-ui.css">
 </head>
-<script src="node_modules/vue/dist/vue.js"></script>
-<script src="node_modules/element-ui/lib/index.js"></script>
+<script src="./js/vue.js"></script>
+<script src="./js/element-ui.js"></script>
 <body>
 <div id="el">
     <div>

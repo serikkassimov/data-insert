@@ -9,12 +9,12 @@
 <html>
 <head>
     <title>Поступление</title>
-    <link rel="stylesheet" href="node_modules/element-ui/lib/theme-default/index.css">
+    <link rel="stylesheet" href="./js/element-ui.css">
 </head>
-<script src="node_modules/vue/dist/vue.js"></script>
-<script src="node_modules/vue-resource/dist/vue-resource.js"></script>
-<script src="node_modules/element-ui/lib/index.js"></script>
-<script src="node_modules/element-ui/lib/umd/locale/ru-RU.js"></script>
+<script src="./js/vue.js"></script>
+<script src="./js/vue-resource.min.js"></script>
+<script src="./js/element-ui.js"></script>
+<script src="./js/element-ui/locale/ru-RU.js"></script>
 
 <body>
 <div id="el">
