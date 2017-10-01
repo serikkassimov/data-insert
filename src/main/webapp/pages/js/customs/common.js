@@ -15,6 +15,10 @@ isUndefined = function(object) {
 	return jQuery.type(object) === typeUndefined;
 };
 
+isDefined = function(object) {
+	return !isUndefined(object);
+};
+
 isNull = function(object) {
 	return jQuery.type(object) === typeNull;
 };
