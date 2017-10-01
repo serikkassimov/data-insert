@@ -173,6 +173,7 @@ public class CustomRememberMeServices implements RememberMeServices, CommonRemem
                             removeRememberMeCookie(request, response);
                             return null;
                         } else {
+                            response.addCookie(createRememberMeCookie(request, series));
                             persistentTokenRepository.updateToken(token.getSeries(), token.getTokenValue(), token.getDate());
                             Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
                             UsernamePasswordAuthenticationToken authentication =
@@ -207,6 +208,7 @@ public class CustomRememberMeServices implements RememberMeServices, CommonRemem
                             removeCommonCookie(request, response);
                             return null;
                         } else {
+                            response.addCookie(createCommonCookie(request, series));
                             persistentTokenRepository.updateToken(token.getSeries(), token.getTokenValue(), token.getDate());
                             Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
                             UsernamePasswordAuthenticationToken authentication =
