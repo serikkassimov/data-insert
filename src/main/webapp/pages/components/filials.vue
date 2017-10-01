@@ -1,4 +1,3 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <template id="filials_template">
     <diV>
         <el-button type="primary" @click="addNew">Добавить</el-button>
