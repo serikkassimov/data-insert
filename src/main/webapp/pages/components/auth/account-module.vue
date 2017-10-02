@@ -96,6 +96,7 @@
 		};
 
 		const pluginInfo = {
+			name: 'components-auth-account-module',
 			parameters: ['store', 'router'],
 			install: function(Vue, store, router) {
 				store.registerModule('account', module);
@@ -110,7 +111,4 @@
 		WorldClassPlugins.plugins.push(pluginInfo);
 	})(jQuery);
 </script>
-
-
-
 <!-- components/auth/account-module.vue :: end -->

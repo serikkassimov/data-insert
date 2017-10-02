@@ -1,5 +1,4 @@
 <!-- components/auth/auth-info-component.vue :: start -->
-
 <template id="components-auth-auth-info">
 	<span>
 		<template v-if="account.anonymousUser">
@@ -34,7 +33,7 @@
 		</el-dialog>
 	</span>
 </template>
-
+<!-- components/auth/auth-info-component.vue :: middle -->
 <script>
 	(function($) {
 		Vue.component('components-auth-auth-info', {
@@ -160,5 +159,4 @@
 		});
 	})(jQuery);
 </script>
-
 <!-- components/auth/auth-info-component.vue :: end -->

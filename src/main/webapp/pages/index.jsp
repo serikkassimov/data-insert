@@ -48,9 +48,22 @@
                         </div>
                     </el-col>
                 </el-row>
+                <el-row :gutter="2">
+                    <el-col :xs="8" :sm="6" :md="4" :lg="3">
+                        <div class="grid-content bg-purple">Меню</div>
+                    </el-col>
+                    <el-col :xs="16" :sm="18" :md="20" :lg="21">
+                        <div class="grid-content bg-purple">
+                            <router-view></router-view>
+                        </div>
+                    </el-col>
+                </el-row>
                 <hr>
-                <H1>MAH DEBUG!!!</H1>
-                <pre>{{ account }}</pre>
+                <input type="button" value="addMenu" @click="addMenu">
+                <input type="button" value="removeMenuThis" @click="removeMenuThis">
+                <input type="button" value="removeMenuAnother" @click="removeMenuAnother">
+                <hr>
+                <pre>{{menuTree}}</pre>
             </template>
         </div>
         <div id="loading-layer" style="position: fixed; left: 0px; top: 0px; right: 0px; bottom: 0px; align-content: center;">
@@ -78,39 +91,14 @@
         
         <script>
             (function($) {
-                const moduleRoutes = {
-                    namespaced: true,
-                    state: {
-                        routes: [
-                            /*
-                            Each page component must add own route info
-                            Example route info:
-                            {
-                                path: '/...',
-                                name: '',
-                                menuHierarchy:
-                                component: Vue.component('...'),
-                                requiredAuthorities: ['', ..., '']
-                            }
-                            */
-                        ]
-                    }
-                };
-                const store = new Vuex.Store({
-                    modules: {
-                        routes: moduleRoutes
-                    }
-                });
+                const store = new Vuex.Store({});
     
-                const routes = [
-                    { path: '/foo', component: Vue.component('components-page-views-foo') }
-                ];
+                const routes = [];
     
-                const router = new VueRouter({
-                    routes: routes
-                });
+                const router = new VueRouter({});
     
                 $(document).ready(function() {
+                    // WorldClassPlugins.debug = true;
                     WorldClassPlugins.install(Vue, store, router);
                     new Vue({
                         el: "#app",
@@ -119,9 +107,36 @@
                         data: {
                         },
                         computed: Vuex.mapState({
-                            account: state => state.account
+                            account: state => state.account,
+                            menu: state => state.menu,
+                            state: state => state,
+                            getters: (state, getters) => getters,
+                            menuTree: (state, getters) => getters['menu/tree']
                         }),
                         methods: {
+                            addMenu: function() {
+                                var info = {
+                                    treePath: ['Root node', 'Parent node', 'This node'],
+                                    route: {path: '/path'},
+                                    requiresAuthorization: true,
+                                    requiredRoles: ['ROLE_USER_1', 'ROLE_USER_2'],
+                                    order: 0
+                                };
+                                this.$store.commit('menu/add', info);
+                                info = {
+                                    treePath: ['Root node', 'Parent node', 'Another node'],
+                                    route: {path: '/ppp'},
+                                    requiresAuthorization: false,
+                                    order: 2
+                                };
+                                this.$store.commit('menu/add', info);
+                            },
+                            removeMenuThis: function() {
+                                this.$store.commit('menu/remove', {treePath: ['Root node', 'Parent node', 'This node']});
+                            },
+                            removeMenuAnother: function() {
+                                this.$store.commit('menu/remove', {treePath: ['Root node', 'Parent node', 'Another node']});
+                            }
                         },
                         mounted: function() {
                             $("#loading-layer").remove();

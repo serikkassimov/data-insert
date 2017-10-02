@@ -27,12 +27,28 @@ isNullOrUndefined = function(object) {
 	return isUndefined(object) || isNull(object);
 };
 
+isDefinedNonNull = function(object) {
+	return (!isUndefined(object)) && (!isNull(object));
+};
+
 isBoolean = function(object) {
 	return jQuery.type(object) === typeBoolean;
 };
 
 isNumber = function(object) {
 	return jQuery.type(object) === typeNumber;
+};
+
+isNanNumber = function(object) {
+	return isNumber(object) && Number.isNaN(object);
+};
+
+isFiniteNumber = function(object) {
+	return isNumber(object) && (!isNanNumber(object)) && Number.isFinite(object);
+};
+
+isComparableNumber = function(object) {
+	return isNumber(object) && isFiniteNumber(object);
 };
 
 isString = function(object) {
