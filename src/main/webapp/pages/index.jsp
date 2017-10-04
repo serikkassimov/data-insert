@@ -7,6 +7,8 @@
         <title>World Class Finance</title>
         <link rel="stylesheet" href="./js/element-ui.css">
         <style type="text/css">
+            html, body {margin:0;padding:0;height:100%;}
+
             .page-view-enter-active {
                 transition: opacity .5s
             }
@@ -26,19 +28,27 @@
             .el-col {
                 border-radius: 2px;
             }
+            .el-row--flex > .el-col {
+                display: flex;
+            }
             .bg-purple {
                 background-color: #EFF2F7;
             }
             .grid-content {
                 border-radius: 2px;
                 min-height: 36px;
+                border: thin solid #EFF2F7;
+            }
+            .el-row--flex > .el-col > .grid-content {
+                height: 100%;
+                width: 100%;
             }
         </style>
     </head>
     <body>
         <div id="app">
             <template>
-                <el-row :gutter="2">
+                <el-row type="flex">
                     <el-col :xs="8" :sm="6" :md="4" :lg="3">
                         <div class="grid-content bg-purple">Лого</div>
                     </el-col>
@@ -48,22 +58,22 @@
                         </div>
                     </el-col>
                 </el-row>
-                <el-row :gutter="2">
-                    <el-col :xs="8" :sm="6" :md="4" :lg="3">
-                        <div class="grid-content bg-purple">Меню</div>
+                <el-row type="flex">
+                    <el-col :xs="16" :sm="10" :md="6" :lg="3">
+                        <div class="grid-content bg-purple" style="overflow: auto;">
+                            <components-menu-menu-component></components-menu-menu-component>
+                        </div>
                     </el-col>
                     <el-col :xs="16" :sm="18" :md="20" :lg="21">
-                        <div class="grid-content bg-purple">
+                        <div class="grid-content">
+                            <input type="button" value="addMenu" @click="addMenu">
+                            <input type="button" value="removeMenuThis" @click="removeMenuThis">
+                            <input type="button" value="removeMenuAnother" @click="removeMenuAnother">
+                            <hr>
                             <router-view></router-view>
                         </div>
                     </el-col>
                 </el-row>
-                <hr>
-                <input type="button" value="addMenu" @click="addMenu">
-                <input type="button" value="removeMenuThis" @click="removeMenuThis">
-                <input type="button" value="removeMenuAnother" @click="removeMenuAnother">
-                <hr>
-                <pre>{{menuTree}}</pre>
             </template>
         </div>
         <div id="loading-layer" style="position: fixed; left: 0px; top: 0px; right: 0px; bottom: 0px; align-content: center;">
@@ -81,9 +91,6 @@
 
         <script src="./js/customs/common.js"></script>
         <script src="./js/customs/vue-plugins.js"></script>
-
-        <script>
-        </script>
         
         <c:forEach items="${includedVues}" var="includedVue">
 <c:import url="/${includedVue}" charEncoding="utf-8"></c:import>
@@ -111,23 +118,32 @@
                             menu: state => state.menu,
                             state: state => state,
                             getters: (state, getters) => getters,
-                            menuTree: (state, getters) => getters['menu/tree']
+                            menuTree: (state, getters) => getters['menu/tree'],
+                            menuTreeSecured: (state, getters) => getters['menu/treeSecured'],
+                            test: (state, getters) => getters['account/authorityNames']
                         }),
                         methods: {
                             addMenu: function() {
                                 var info = {
                                     treePath: ['Root node', 'Parent node', 'This node'],
-                                    route: {path: '/path'},
+                                    route: {path: '/pn/path'},
                                     requiresAuthorization: true,
-                                    requiredRoles: ['ROLE_USER_1', 'ROLE_USER_2'],
-                                    order: 0
+                                    requiredRoles: ['ROLE_ADMIN'],
+                                    order: 2
                                 };
                                 this.$store.commit('menu/add', info);
                                 info = {
                                     treePath: ['Root node', 'Parent node', 'Another node'],
-                                    route: {path: '/ppp'},
+                                    route: {path: '/pn/ppp'},
                                     requiresAuthorization: false,
-                                    order: 2
+                                    order: 0
+                                };
+                                this.$store.commit('menu/add', info);
+                                info = {
+                                    treePath: ['Root node', 'Parent node'],
+                                    route: {path: '/pn'},
+                                    requiresAuthorization: false,
+                                    order: 1
                                 };
                                 this.$store.commit('menu/add', info);
                             },

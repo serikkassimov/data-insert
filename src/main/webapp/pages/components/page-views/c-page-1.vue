@@ -1,7 +1,7 @@
 <!-- components/page-views/c-page-1.vue :: start -->
 <template id="components-page-views-c-page-1">
 	<div>
-		<div>{{ text }}</div>
+		<div>{{ text }} :: {{id}}</div>
 	</div>
 </template>
 <!-- components/page-views/c-page-1.vue :: middle -->
@@ -20,7 +20,10 @@
 				c: function() {
 					return 'c';
 				},
-				b: state => 'b'
+				b: state => 'b',
+				id: function() {
+					return this.$route.params.id;
+				}
 			}),
 			methods: {}
 		});
@@ -29,7 +32,7 @@
 		WorldClassPlugins.plugins.push({
 			parameters: ['store', 'router'],
 			name: componentName,
-			dependencies: [parentComponentName],
+			dependencies: ['components-menu-menu-module', parentComponentName],
 			install: function(Vue, store, router) {
 				router.addRoutes([
 					{
@@ -39,10 +42,36 @@
 							{
 								path: 'c1',
 								component: Vue.component(componentName)
+							},
+							{
+								path: 'c1/:id',
+								component: Vue.component(componentName)
 							}
 						]
 					}
 				]);
+
+				var info = {
+					treePath: ['P page', 'C page 1'],
+					route: {path: '/p/c1'},
+					requiresAuthorization: false,
+					order: 0
+				};
+				store.commit('menu/add', info);
+				info = {
+					treePath: ['P page', 'C with ID', 'C page 1-1'],
+					route: {path: '/p/c1/1'},
+					requiresAuthorization: false,
+					order: 1
+				};
+				store.commit('menu/add', info);
+				info = {
+					treePath: ['P page', 'C with ID', 'C page 1-2'],
+					route: {path: '/p/c1/2'},
+					requiresAuthorization: false,
+					order: 2
+				};
+				store.commit('menu/add', info);
 			}
 		});
 	})(jQuery);

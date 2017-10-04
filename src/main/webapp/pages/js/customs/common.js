@@ -94,3 +94,19 @@ isRegexp = function(object) {
 isObject = function(object) {
 	return jQuery.type(object) === typeObject;
 };
+
+equals = function(object1, object2) {
+	if (jQuery.type(object1) !== jQuery.type(object2)) return false;
+	else if (isNonEmptyArray(object1) || isObject(object2)) {
+		var checkedIndices = [];
+		var index;
+		for (index in object1) {
+			if (!equals(object1[index], object2[index])) return false;
+			checkedIndices.push(index);
+		}
+		for (index in object2) {
+			if (checkedIndices.indexOf(index) === -1) return false;
+		}
+		return true;
+	} else return object1 === object2;
+};

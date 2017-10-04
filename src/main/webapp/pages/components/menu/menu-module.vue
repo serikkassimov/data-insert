@@ -41,7 +41,24 @@
 		return result;
 	};
 
-	var fillTree = function(tree, info) {
+	var fillTree = function(tree, info, secured, account) {
+		if (secured && info.requiresAuthorization) {
+			if (account.anonymousUser) return;
+			else if (info.requiredRoles.length > 0) {
+				if (account.authorityNames.length === 0) return;
+				else {
+					var overlapExists = false;
+					for (var requiredRoleIndex in info.requiredRoles) {
+						if (account.authorityNames.indexOf(info.requiredRoles[requiredRoleIndex]) > -1) {
+							overlapExists = true;
+							break;
+						}
+					}
+					if (!overlapExists) return;
+				}
+			}
+		}
+
 		var children = tree;
 		var child = undefined;
 		for (var labelIndex in info.treePath) {
@@ -103,6 +120,18 @@
 		else child.route = info.route;
 		child.requiresAuthorization = info.requiresAuthorization;
 		child.requiredRoles = $.extend(true, [], info.requiredRoles);
+	};
+
+	var createIndices = function(tree, parentIndex) {
+		for (var index in tree) {
+			var element = tree[index];
+			var elementIndex = '' + index;
+			if (isNonEmptyString(parentIndex)) elementIndex = parentIndex + '-' + elementIndex;
+			element.index = elementIndex;
+			if (isNonEmptyArray(element.children)) {
+				for (var childIndex in element.children) createIndices(element.children, elementIndex);
+			}
+		}
 	};
 
 	const module = {
@@ -204,9 +233,29 @@
 		},
 		actions: {},
 		getters: {
-			tree: state => {
+			tree: (state, getters, rootState, rootGetters) => {
 				var result = [];
-				for (var index in state.menu) fillTree(result, state.menu[index]);
+				for (var index in state.menu) fillTree(
+					result,
+					state.menu[index],
+					false
+				);
+				createIndices(result);
+				return result;
+			},
+			treeSecured: (state, getters, rootState, rootGetters) => {
+				var account = {
+					anonymousUser: rootState.account.anonymousUser,
+					authorityNames: rootGetters['account/authorityNames']
+				};
+				var result = [];
+				for (var index in state.menu) fillTree(
+					result,
+					state.menu[index],
+					true,
+					account
+				);
+				createIndices(result);
 				return result;
 			}
 		}

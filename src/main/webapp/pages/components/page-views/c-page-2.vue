@@ -29,7 +29,7 @@
 		WorldClassPlugins.plugins.push({
 			parameters: ['store', 'router'],
 			name: componentName,
-			dependencies: [parentComponentName],
+			dependencies: ['components-menu-menu-module', parentComponentName],
 			install: function(Vue, store, router) {
 				router.addRoutes([
 					{
@@ -43,6 +43,14 @@
 						]
 					}
 				]);
+
+				const info = {
+					treePath: ['P page', 'C page 2'],
+					route: {path: '/p/c2'},
+					requiresAuthorization: false,
+					order: 4
+				};
+				store.commit('menu/add', info);
 			}
 		});
 	})(jQuery);
