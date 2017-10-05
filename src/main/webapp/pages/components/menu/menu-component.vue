@@ -2,38 +2,38 @@
 <template id="components-menu-menu-element-component">
 	<div>
 		<template v-if="item.children && (item.children.length > 0)">
-			<el-submenu :index="item.index">
+			<el-submenu :index="item.index + '-sm'">
 				<template slot="title">
 					<i class="el-icon-menu"></i>
 					<span slot="title">{{item.label}}</span>
 				</template>
 				<template v-if="item.route">
-					<el-menu-item :index="'--' + item.index" @click="elementClick">{{item.label}}</el-menu-item>
+					<el-menu-item :index="item.index" @click="elementClick">{{item.label}}</el-menu-item>
 					<el-menu-item-group>
 						<span slot="title">
 							<hr>
 						</span>
 						<template v-for="(child, childIndex) in item.children">
-							<components-menu-menu-element-component :item="child" v-bind:key="child.index" @click="childClick"></components-menu-menu-element-component>
+							<components-menu-menu-element-component :item="child" v-bind:key="childIndex" @click="childClick"></components-menu-menu-element-component>
 						</template>
 					</el-menu-item-group>
 				</template>
 				<template v-else>
 					<template v-for="(child, childIndex) in item.children">
-						<components-menu-menu-element-component :item="child" v-bind:key="child.index" @click="childClick"></components-menu-menu-element-component>
+						<components-menu-menu-element-component :item="child" v-bind:key="childIndex" @click="childClick"></components-menu-menu-element-component>
 					</template>
 				</template>
 			</el-submenu>
 		</template>
 		<template v-else>
-			<el-menu-item :index="'--' + item.index" @click="elementClick">{{item.label}}</el-menu-item>
+			<el-menu-item :index="item.index" @click="elementClick">{{item.label}}</el-menu-item>
 		</template>
 	</div>
 </template>
 <!-- -->
 <template id="components-menu-menu-component">
 	<span>
-		<el-menu theme="dark" :unique-opened="true" :default-active="activeIndex">
+		<el-menu theme="dark" :unique-opened="true" :default-active="activeIndex" :default-openeds="activeSubmenuIndices">
 			<template v-for="(item, index) in menu">
 				<components-menu-menu-element-component :item="item" @click="click"></components-menu-menu-element-component>
 			</template>
@@ -47,7 +47,9 @@
 			template: '#components-menu-menu-element-component',
 			props: ['item'],
 			data: function() {
-				return {};
+				return {
+					index: this.item.index + '-c'
+				};
 			},
 			computed: Vuex.mapState({}),
 			methods: {
@@ -77,6 +79,9 @@
 				return {};
 			},
 			computed: Vuex.mapState({
+				router: function() {
+					return this.$router;
+				},
 				menu: (state, getters) => {
 					return getters['menu/treeSecured'];
 				},
@@ -108,8 +113,27 @@
 						}
 					}
 
-					if (isObject(bestMatchItem)) return '--' + bestMatchItem.index;
-					else return undefined;
+					var result;
+					if (isObject(bestMatchItem)) result = bestMatchItem.index;
+					else result = undefined;
+					return result;
+				},
+				activeSubmenuIndices: function(state, getters) {
+					var activeIndex = this.activeIndex;
+					var result = [];
+					if (isNonEmptyString(activeIndex)) {
+						if (activeIndex.indexOf('--') === 0) activeIndex = activeIndex.substring(2);
+						var indices = activeIndex.split('-');
+						var activeIndex = '';
+						for (var index in indices) {
+							if (activeIndex.length > 0) activeIndex += '-';
+							activeIndex += indices[index];
+							result.push(activeIndex + '-c');
+							if (index < indices.length - 1) result.push(activeIndex + '-sm');
+						}
+						result.push(activeIndex);
+					}
+					return result;
 				}
 			}),
 			methods: {
