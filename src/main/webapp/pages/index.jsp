@@ -7,7 +7,23 @@
         <title>World Class Finance</title>
         <link rel="stylesheet" href="./js/element-ui.css">
         <style type="text/css">
-            html, body {margin:0;padding:0;height:100%;}
+            html, body {
+                margin:0;
+                padding:0;
+                height:100%;
+                display: flex;
+                background-color: #324057;
+            }
+            body {
+                position: absolute;
+                left: 0px;
+                right: 0px;
+            }
+            #app {
+                left: 0px;
+                right: 0px;
+                width: 100%;
+            }
 
             .page-view-enter-active {
                 transition: opacity .5s
@@ -32,12 +48,12 @@
                 display: flex;
             }
             .bg-purple {
-                background-color: #EFF2F7;
+                background-color: #324057;
             }
             .grid-content {
                 border-radius: 2px;
                 min-height: 36px;
-                border: thin solid #EFF2F7;
+                border: thin solid #324057;
             }
             .el-row--flex > .el-col > .grid-content {
                 height: 100%;
@@ -50,7 +66,11 @@
             <template>
                 <el-row type="flex">
                     <el-col :xs="8" :sm="6" :md="4" :lg="3">
-                        <div class="grid-content bg-purple">Лого</div>
+                        <div class="grid-content bg-purple">
+                            <el-menu theme="dark" mode="horizontal">
+                                <el-menu-item :index="'home'" @click="homePageClick">Домашняя страница</el-menu-item>
+                            </el-menu>
+                        </div>
                     </el-col>
                     <el-col :xs="16" :sm="18" :md="20" :lg="21">
                         <div class="grid-content bg-purple" style="text-align: right;">
@@ -58,18 +78,14 @@
                         </div>
                     </el-col>
                 </el-row>
-                <el-row type="flex">
+                <el-row type="flex" style="height: 100%;">
                     <el-col :xs="16" :sm="10" :md="6" :lg="3">
                         <div class="grid-content bg-purple" style="overflow: auto;">
                             <components-menu-menu-component></components-menu-menu-component>
                         </div>
                     </el-col>
                     <el-col :xs="16" :sm="18" :md="20" :lg="21">
-                        <div class="grid-content">
-                            <input type="button" value="addMenu" @click="addMenu">
-                            <input type="button" value="removeMenuThis" @click="removeMenuThis">
-                            <input type="button" value="removeMenuAnother" @click="removeMenuAnother">
-                            <hr>
+                        <div class="grid-content" style="background-color: white;">
                             <router-view></router-view>
                         </div>
                     </el-col>
@@ -114,44 +130,10 @@
                         data: {
                         },
                         computed: Vuex.mapState({
-                            account: state => state.account,
-                            menu: state => state.menu,
-                            state: state => state,
-                            getters: (state, getters) => getters,
-                            menuTree: (state, getters) => getters['menu/tree'],
-                            menuTreeSecured: (state, getters) => getters['menu/treeSecured'],
-                            test: (state, getters) => getters['account/authorityNames']
                         }),
                         methods: {
-                            addMenu: function() {
-                                var info = {
-                                    treePath: ['Root node', 'Parent node', 'This node'],
-                                    route: {path: '/pn/path'},
-                                    requiresAuthorization: true,
-                                    requiredRoles: ['ROLE_ADMIN'],
-                                    order: 2
-                                };
-                                this.$store.commit('menu/add', info);
-                                info = {
-                                    treePath: ['Root node', 'Parent node', 'Another node'],
-                                    route: {path: '/pn/ppp'},
-                                    requiresAuthorization: false,
-                                    order: 0
-                                };
-                                this.$store.commit('menu/add', info);
-                                info = {
-                                    treePath: ['Root node', 'Parent node'],
-                                    route: {path: '/pn'},
-                                    requiresAuthorization: false,
-                                    order: 1
-                                };
-                                this.$store.commit('menu/add', info);
-                            },
-                            removeMenuThis: function() {
-                                this.$store.commit('menu/remove', {treePath: ['Root node', 'Parent node', 'This node']});
-                            },
-                            removeMenuAnother: function() {
-                                this.$store.commit('menu/remove', {treePath: ['Root node', 'Parent node', 'Another node']});
+                            homePageClick: function() {
+                                this.$router.push('/');
                             }
                         },
                         mounted: function() {

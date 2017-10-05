@@ -33,7 +33,7 @@
 <!-- -->
 <template id="components-menu-menu-component">
 	<span>
-		<el-menu :unique-opened="true" :default-active="activeIndex">
+		<el-menu theme="dark" :unique-opened="true" :default-active="activeIndex">
 			<template v-for="(item, index) in menu">
 				<components-menu-menu-element-component :item="item" @click="click"></components-menu-menu-element-component>
 			</template>

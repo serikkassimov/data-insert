@@ -33,19 +33,19 @@
 			name: componentName,
 			dependencies: ['components-menu-menu-module'],
 			install: function(Vue, store, router) {
-				router.addRoutes([
-					{
-						path: '/p', component: Vue.component(componentName)
-					}
-				]);
+				// router.addRoutes([
+				// 	{
+				// 		path: '/p', component: Vue.component(componentName)
+				// 	}
+				// ]);
 
-				const info = {
-					treePath: ['P page'],
-					route: {path: '/p'},
-					requiresAuthorization: false,
-					order: 0
-				};
-				store.commit('menu/add', info);
+				// const info = {
+				// 	treePath: ['P page'],
+				// 	route: {path: '/p'},
+				// 	requiresAuthorization: false,
+				// 	order: 0
+				// };
+				// store.commit('menu/add', info);
 			}
 		});
 	})(jQuery);
