@@ -20,6 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,7 +70,7 @@ public class AuthController {
             if (remember) rememberMeServices.loginFail(request, response);
             else commonRememberServices.commonLoginFail(request, response);
             
-            if (exception instanceof BadCredentialsException) return LoginResultEnumDto.BAD_CREDENTIALS;
+            if ((exception instanceof BadCredentialsException) || (exception instanceof UsernameNotFoundException)) return LoginResultEnumDto.BAD_CREDENTIALS;
             else return LoginResultEnumDto.EXCEPTION;
         }
         return LoginResultEnumDto.SUCCESS;

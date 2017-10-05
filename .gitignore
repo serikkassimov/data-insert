@@ -2,3 +2,4 @@
 target
 *.iml
 src/main/webapp/pages/.vscode
+jdbc:h2:tcp://185.22.64.109:9092/./db
