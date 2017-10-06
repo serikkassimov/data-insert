@@ -78,7 +78,7 @@
                         </div>
                     </el-col>
                 </el-row>
-                <el-row type="flex" style="height: 100%;">
+                <el-row type="flex" style="min-height: 100%;">
                     <el-col :xs="16" :sm="10" :md="6" :lg="3">
                         <div class="grid-content bg-purple" style="overflow: auto;">
                             <components-menu-menu-component></components-menu-menu-component>
