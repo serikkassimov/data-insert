@@ -19,7 +19,7 @@ public class BaseEntity implements Serializable {
     public static final String FK = "FK";
     
     @Id
-    @GeneratedValue(generator = SEQ, strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(generator = SEQ, strategy = GenerationType.AUTO)
     @Column(name = COL_ID)
     private Long id;
 
