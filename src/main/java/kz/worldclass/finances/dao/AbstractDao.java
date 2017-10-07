@@ -3,6 +3,7 @@ package kz.worldclass.finances.dao;
 import com.querydsl.core.dml.DMLClause;
 import com.querydsl.jpa.hibernate.HibernateQuery;
 import com.querydsl.jpa.hibernate.HibernateQueryFactory;
+import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -57,92 +58,77 @@ public abstract class AbstractDao<T> {
     }
     
     /**
-     * 
+     * <i><b>Note:</b> uses {@link #getCurrentSession()}, see errors which may be thrown</i>
      * @param id
      * @return 
      * @throws IllegalStateException one of:
      *  <ul>
-     *      <li>session factory is null</li>
-     *      <li>current session is null</li>
+     *      <li>{@link #getEntityClass()} returned <code>null</code></li>
      *  </ul>
      */
     public T get(Long id) {
-        return (T) getCurrentSession().get(getEntityClass(), id);
+        Class<T> entityClass = getEntityClass();
+        if (entityClass == null) throw new IllegalStateException("getEntityClass() returned null");
+        return (T) getCurrentSession().get(entityClass, id);
     }
     
     /**
-     * 
-     * @param entity 
+     * <i><b>Note:</b> uses {@link #getCurrentSession()}, see errors which may be thrown</i>
+     * @return 
      * @throws IllegalStateException one of:
      *  <ul>
-     *      <li>session factory is null</li>
-     *      <li>current session is null</li>
+     *      <li>{@link #getEntityClass()} returned <code>null</code></li>
      *  </ul>
+     */
+    public List<T> all() {
+        Class<T> entityClass = getEntityClass();
+        if (entityClass == null) throw new IllegalStateException("getEntityClass() returned null");
+        return (List<T>) getCurrentSession().createQuery(String.format("select t from %s t", getEntityClass().getName())).list();
+    }
+    
+    /**
+     * <i><b>Note:</b> uses {@link #getCurrentSession()}, see errors which may be thrown</i>
+     * @param entity 
      */
     public void persist(T entity) {
         getCurrentSession().persist(entity);
     }
     
     /**
-     * 
+     * <i><b>Note:</b> uses {@link #getCurrentSession()}, see errors which may be thrown</i>
      * @param entity 
-     * @throws IllegalStateException one of:
-     *  <ul>
-     *      <li>session factory is null</li>
-     *      <li>current session is null</li>
-     *  </ul>
      */
     public void merge(T entity) {
         getCurrentSession().merge(entity);
     }
     
     /**
-     * 
+     * <i><b>Note:</b> uses {@link #getCurrentSession()}, see errors which may be thrown</i>
      * @param entity 
-     * @throws IllegalStateException one of:
-     *  <ul>
-     *      <li>session factory is null</li>
-     *      <li>current session is null</li>
-     *  </ul>
      */
     public void delete(T entity) {
         getCurrentSession().delete(entity);
     }
     
     /**
-     * 
+     * <i><b>Note:</b> uses {@link #getCurrentSession()}, see errors which may be thrown</i>
      * @param entity 
-     * @throws IllegalStateException one of:
-     *  <ul>
-     *      <li>session factory is null</li>
-     *      <li>current session is null</li>
-     *  </ul>
      */
     public void save(T entity) {
         getCurrentSession().save(entity);
     }
     
     /**
-     * 
+     * <i><b>Note:</b> uses {@link #getCurrentSession()}, see errors which may be thrown</i>
      * @param entity 
-     * @throws IllegalStateException one of:
-     *  <ul>
-     *      <li>session factory is null</li>
-     *      <li>current session is null</li>
-     *  </ul>
      */
     public void update(T entity) {
         getCurrentSession().update(entity);
     }
     
     /**
-     * 
+     * <i><b>Note:</b> uses {@link #getCurrentSession()}, see errors which may be thrown</i>
      * @param entity 
-     * @throws IllegalStateException one of:
-     *  <ul>
-     *      <li>session factory is null</li>
-     *      <li>current session is null</li>
-     *  </ul>
      */
     public void saveOrUpdate(T entity) {
         getCurrentSession().saveOrUpdate(entity);
