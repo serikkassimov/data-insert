@@ -1,11 +1,9 @@
 package kz.worldclass.finances.data.entity;
 
-import kz.worldclass.finances.data.entity.base.BaseDictEntity;
-
 import javax.persistence.*;
-import java.util.Collection;
 
 import static kz.worldclass.finances.data.entity.DictBudgetEntity.*;
+import kz.worldclass.finances.data.entity.base.BaseTreeDictEntity;
 
 @Entity
 @Table(
@@ -15,6 +13,16 @@ import static kz.worldclass.finances.data.entity.DictBudgetEntity.*;
                     name = IND + SEP + TABLE + SEP + COL_CODE,
                     unique = true,
                     columnList = COL_CODE
+            ),
+            @Index(
+                    name = IND + SEP + TABLE + SEP + COL_PARENT_ID,
+                    unique = false,
+                    columnList = COL_PARENT_ID
+            ),
+            @Index(
+                    name = IND + SEP + TABLE + SEP + COL_OUTGO,
+                    unique = false,
+                    columnList = COL_OUTGO
             )
         },
         uniqueConstraints = {
@@ -24,19 +32,20 @@ import static kz.worldclass.finances.data.entity.DictBudgetEntity.*;
             )
         }
 )
-@SequenceGenerator(name = SEQ, schema = SCHEMA, sequenceName = SEQ + SEP + TABLE, allocationSize = 10)
+@SequenceGenerator(name = SEQ, schema = SCHEMA, sequenceName = SEQ + SEP + TABLE, allocationSize = ALLOCATION_SIZE_DEFAULT)
 @SuppressWarnings("PersistenceUnitPresent")
-public class DictBudgetEntity extends BaseDictEntity {
+public class DictBudgetEntity extends BaseTreeDictEntity<DictBudgetEntity> {
     public static final String TABLE = "DICT_BUDGET";
+    public static final String COL_OUTGO = "OUTGO";
     
-    @OneToMany(mappedBy = UserRoleLinkEntity.PROP_ROLE)
-    private Collection<UserRoleLinkEntity> userLinks;
+    @Column(name = COL_OUTGO, nullable = false, unique = false, insertable = true, updatable = true)
+    private Boolean outgo;
 
-    public Collection<UserRoleLinkEntity> getUserLinks() {
-        return userLinks;
+    public Boolean getOutgo() {
+        return outgo;
     }
 
-    public void setUserLinks(Collection<UserRoleLinkEntity> userLinks) {
-        this.userLinks = userLinks;
+    public void setOutgo(Boolean outgo) {
+        this.outgo = outgo;
     }
 }

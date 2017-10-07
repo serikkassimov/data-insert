@@ -32,7 +32,7 @@ import static kz.worldclass.finances.data.entity.UserEntity.*;
             )
         }
 )
-@SequenceGenerator(name = SEQ, schema = SCHEMA, sequenceName = SEQ + SEP + TABLE, allocationSize = 10)
+@SequenceGenerator(name = SEQ, schema = SCHEMA, sequenceName = SEQ + SEP + TABLE, allocationSize = ALLOCATION_SIZE_DEFAULT)
 @SuppressWarnings("PersistenceUnitPresent")
 public class UserEntity extends BaseEntity {
 //    public static final String TABLE = "USER"; // могут быть ошибки при создании таблицы

@@ -1,13 +1,11 @@
 package kz.worldclass.finances.data.entity;
 
-import java.util.Collection;
 import javax.persistence.Entity;
 import javax.persistence.Index;
-import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import static kz.worldclass.finances.data.entity.DictRoleEntity.*;
+import static kz.worldclass.finances.data.entity.DictBudgetNextChangeStateEntity.*;
 import kz.worldclass.finances.data.entity.base.BaseDictEntity;
 
 @Entity
@@ -29,17 +27,6 @@ import kz.worldclass.finances.data.entity.base.BaseDictEntity;
 )
 @SequenceGenerator(name = SEQ, schema = SCHEMA, sequenceName = SEQ + SEP + TABLE, allocationSize = ALLOCATION_SIZE_DEFAULT)
 @SuppressWarnings("PersistenceUnitPresent")
-public class DictRoleEntity extends BaseDictEntity {
-    public static final String TABLE = "DICT_ROLE";
-    
-    @OneToMany(mappedBy = UserRoleLinkEntity.PROP_ROLE)
-    private Collection<UserRoleLinkEntity> userLinks;
-
-    public Collection<UserRoleLinkEntity> getUserLinks() {
-        return userLinks;
-    }
-
-    public void setUserLinks(Collection<UserRoleLinkEntity> userLinks) {
-        this.userLinks = userLinks;
-    }
+public class DictBudgetNextChangeStateEntity extends BaseDictEntity {
+    public static final String TABLE = "DICT_BUDGET_NEXT_CHANGE_STATE";
 }

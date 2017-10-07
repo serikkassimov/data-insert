@@ -17,6 +17,9 @@ public class BaseEntity implements Serializable {
     public static final String IND = "IND";
     public static final String UNQ = "UNQ";
     public static final String FK = "FK";
+    public static final int ALLOCATION_SIZE_DEFAULT = 10;
+    public static final int BUDGET_PRECISION = 14;
+    public static final int BUDGET_SCALE = 2;
     
     @Id
     @GeneratedValue(generator = SEQ, strategy = GenerationType.AUTO)

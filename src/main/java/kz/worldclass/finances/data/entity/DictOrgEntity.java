@@ -28,7 +28,7 @@ import kz.worldclass.finances.data.entity.base.BaseDictEntity;
             )
         }
 )
-@SequenceGenerator(name = SEQ, schema = SCHEMA, sequenceName = SEQ + SEP + TABLE)
+@SequenceGenerator(name = SEQ, schema = SCHEMA, sequenceName = SEQ + SEP + TABLE, allocationSize = ALLOCATION_SIZE_DEFAULT)
 @SuppressWarnings("PersistenceUnitPresent")
 public class DictOrgEntity extends BaseDictEntity {
     public static final String TABLE = "DICT_ORG";
