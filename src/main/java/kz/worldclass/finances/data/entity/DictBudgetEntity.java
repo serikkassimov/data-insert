@@ -5,7 +5,7 @@ import kz.worldclass.finances.data.entity.base.BaseDictEntity;
 import javax.persistence.*;
 import java.util.Collection;
 
-import static kz.worldclass.finances.data.entity.DictRoleEntity.*;
+import static kz.worldclass.finances.data.entity.DictBudgetEntity.*;
 
 @Entity
 @Table(
@@ -26,8 +26,8 @@ import static kz.worldclass.finances.data.entity.DictRoleEntity.*;
 )
 @SequenceGenerator(name = SEQ, schema = SCHEMA, sequenceName = SEQ + SEP + TABLE, allocationSize = 10)
 @SuppressWarnings("PersistenceUnitPresent")
-public class DictBudjetEntity extends BaseDictEntity {
-    public static final String TABLE = "DICT_BUDJET";
+public class DictBudgetEntity extends BaseDictEntity {
+    public static final String TABLE = "DICT_BUDGET";
     
     @OneToMany(mappedBy = UserRoleLinkEntity.PROP_ROLE)
     private Collection<UserRoleLinkEntity> userLinks;
