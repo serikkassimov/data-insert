@@ -43,7 +43,7 @@
 
 	var fillTree = function(tree, info, secured, account) {
 		if (secured && info.requiresAuthorization) {
-			if (account.anonymousUser) return;
+			if (account.anonymousUser || (!account.accountNonExpired) || (!account.accountNonLocked) || (!account.credentialsNonExpired) || (!account.enabled)) return;
 			else if (info.requiredRoles.length > 0) {
 				if (account.authorityNames.length === 0) return;
 				else {
@@ -246,6 +246,10 @@
 			treeSecured: (state, getters, rootState, rootGetters) => {
 				var account = {
 					anonymousUser: rootState.account.anonymousUser,
+					accountNonExpired: rootState.account.accountNonExpired,
+					accountNonLocked: rootState.account.accountNonLocked,
+					credentialsNonExpired: rootState.account.credentialsNonExpired,
+					enabled: rootState.account.enabled,
 					authorityNames: rootGetters['account/authorityNames']
 				};
 				var result = [];

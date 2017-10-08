@@ -11,7 +11,7 @@ import org.springframework.core.io.ClassPathResource;
 @ComponentScan(basePackages = "kz.worldclass.finances")
 public class AppConfig {
     @Bean
-    public PropertyPlaceholderConfigurer propertyPlaceholderConfigurer() {
+    public static PropertyPlaceholderConfigurer propertyPlaceholderConfigurer() {
         PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
         ppc.setLocation(new ClassPathResource("app.properties"));
         ppc.setIgnoreUnresolvablePlaceholders(true);

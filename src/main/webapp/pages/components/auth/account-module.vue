@@ -107,7 +107,7 @@
 			actions: {
 				update: function(context) {
 					$.ajax({
-						url: '/data-insert/auth/info',
+						url: WorldClassRestRoot + '/auth/info',
 						context: context,
 						dataType: 'json',
 						error: function(jqXHR, textStatus, errorThrown) {
@@ -141,7 +141,7 @@
 			if (account.restrictRoutes) {
 				var meta = route.meta;
 				if (isObject(meta) && meta.requiresAuthorization) {
-					if (account.anonymousUser) result = true;
+					if (account.anonymousUser || (!account.accountNonExpired) || (!account.accountNonLocked) || (!account.credentialsNonExpired) || (!account.enabled)) result = true;
 					else if (isNonEmptyArray(meta.requiredRoles)) {
 						if (isNonEmptyArray(account.authorities)) {
 							result = true;

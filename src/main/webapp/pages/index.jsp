@@ -59,12 +59,19 @@
                 height: 100%;
                 width: 100%;
             }
+            .el-row .danger {
+                background-color: rgba(255,73,73,.1);
+                border-color: rgba(255,73,73,.2);
+            }
         </style>
+        <script>
+            WorldClassRestRoot = '<%= request.getContextPath() %>';
+        </script>
     </head>
     <body>
         <div id="app">
             <template>
-                <el-row type="flex">
+                <el-row type="flex" align="middle">
                     <el-col :xs="8" :sm="6" :md="4" :lg="3">
                         <div class="grid-content bg-purple">
                             <el-menu theme="dark" mode="horizontal">

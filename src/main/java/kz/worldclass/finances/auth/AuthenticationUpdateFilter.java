@@ -22,9 +22,7 @@ public class AuthenticationUpdateFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         Authentication authentication = rememberMeServices.autoLogin((HttpServletRequest) request, (HttpServletResponse) response);
-        if (authentication != null) {
-            if (SecurityContextHolder.getContext().getAuthentication() == null) SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
+        if (authentication != null) SecurityContextHolder.getContext().setAuthentication(authentication);
         chain.doFilter(request, response);
     }
 }

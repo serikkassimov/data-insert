@@ -4,7 +4,6 @@ import kz.worldclass.finances.auth.AuthenticationUpdateFilter;
 import kz.worldclass.finances.auth.CustomAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -49,6 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                     .antMatchers("/", "/js/**", "/images/**", "/components/**").permitAll()
                     .antMatchers("/auth/info", "/auth/login", "/auth/logout").permitAll()
+                    .antMatchers("/auth-manage/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
                     .and()
 //                .rememberMe()

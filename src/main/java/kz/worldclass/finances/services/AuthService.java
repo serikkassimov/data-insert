@@ -1,6 +1,7 @@
 package kz.worldclass.finances.services;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -44,10 +45,10 @@ public class AuthService implements UserDetailsService, PersistentTokenRepositor
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
         UserEntity userEntity = userDao.fetchOneByLogin(username);
         if (userEntity == null) throw new UsernameNotFoundException(String.format("no user with login \"%s\"", username));
+        userDao.refresh(userEntity);
         
         User user = new User();
         user.setAccountNonExpired(true);
-        user.setAccountNonLocked(true);
         user.setCredentialsNonExpired(true);
         user.setEnabled(true);
         
@@ -56,16 +57,23 @@ public class AuthService implements UserDetailsService, PersistentTokenRepositor
         user.setLastName(userEntity.getLastname());
         user.setPassword(userEntity.getPassword());
         user.setUsername(userEntity.getLogin());
+        user.setAccountNonLocked(!userEntity.getLocked());
         
-        List<Role> roles = new ArrayList<>();
-        for (UserRoleLinkEntity linkEntity: userEntity.getRoleLinks()) {
-            DictRoleEntity roleEntity = linkEntity.getRole();
-            
+        if (userEntity.getLocked()) {
             Role role = new Role();
-            role.setName(roleEntity.getCode());
-            roles.add(role);
+            role.setName("ANONYMOUS");
+            user.setAuthorities(Arrays.asList(role));
+        } else {
+            List<Role> roles = new ArrayList<>();
+            for (UserRoleLinkEntity linkEntity: userEntity.getRoleLinks()) {
+                DictRoleEntity roleEntity = linkEntity.getRole();
+
+                Role role = new Role();
+                role.setName(roleEntity.getCode());
+                roles.add(role);
+            }
+            user.setAuthorities(roles);
         }
-        user.setAuthorities(roles);
         
         Collection<PersistentTokenEntity> expiredTokenEntitys =
                 persistentTokenDao.fetchExpired(userEntity);

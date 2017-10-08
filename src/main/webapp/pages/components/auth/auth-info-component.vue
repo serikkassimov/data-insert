@@ -6,6 +6,10 @@
 		</template>
 		<template v-else>
 			<el-tag>{{ account.username }} ({{ account.email }})</el-tag>
+			<el-tag type="danger" v-if="!account.accountNonExpired">Срок действия аккаунта истек</el-tag>
+			<el-tag type="danger" v-if="!account.accountNonLocked">Заблокирован</el-tag>
+			<el-tag type="danger" v-if="!account.credentialsNonExpired">Срок действия пароля истек</el-tag>
+			<el-tag type="danger" v-if="!account.enabled">Недоступен</el-tag>
 			<el-button @click="startLogout">Выйти</el-button>
 		</template>
 		<el-dialog title="Вход" size="tiny" :visible.sync="login.dialog.visible" v-loading.body="login.dialog.loading">

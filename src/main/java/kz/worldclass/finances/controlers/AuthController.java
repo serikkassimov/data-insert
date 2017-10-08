@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import kz.worldclass.finances.auth.CommonRememberServices;
 import kz.worldclass.finances.data.dto.auth.PublicAuthenticationDto;
-import kz.worldclass.finances.data.dto.Dtos;
+import kz.worldclass.finances.data.dto.auth.Dtos;
 import kz.worldclass.finances.data.dto.auth.LoginResultEnumDto;
 import kz.worldclass.finances.services.AuthService;
 import org.slf4j.Logger;

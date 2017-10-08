@@ -1,8 +1,5 @@
-package kz.worldclass.finances.data.dto;
+package kz.worldclass.finances.data.dto.auth;
 
-import kz.worldclass.finances.data.dto.auth.PublicUserDto;
-import kz.worldclass.finances.data.dto.auth.PublicAuthenticationDto;
-import kz.worldclass.finances.data.dto.auth.RoleDto;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -10,7 +7,6 @@ import kz.worldclass.finances.auth.Role;
 import kz.worldclass.finances.auth.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 public class Dtos {
     public static final String ANONYMOUS_USER = "anonymousUser";
@@ -40,6 +36,32 @@ public class Dtos {
         return result;
     }
     
+    public static RoleDto less(GrantedAuthority source) {
+        RoleDto result = new RoleDto();
+        if (source != null) {
+            result.name = source.getAuthority();
+        }
+        return result;
+    }
+    
+    public static RoleDto complete(GrantedAuthority source) {
+        RoleDto result = less(source);
+        return result;
+    }
+    
+    public static RoleDto less(Role source) {
+        RoleDto result = new RoleDto();
+        if (source != null) {
+            result.name = source.getAuthority();
+        }
+        return result;
+    }
+    
+    public static RoleDto complete(Role source) {
+        RoleDto result = less(source);
+        return result;
+    }
+    
     public static PublicUserDto less(User source) {
         PublicUserDto result = new PublicUserDto();
         if (source != null) {
@@ -65,32 +87,6 @@ public class Dtos {
                 result.authorities = roleDtos.toArray(new RoleDto[roleDtos.size()]);
             }
         }
-        return result;
-    }
-    
-    public static RoleDto less(GrantedAuthority source) {
-        RoleDto result = new RoleDto();
-        if (source != null) {
-            result.name = source.getAuthority();
-        }
-        return result;
-    }
-    
-    public static RoleDto complete(GrantedAuthority source) {
-        RoleDto result = less(source);
-        return result;
-    }
-    
-    public static RoleDto less(Role source) {
-        RoleDto result = new RoleDto();
-        if (source != null) {
-            result.name = source.getAuthority();
-        }
-        return result;
-    }
-    
-    public static RoleDto complete(Role source) {
-        RoleDto result = less(source);
         return result;
     }
 }

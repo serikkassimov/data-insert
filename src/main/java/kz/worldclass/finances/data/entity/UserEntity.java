@@ -44,6 +44,7 @@ public class UserEntity extends BaseEntity {
     public static final String COL_LASTNAME = "LASTNAME";
     public static final String COL_PATRONYMIC = "PATRONYMIC";
     public static final String COL_EMAIL = "EMAIL";
+    public static final String COL_LOCKED = "LOCKED";
     public static final String PROP_ORG = "org";
     
     @ManyToOne(optional = false)
@@ -70,6 +71,9 @@ public class UserEntity extends BaseEntity {
     
     @Column(name = COL_EMAIL)
     private String email;
+    
+    @Column(name = COL_LOCKED, nullable = false)
+    private Boolean locked;
     
     @OneToMany(mappedBy = UserRoleLinkEntity.PROP_USER)
     private Collection<UserRoleLinkEntity> roleLinks;
@@ -131,6 +135,14 @@ public class UserEntity extends BaseEntity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Boolean getLocked() {
+        return locked;
+    }
+
+    public void setLocked(Boolean locked) {
+        this.locked = locked;
     }
 
     public Collection<UserRoleLinkEntity> getRoleLinks() {

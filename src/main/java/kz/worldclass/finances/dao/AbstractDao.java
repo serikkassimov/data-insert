@@ -83,7 +83,9 @@ public abstract class AbstractDao<T> {
     public List<T> all() {
         Class<T> entityClass = getEntityClass();
         if (entityClass == null) throw new IllegalStateException("getEntityClass() returned null");
-        return (List<T>) getCurrentSession().createQuery(String.format("select t from %s t", getEntityClass().getName())).list();
+        return (List<T>) getCurrentSession()
+                .createQuery(String.format("select t from %s t", getEntityClass().getName()))
+                .list();
     }
     
     /**
@@ -132,5 +134,9 @@ public abstract class AbstractDao<T> {
      */
     public void saveOrUpdate(T entity) {
         getCurrentSession().saveOrUpdate(entity);
+    }
+    
+    public void refresh(T entity) {
+        getCurrentSession().refresh(entity);
     }
 }

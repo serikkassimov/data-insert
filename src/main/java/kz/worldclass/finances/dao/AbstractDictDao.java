@@ -20,7 +20,9 @@ public abstract class AbstractDictDao<T extends BaseDictEntity> extends Abstract
     public List<T> all() {
         Class<T> entityClass = getEntityClass();
         if (entityClass == null) throw new IllegalStateException("getEntityClass() returned null");
-        return (List<T>) getCurrentSession().createQuery(String.format("select t from %s t order by t.%s", getEntityClass().getName(), BaseDictEntity.PROP_CODE));
+        return (List<T>) getCurrentSession()
+                .createQuery(String.format("select t from %s t order by t.%s", getEntityClass().getName(), BaseDictEntity.PROP_CODE))
+                .list();
     }
     
     /**
