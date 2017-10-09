@@ -49,6 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers("/", "/js/**", "/images/**", "/components/**").permitAll()
                     .antMatchers("/auth/info", "/auth/login", "/auth/logout").permitAll()
                     .antMatchers("/auth-manage/**").hasRole("ADMIN")
+                    .antMatchers("/dict/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
                     .and()
 //                .rememberMe()

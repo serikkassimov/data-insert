@@ -12,7 +12,7 @@
 			<el-button @click="reloadUsers">Обновить</el-button>
 			<el-button @click="newUser">Добавить</el-button>
 			<el-table
-				ref="usersTable" stripe border style="width: 100%"
+				ref="usersTable" border style="width: 100%"
 				:data="users.items" :row-class-name="usersTableClassName"
 			>
 				<el-table-column prop="login" label="Логин" width="200"></el-table-column>
@@ -381,6 +381,11 @@
 								this.$notify.error({
 									title: 'Ошибка',
 									message: 'Ошибка при сохранении пользователя: организация не указана'
+								});
+							} else if (data === 'USER_NOT_FOUND') {
+								this.$notify.error({
+									title: 'Ошибка',
+									message: 'Ошибка при сохранении пользователя: пользователь не найден'
 								});
 							} else if (data === 'ORG_NOT_FOUND') {
 								this.$notify.error({

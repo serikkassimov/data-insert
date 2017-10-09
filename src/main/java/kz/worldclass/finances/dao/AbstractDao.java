@@ -58,6 +58,25 @@ public abstract class AbstractDao<T> {
     }
     
     /**
+     * 
+     * @return 
+     * @throws IllegalStateException one of:
+     *  <ul>
+     *      <li>{@link #getEntityClass()} returned <code>null</code></li>
+     *      <li>cannot create entity</li>
+     *  </ul>
+     */
+    public T newEntity() {
+        Class<T> entityClass = getEntityClass();
+        if (entityClass == null) throw new IllegalStateException("getEntityClass() returned null");
+        try {
+            return entityClass.newInstance();
+        } catch (IllegalAccessException | InstantiationException | RuntimeException exception) {
+            throw new IllegalStateException(String.format("cannot create entity of class \"%s\"", entityClass.getName()), exception);
+        }
+    }
+    
+    /**
      * <i><b>Note:</b> uses {@link #getCurrentSession()}, see errors which may be thrown</i>
      * @param id
      * @return 

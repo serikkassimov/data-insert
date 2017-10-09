@@ -59,7 +59,10 @@ public class AuthManageService {
     public SaveUserResult saveUser(UserDto userDto) throws SaveUserException {
         UserEntity userEntity;
         if (userDto.id == null) userEntity = new UserEntity();
-        else userEntity = userDao.get(userDto.id);
+        else {
+            userEntity = userDao.get(userDto.id);
+            if (userEntity == null) return SaveUserResult.USER_NOT_FOUND;
+        }
 
         UserEntity loginOwnerEntity = userDao.fetchOneByLogin(userDto.login);
         if ((loginOwnerEntity != null) && (!loginOwnerEntity.getId().equals(userEntity.getId()))) throw new SaveUserException(SaveUserResult.LOGIN_BUSY);
