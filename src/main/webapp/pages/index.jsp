@@ -93,9 +93,7 @@
                     </el-col>
                     <el-col :xs="16" :sm="18" :md="20" :lg="21">
                         <div class="grid-content" style="background-color: white;">
-                            <transition name="page-view">
-                                <router-view></router-view>
-                            </transition>
+                            <router-view></router-view>
                         </div>
                     </el-col>
                 </el-row>

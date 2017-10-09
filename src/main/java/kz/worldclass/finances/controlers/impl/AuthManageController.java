@@ -6,6 +6,7 @@ import kz.worldclass.finances.data.dto.entity.DictOrgDto;
 import kz.worldclass.finances.data.dto.entity.DictRoleDto;
 import kz.worldclass.finances.data.dto.entity.UserDto;
 import kz.worldclass.finances.data.dto.results.authmanage.LockUserResult;
+import kz.worldclass.finances.data.dto.results.authmanage.SaveUserException;
 import kz.worldclass.finances.data.dto.results.authmanage.SaveUserResult;
 import kz.worldclass.finances.data.dto.results.authmanage.UnlockUserResult;
 import kz.worldclass.finances.services.AuthManageService;
@@ -45,7 +46,11 @@ public class AuthManageController extends AbstractRestController {
         if ((userDto.login == null) || userDto.login.isEmpty()) return SaveUserResult.NO_LOGIN;
         if ((userDto.password == null) || userDto.password.isEmpty()) return SaveUserResult.NO_PASSWORD;
         if ((userDto.org == null) || (userDto.org.id == null)) return SaveUserResult.NO_ORG;
-        return service.saveUser(userDto);
+        try {
+            return service.saveUser(userDto);
+        } catch (SaveUserException exception) {
+            return exception.getResult();
+        }
     }
     
     @RequestMapping(value = "/lock", produces = APPLICATION_JSON_UTF_8)

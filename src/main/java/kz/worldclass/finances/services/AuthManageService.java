@@ -1,20 +1,29 @@
 package kz.worldclass.finances.services;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import kz.worldclass.finances.dao.impl.DictOrgDao;
 import kz.worldclass.finances.dao.impl.DictRoleDao;
 import kz.worldclass.finances.dao.impl.UserDao;
+import kz.worldclass.finances.dao.impl.UserRoleLinkDao;
 import kz.worldclass.finances.data.dto.entity.DictOrgDto;
 import kz.worldclass.finances.data.dto.entity.DictRoleDto;
 import kz.worldclass.finances.data.dto.entity.Dtos;
 import kz.worldclass.finances.data.dto.entity.UserDto;
 import kz.worldclass.finances.data.dto.results.authmanage.LockUserResult;
+import kz.worldclass.finances.data.dto.results.authmanage.SaveUserException;
 import kz.worldclass.finances.data.dto.results.authmanage.SaveUserResult;
 import kz.worldclass.finances.data.dto.results.authmanage.UnlockUserResult;
 import kz.worldclass.finances.data.entity.DictOrgEntity;
 import kz.worldclass.finances.data.entity.DictRoleEntity;
 import kz.worldclass.finances.data.entity.UserEntity;
+import kz.worldclass.finances.data.entity.UserRoleLinkEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +37,8 @@ public class AuthManageService {
     private DictRoleDao dictRoleDao;
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private UserRoleLinkDao userRoleLinkDao;
     
     public List<UserDto> getUsers() {
         List<UserDto> result = new ArrayList<>();
@@ -47,17 +58,17 @@ public class AuthManageService {
         return result;
     }
     
-    public SaveUserResult saveUser(UserDto userDto) {
+    public SaveUserResult saveUser(UserDto userDto) throws SaveUserException {
         UserEntity userEntity;
         if (userDto.id == null) userEntity = new UserEntity();
         else userEntity = userDao.get(userDto.id);
-        
+
         UserEntity loginOwnerEntity = userDao.fetchOneByLogin(userDto.login);
-        if ((loginOwnerEntity != null) && (!loginOwnerEntity.getId().equals(userEntity.getId()))) return SaveUserResult.LOGIN_BUSY;
-        
+        if ((loginOwnerEntity != null) && (!loginOwnerEntity.getId().equals(userEntity.getId()))) throw new SaveUserException(SaveUserResult.LOGIN_BUSY);
+
         DictOrgEntity orgEntity = dictOrgDao.get(userDto.org.id);
-        if (orgEntity == null) return SaveUserResult.ORG_NOT_FOUND;
-        
+        if (orgEntity == null) throw new SaveUserException(SaveUserResult.ORG_NOT_FOUND);
+
         userEntity.setLogin(userDto.login);
         userEntity.setPassword(userDto.password);
         userEntity.setFirstname(userDto.firstname);
@@ -65,7 +76,31 @@ public class AuthManageService {
         userEntity.setPatronymic(userDto.patronymic);
         userEntity.setEmail(userDto.email);
         userEntity.setOrg(orgEntity);
-        
+
+        Map<Long, UserRoleLinkEntity> redundantLinkMap = new HashMap<>();
+        for (UserRoleLinkEntity linkEntity: userEntity.getRoleLinks()) redundantLinkMap.put(linkEntity.getRole().getId(), linkEntity);
+
+        Set<Long> missingRoleIds = new HashSet<>();
+        if (userDto.roles != null) {
+            for (DictRoleDto roleDto: userDto.roles) {
+                if ((roleDto != null) && (roleDto.id != null)) {
+                    if (redundantLinkMap.containsKey(roleDto.id)) redundantLinkMap.remove(roleDto.id);
+                    else missingRoleIds.add(roleDto.id);
+                }
+            }
+        }
+
+        for (UserRoleLinkEntity linkEntity: redundantLinkMap.values()) userRoleLinkDao.delete(linkEntity);
+        for (Long missingRoleId: missingRoleIds) {
+            DictRoleEntity roleEntity = dictRoleDao.get(missingRoleId);
+            if (roleEntity == null) throw new SaveUserException(SaveUserResult.ROLE_NOT_FOUND);
+            
+            UserRoleLinkEntity linkEntity = new UserRoleLinkEntity();
+            linkEntity.setUser(userEntity);
+            linkEntity.setRole(roleEntity);
+            userRoleLinkDao.save(linkEntity);
+        }
+
         userDao.save(userEntity);
         
         return SaveUserResult.SUCCESS;
