@@ -37,6 +37,7 @@ public class Dtos {
         if (source != null) {
             target.code = source.getCode();
             target.name = source.getName();
+            target.disabled = source.getDisabled();
         }
     }
     

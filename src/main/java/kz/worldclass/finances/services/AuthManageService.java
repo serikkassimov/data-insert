@@ -22,8 +22,6 @@ import kz.worldclass.finances.data.entity.DictOrgEntity;
 import kz.worldclass.finances.data.entity.DictRoleEntity;
 import kz.worldclass.finances.data.entity.UserEntity;
 import kz.worldclass.finances.data.entity.UserRoleLinkEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,13 +46,13 @@ public class AuthManageService {
     
     public List<DictRoleDto> getRoles() {
         List<DictRoleDto> result = new ArrayList<>();
-        for (DictRoleEntity entity: dictRoleDao.all()) result.add(Dtos.less(entity));
+        for (DictRoleEntity entity: dictRoleDao.allEnabled()) result.add(Dtos.less(entity));
         return result;
     }
     
     public List<DictOrgDto> getOrgs() {
         List<DictOrgDto> result = new ArrayList<>();
-        for (DictOrgEntity entity: dictOrgDao.all()) result.add(Dtos.less(entity));
+        for (DictOrgEntity entity: dictOrgDao.allEnabled()) result.add(Dtos.less(entity));
         return result;
     }
     
