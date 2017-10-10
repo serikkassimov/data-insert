@@ -14,13 +14,19 @@
 							<hr>
 						</span>
 						<template v-for="(child, childIndex) in item.children">
-							<components-menu-menu-element-component :item="child" v-bind:key="childIndex" @click="childClick"></components-menu-menu-element-component>
+							<components-menu-menu-element-component
+								:item="child" v-bind:key="childIndex"
+								@click="childClick" @mounted="childMounted" @destroyed="childDestroyed"
+							></components-menu-menu-element-component>
 						</template>
 					</el-menu-item-group>
 				</template>
 				<template v-else>
 					<template v-for="(child, childIndex) in item.children">
-						<components-menu-menu-element-component :item="child" v-bind:key="childIndex" @click="childClick"></components-menu-menu-element-component>
+						<components-menu-menu-element-component
+							:item="child" v-bind:key="childIndex"
+							@click="childClick" @mounted="childMounted" @destroyed="childDestroyed"
+						></components-menu-menu-element-component>
 					</template>
 				</template>
 			</el-submenu>
@@ -35,7 +41,10 @@
 	<span>
 		<el-menu theme="dark" :unique-opened="true" :default-active="activeIndex" :default-openeds="activeSubmenuIndices">
 			<template v-for="(item, index) in menu">
-				<components-menu-menu-element-component :item="item" @click="click"></components-menu-menu-element-component>
+				<components-menu-menu-element-component
+					:item="item"
+					@click="click" @mounted="elementMounted" @destroyed="elementDestroyed"
+				></components-menu-menu-element-component>
 			</template>
 		</el-menu>
 	</span>
@@ -61,14 +70,26 @@
 				},
 				childClick: function(eventData) {
 					this.$emit('click', eventData);
+				},
+				childMounted: function(index) {
+					this.$emit('mounted', index);
+				},
+				childDestroyed: function(index) {
+					this.$emit('destroyed', index);
 				}
+			},
+			mounted: function() {
+				this.$emit('mounted', this.item.index);
+			},
+			destroyed: function() {
+				this.$emit('destroyed', this.item.index);
 			}
 		});
 
 		var listRouteItems = function(tree, resultList) {
 			for (var index in tree) {
 				var item = tree[index];
-				if (isObject(item.route)) resultList[item.index] = item;
+				if (isObject(item.route) || isNonEmptyString(item.route)) resultList[item.index] = item;
 				if (isNonEmptyArray(item.children)) listRouteItems(item.children, resultList);
 			}
 		};
@@ -76,7 +97,9 @@
 		Vue.component('components-menu-menu-component', {
 			template: '#components-menu-menu-component',
 			data: function () {
-				return {};
+				return {
+					indices: []
+				};
 			},
 			computed: Vuex.mapState({
 				router: function() {
@@ -116,6 +139,8 @@
 					var result;
 					if (isObject(bestMatchItem)) result = bestMatchItem.index;
 					else result = undefined;
+
+					if (this.indices.indexOf(result) === -1) result = undefined;
 					return result;
 				},
 				activeSubmenuIndices: function(state, getters) {
@@ -131,12 +156,18 @@
 							result.push(activeIndex + '-c');
 							if (index < indices.length - 1) result.push(activeIndex + '-sm');
 						}
-						result.push(activeIndex);
 					}
 					return result;
 				}
 			}),
 			methods: {
+				elementMounted: function(index) {
+					if (this.indices.indexOf(index) === -1) this.indices.push(index);
+				},
+				elementDestroyed: function(index) {
+					var indexIndex;
+					while ((indexIndex = this.indices.indexOf(index)) !== -1) this.indices.splice(indexIndex, 1);
+				},
 				click: function(eventData) {
 					this.$router.push(eventData.item.route);
 				}
