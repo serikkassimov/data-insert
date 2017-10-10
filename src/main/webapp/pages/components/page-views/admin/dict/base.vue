@@ -308,9 +308,11 @@
 			this.reloadItems();
 		},
 		updated: function() {
-			if (this.dictType !== this.dict.type) {
-				this.dictType = this.dict.type;
-				this.reloadItems();
+			if (this.dict) {
+				if (this.dictType !== this.dict.type) {
+					this.dictType = this.dict.type;
+					this.reloadItems();
+				}
 			}
 		}
 	});
