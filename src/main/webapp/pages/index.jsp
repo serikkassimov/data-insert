@@ -19,37 +19,39 @@
             WorldClassRestRoot = '<%= request.getContextPath() %>';
         </script>
     </head>
-    <body class="h-100">
-        <div class="container-fluid h-100" style="position: absolute;">
-            <div class="row h-100">
-                <div class="col col-12 col-sm-8 col-md-5 col-lg-4 col-xl-3 bg-dark"></div>
-                <div class="col col-12 col-sm-8 col-md-7 col-lg-8 col-xl-9">
-                    <div id="loading-layer">
-                        <image src="./images/loading.gif" alt="Loading..." style="margin: auto; display: block;"/>
-                    </div>
-                </div>
-            </div>
+    <body class="h-100" style="background-color: #F7F7F9;">
+        <div id="loading-layer">
+            <image src="./images/loading.gif" alt="Loading..." style="margin: auto; display: block;"/>
         </div>
-        <div id="app" class="container-fluid h-100" style="position: absolute;">
+        <div id="app">
             <template>
-                <div class="row bg-dark align-items-center">
-                    <div class="col">
-                        <el-menu theme="dark" mode="horizontal">
-                            <el-menu-item :index="'home'" @click="homePageClick">Домашняя страница</el-menu-item>
-                        </el-menu>
-                    </div>
-                    <div class="col">
-                        <div class="grid-content bg-purple" style="text-align: right;">
-                            <components-auth-auth-info></components-auth-auth-info>
+                <div class="h-100 w-100" style="position: absolute;">
+                    <div class="row h-100 no-gutters">
+                        <div class="col col-12 col-sm-8 col-md-5 col-lg-4 col-xl-3 bg-dark"></div>
+                        <div class="col col-12 col-sm-8 col-md-7 col-lg-8 col-xl-9 bg-white">
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col col-12 col-sm-8 col-md-5 col-lg-4 col-xl-3 bg-dark">
-                        <components-menu-menu-component></components-menu-menu-component>
+                <div class="h-100 w-100" style="position: absolute;">
+                    <div class="row bg-dark align-items-center no-gutters">
+                        <div class="col">
+                            <el-menu theme="dark" mode="horizontal">
+                                <el-menu-item :index="'home'" @click="homePageClick">Домашняя страница</el-menu-item>
+                            </el-menu>
+                        </div>
+                        <div class="col">
+                            <div class="grid-content bg-purple" style="text-align: right;">
+                                <components-auth-auth-info></components-auth-auth-info>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col col-12 col-sm-8 col-md-7 col-lg-8 col-xl-9">
-                        <router-view></router-view>
+                    <div class="row no-gutters">
+                        <div class="col col-12 col-sm-8 col-md-5 col-lg-4 col-xl-3 bg-dark">
+                            <components-menu-menu-component></components-menu-menu-component>
+                        </div>
+                        <div class="col col-12 col-sm-8 col-md-7 col-lg-8 col-xl-9">
+                            <router-view></router-view>
+                        </div>
                     </div>
                 </div>
             </template>

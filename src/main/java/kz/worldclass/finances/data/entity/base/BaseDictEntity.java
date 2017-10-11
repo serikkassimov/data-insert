@@ -11,7 +11,7 @@ public class BaseDictEntity extends BaseEntity {
     public static final String PROP_CODE = "code";
     public static final String PROP_DISABLED = "disabled";
     
-    @Column(name = COL_CODE, nullable = false, unique = true, insertable = true, updatable = false, length = 50)
+    @Column(name = COL_CODE, nullable = false, unique = true, insertable = true, updatable = true, length = 50)
     private String code;
     
     @Column(name = COL_NAME)
