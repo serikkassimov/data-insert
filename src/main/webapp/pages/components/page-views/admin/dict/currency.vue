@@ -356,7 +356,7 @@
 
 	WorldClassPlugins.plugins.push({
 		name: componentName,
-		dependencies: ['components-menu-menu-module'],
+		dependencies: [],
 		parameters: ['store', 'router'],
 		install: function(Vue, store, router) {
 			var path = '/admin/dict/currency';
@@ -369,15 +369,6 @@
 					requiredRoles: ['ROLE_ADMIN']
 				}
 			}]);
-
-			var info = {
-				treePath: ['Администрирование', 'Справочники', 'Валюта'],
-				route: path,
-				requiresAuthorization: true,
-				requiredRoles: ['ROLE_ADMIN'],
-				order: 0
-			};
-			store.commit('menu/add', info);
 		}
 	});
 })(jQuery);

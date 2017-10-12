@@ -520,7 +520,7 @@
 	WorldClassPlugins.plugins.push({
 		parameters: ['store', 'router'],
 		name: componentName,
-		dependencies: ['components-menu-menu-module'],
+		dependencies: [],
 		install: function(Vue, store, router) {
 			var path = '/admin/auth-manage/users';
 
@@ -532,15 +532,6 @@
 					requiredRoles: ['ROLE_ADMIN']
 				}
 			}]);
-
-			var info = {
-				treePath: ['Администрирование', 'Авторизация', 'Пользователи'],
-				route: path,
-				requiresAuthorization: true,
-				requiredRoles: ['ROLE_ADMIN'],
-				order: 0
-			};
-			store.commit('menu/add', info);
 		}
 	});
 })(jQuery);

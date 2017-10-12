@@ -332,7 +332,7 @@
 
 	WorldClassPlugins.plugins.push({
 		name: componentName,
-		dependencies: ['components-menu-menu-module'],
+		dependencies: [],
 		parameters: ['store', 'router'],
 		install: function(Vue, store, router) {
 			var pathPrefix = '/admin/dict/';
@@ -356,15 +356,6 @@
 						dict: dict
 					}
 				}]);
-
-				var info = {
-					treePath: ['Администрирование', 'Справочники', dict.name],
-					route: path,
-					requiresAuthorization: true,
-					requiredRoles: ['ROLE_ADMIN'],
-					order: 0
-				};
-				store.commit('menu/add', info);
 			}
 		}
 	});

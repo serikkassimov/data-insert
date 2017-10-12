@@ -82,15 +82,6 @@
                         }
                     }
                 ]);
-
-                var info = {
-                    treePath: ['Отчеты', 'Заявка'],
-                    route: {path: '/request-report'},
-                    requiresAuthorization: true,
-                    requiredRoles: ['ROLE_ADMIN', 'ROLE_FILIAL_USER'],
-                    order: 0
-                };
-                store.commit('menu/add', info);
             }
         });
     })(jQuery);
