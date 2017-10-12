@@ -5,10 +5,12 @@ import kz.worldclass.finances.controlers.AbstractRestController;
 import static kz.worldclass.finances.controlers.AbstractRestController.APPLICATION_JSON;
 import static kz.worldclass.finances.controlers.AbstractRestController.APPLICATION_JSON_UTF_8;
 import kz.worldclass.finances.data.dto.entity.DictBudgetDto;
+import kz.worldclass.finances.data.dto.entity.DictCurrencyDto;
 import kz.worldclass.finances.data.dto.entity.base.BaseDictDto;
 import kz.worldclass.finances.data.dto.results.dict.DisableBaseResult;
 import kz.worldclass.finances.data.dto.results.dict.EnableBaseResult;
-import kz.worldclass.finances.data.dto.results.dict.SaveBaseResult;
+import kz.worldclass.finances.data.dto.results.dict.SaveBaseDictResult;
+import kz.worldclass.finances.data.dto.results.dict.SaveCurrencyResult;
 import kz.worldclass.finances.data.dto.results.dict.SaveDictBudgetResult;
 import kz.worldclass.finances.services.DictService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +35,13 @@ public class DictController extends AbstractRestController {
     }
     
     @RequestMapping(value = "/base/{dictType}/save", produces = APPLICATION_JSON_UTF_8, consumes = APPLICATION_JSON, method = RequestMethod.POST)
-    public SaveBaseResult saveBase(
+    public SaveBaseDictResult saveBase(
             @PathVariable(name = "dictType") String dictType,
             @RequestBody(required = false) BaseDictDto dto
     ) {
-        if (dto == null) return SaveBaseResult.NO_DATA;
-        if ((dto.code == null) || dto.code.isEmpty()) return SaveBaseResult.NO_CODE;
+        if (dto == null) return SaveBaseDictResult.NO_DATA;
+        if ((dto.code == null) || dto.code.isEmpty()) return SaveBaseDictResult.NO_CODE;
+        if (dto.disabled == null) return SaveBaseDictResult.NO_DISABLED;
         return service.saveBase(dictType, dto);
     }
     
@@ -76,22 +79,24 @@ public class DictController extends AbstractRestController {
     ) {
         if (dto == null) return SaveDictBudgetResult.NO_DATA;
         if ((dto.code == null) || dto.code.isEmpty()) return SaveDictBudgetResult.NO_CODE;
+        if (dto.disabled == null) return SaveDictBudgetResult.NO_DISABLED;
+        if (dto.outgo == null) return SaveDictBudgetResult.NO_OUTGO;
         return service.saveDictBudget(dto);
     }
     
-    @RequestMapping(value = "/budget/enable", produces = APPLICATION_JSON_UTF_8)
-    public EnableBaseResult budgetEnable(
-            @RequestParam(name = "id", required = false) Long id
-    ) {
-        if (id == null) return EnableBaseResult.NO_ID;
-        return service.enableDictBudget(id);
+    @RequestMapping(value = "/currency/list", produces = APPLICATION_JSON_UTF_8)
+    public List<DictCurrencyDto> currencyList() {
+        return service.getDictCurrencies();
     }
     
-    @RequestMapping(value = "/budget/disable", produces = APPLICATION_JSON_UTF_8)
-    public DisableBaseResult budgetDisable(
-            @RequestParam(name = "id", required = false) Long id
+    @RequestMapping(value = "/currency/save", produces = APPLICATION_JSON_UTF_8, consumes = APPLICATION_JSON, method = RequestMethod.POST)
+    public SaveCurrencyResult currencySave(
+            @RequestBody(required = false) DictCurrencyDto dto
     ) {
-        if (id == null) return DisableBaseResult.NO_ID;
-        return service.disableDictBudget(id);
+        if (dto == null) return SaveCurrencyResult.NO_DATA;
+        if ((dto.code == null) || dto.code.isEmpty()) return SaveCurrencyResult.NO_CODE;
+        if (dto.disabled == null) return SaveCurrencyResult.NO_DISABLED;
+        if (dto.symbol == null) return SaveCurrencyResult.NO_SYMBOL;
+        return service.saveDictCurrency(dto);
     }
 }

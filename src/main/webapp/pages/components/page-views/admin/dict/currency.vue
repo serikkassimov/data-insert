@@ -1,8 +1,8 @@
-<!-- components/page-views/admin/dict/base.vue :: start -->
-<template id="page-views-admin-dict-base">
+<!-- components/page-views/admin/dict/currency.vue :: start -->
+<template id="page-views-admin-dict-currency">
 	<div>
 		<div class="card">
-			<h5 class="card-header">Справочник: {{dict.name}}</h5>
+			<h5 class="card-header">Справочник: Валюты</h5>
 		</div>
 		<div class="card" v-loading.body="items.loading">
 			<div class="card-header">
@@ -16,6 +16,7 @@
 				>
 					<el-table-column prop="code" label="Код"></el-table-column>
 					<el-table-column prop="name" label="Название"></el-table-column>
+					<el-table-column prop="symbol" label="Символ"></el-table-column>
 					<el-table-column label="Действия">
 						<template scope="scope">
 							<el-button size="small" @click="editItem(scope.row)">Изменить</el-button>
@@ -41,6 +42,9 @@
 				<el-form-item label="Название" prop="name">
 					<el-input v-model="item.data.name"></el-input>
 				</el-form-item>
+				<el-form-item label="Символ" prop="symbol">
+					<el-input v-model="item.data.symbol"></el-input>
+				</el-form-item>
 			</el-form>
 			<span slot="footer" class="dialog-footer">
 				<el-button type="primary" :disabled="!itemChanged" @click="saveItem">Сохранить</el-button>
@@ -49,10 +53,10 @@
 		</el-dialog>
 	</div>
 </template>
-<!-- components/page-views/admin/dict/base.vue :: middle -->
+<!-- components/page-views/admin/dict/currency.vue :: middle -->
 <script>
 (function($) {
-	var componentName = 'page-views-admin-dict-base';
+	var componentName = 'page-views-admin-dict-currency';
 	var ajaxRoot = WorldClassRestRoot + '/dict';
 	Vue.component(componentName, {
 		template: '#' + componentName,
@@ -69,9 +73,19 @@
 				}
 				callback();
 			};
+			var symbolDuplicateCheck = function(rule, value, callback) {
+				for (var index in component.items.items) {
+					var item = component.items.items[index];
+					if (item.id === component.item.data.id) continue;
+					if (item.symbol === value) {
+						callback(new Error('Found another item (ID: ' + item.id + ') with symbol "' + value + '"'));
+						return;
+					}
+				}
+				callback();
+			};
 
 			return {
-				dictType: undefined,
 				items: {
 					items: [],
 					loading: false
@@ -81,19 +95,26 @@
 						id: undefined,
 						code: undefined,
 						name: undefined,
-						disabled: undefined
+						disabled: undefined,
+						symbol: undefined
 					},
 					original: {
 						id: undefined,
 						code: undefined,
 						name: undefined,
-						disabled: undefined
+						disabled: undefined,
+						symbol: undefined
 					},
 					rules: {
 						code: [
 							{required: true, message: 'Необходимо ввести код (макс 50 символов)', trigger: ['change', 'blur']},
 							{min: 1, max: 50, message: 'Необходимо ввести код (макс 50 символов)', trigger: ['change', 'blur']},
 							{validator: codeDuplicateCheck, message: 'Код занят', trigger: ['change', 'blur']}
+						],
+						symbol: [
+							{required: true, message: 'Необходимо ввести символ (1 символ)', trigger: ['change', 'blur']},
+							{min: 1, max: 1, message: 'Необходимо ввести символ (1 символ)', trigger: ['change', 'blur']},
+							{validator: symbolDuplicateCheck, message: 'Символ занят', trigger: ['change', 'blur']}
 						]
 					},
 					dialog: {
@@ -106,9 +127,6 @@
 		computed: Vuex.mapState({
 			itemChanged: function() {
 				return !equals(this.item.data, this.item.original);
-			},
-			dict: function() {
-				return this.$route.meta.dict;
 			}
 		}),
 		methods: {
@@ -119,7 +137,7 @@
 				this.items.items = [];
 
 				$.ajax({
-					url: ajaxRoot + '/base/' + this.dict.type + '/list',
+					url: ajaxRoot + '/currency/list',
 					dataType: 'json',
 					context: this,
 					error: function(jqXHR, textStatus, errorThrown) {
@@ -152,6 +170,7 @@
 				if (!isString(actualItem.code)) actualItem.code = '';
 				if (!isString(actualItem.name)) actualItem.name = '';
 				if (!isBoolean(actualItem.disabled)) actualItem.disabled = false;
+				if (!isNonEmptyString(actualItem.symbol)) actualItem.symbol = '';
 
 				this.item.original = $.extend(true, {}, actualItem);
 				this.item.data = $.extend(true, {}, actualItem);
@@ -167,7 +186,7 @@
 					this.item.saving = true;
 					var data = JSON.stringify(this.item.data);
 					$.ajax({
-						url: ajaxRoot + '/base/' + this.dict.type + '/save',
+						url: ajaxRoot + '/currency/save',
 						method: 'POST',
 						data: data,
 						contentType: 'application/json',
@@ -204,6 +223,11 @@
 									title: 'Ошибка',
 									message: 'Ошибка при сохранении элемента: нет признака "выключен"'
 								});
+							} else if (data === 'NO_SYMBOL') {
+								this.$notify.error({
+									title: 'Ошибка',
+									message: 'Ошибка при сохранении элемента: нет символа'
+								});
 							} else if (data === 'NOT_FOUND') {
 								this.$notify.error({
 									title: 'Ошибка',
@@ -239,7 +263,7 @@
 
 				this.items.loading = true;
 				$.ajax({
-					url: ajaxRoot + '/base/' + this.dict.type + '/enable?id=' + id,
+					url: ajaxRoot + '/base/currency/enable?id=' + id,
 					dataType: 'json',
 					context: this,
 					error: function(jqXHR, textStatus, errorThrown) {
@@ -286,7 +310,7 @@
 
 				this.items.loading = true;
 				$.ajax({
-					url: ajaxRoot + '/base/' + this.dict.type + '/disable?id=' + id,
+					url: ajaxRoot + '/base/currency/disable?id=' + id,
 					dataType: 'json',
 					context: this,
 					error: function(jqXHR, textStatus, errorThrown) {
@@ -335,37 +359,25 @@
 		dependencies: ['components-menu-menu-module'],
 		parameters: ['store', 'router'],
 		install: function(Vue, store, router) {
-			var pathPrefix = '/admin/dict/';
-			var dicts = [
-				{type: 'roles', name: 'Роли'},
-				{type: 'orgs', name: 'Организации'},
-				{type: 'budgetStoreTypes', name: 'Типы хранения бюджета'},
-				{type: 'budgetNextChangeTypes', name: 'Типы изменений бюджета'},
-				{type: 'budgetNextChangeStates', name: 'Статусы изменений бюджета'}
-			];
-			for (var index in dicts) {
-				var dict = dicts[index];
-				var path = pathPrefix + dict.type;
+			var path = '/admin/dict/currency';
 
-				router.addRoutes([{
-					path: path,
-					component: Vue.component(componentName),
-					meta: {
-						requiresAuthorization: true,
-						requiredRoles: ['ROLE_ADMIN'],
-						dict: dict
-					}
-				}]);
-
-				var info = {
-					treePath: ['Администрирование', 'Справочники', dict.name],
-					route: path,
+			router.addRoutes([{
+				path: path,
+				component: Vue.component(componentName),
+				meta: {
 					requiresAuthorization: true,
-					requiredRoles: ['ROLE_ADMIN'],
-					order: 0
-				};
-				store.commit('menu/add', info);
-			}
+					requiredRoles: ['ROLE_ADMIN']
+				}
+			}]);
+
+			var info = {
+				treePath: ['Администрирование', 'Справочники', 'Валюта'],
+				route: path,
+				requiresAuthorization: true,
+				requiredRoles: ['ROLE_ADMIN'],
+				order: 0
+			};
+			store.commit('menu/add', info);
 		}
 	});
 })(jQuery);

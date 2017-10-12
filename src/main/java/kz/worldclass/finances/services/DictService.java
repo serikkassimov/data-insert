@@ -7,16 +7,20 @@ import kz.worldclass.finances.dao.impl.DictBudgetDao;
 import kz.worldclass.finances.dao.impl.DictBudgetNextChangeStateDao;
 import kz.worldclass.finances.dao.impl.DictBudgetNextChangeTypeDao;
 import kz.worldclass.finances.dao.impl.DictBudgetStoreTypeDao;
+import kz.worldclass.finances.dao.impl.DictCurrencyDao;
 import kz.worldclass.finances.dao.impl.DictOrgDao;
 import kz.worldclass.finances.dao.impl.DictRoleDao;
 import kz.worldclass.finances.data.dto.entity.DictBudgetDto;
+import kz.worldclass.finances.data.dto.entity.DictCurrencyDto;
 import kz.worldclass.finances.data.dto.entity.Dtos;
 import kz.worldclass.finances.data.dto.entity.base.BaseDictDto;
 import kz.worldclass.finances.data.dto.results.dict.DisableBaseResult;
 import kz.worldclass.finances.data.dto.results.dict.EnableBaseResult;
-import kz.worldclass.finances.data.dto.results.dict.SaveBaseResult;
+import kz.worldclass.finances.data.dto.results.dict.SaveBaseDictResult;
+import kz.worldclass.finances.data.dto.results.dict.SaveCurrencyResult;
 import kz.worldclass.finances.data.dto.results.dict.SaveDictBudgetResult;
 import kz.worldclass.finances.data.entity.DictBudgetEntity;
+import kz.worldclass.finances.data.entity.DictCurrencyEntity;
 import kz.worldclass.finances.data.entity.base.BaseDictEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,9 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class DictService {
+    private static final String BUDGET = "budget";
     private static final String BUDGET_NEXT_CHANGE_STATES = "budgetNextChangeStates";
     private static final String BUDGET_NEXT_CHANGE_TYPES = "budgetNextChangeTypes";
     private static final String BUDGET_STORE_TYPES = "budgetStoreTypes";
+    private static final String CURRENCY = "currency";
     private static final String ORGS = "orgs";
     private static final String ROLES = "roles";
 
@@ -40,18 +46,24 @@ public class DictService {
     @Autowired
     private DictBudgetStoreTypeDao dictBudgetStoreTypeDao;
     @Autowired
+    private DictCurrencyDao dictCurrencyDao;
+    @Autowired
     private DictRoleDao dictRoleDao;
     @Autowired
     private DictOrgDao dictOrgDao;
     
     private AbstractDictDao getDao(String dictType) {
         switch (dictType) {
+            case BUDGET:
+                return dictBudgetDao;
             case BUDGET_NEXT_CHANGE_STATES:
                 return dictBudgetNextChangeStateDao;
             case BUDGET_NEXT_CHANGE_TYPES:
                 return dictBudgetNextChangeTypeDao;
             case BUDGET_STORE_TYPES:
                 return dictBudgetStoreTypeDao;
+            case CURRENCY:
+                return dictCurrencyDao;
             case ORGS:
                 return dictOrgDao;
             case ROLES:
@@ -73,14 +85,14 @@ public class DictService {
         return result;
     }
     
-    public SaveBaseResult saveBase(String dictType, BaseDictDto dto) {
+    public SaveBaseDictResult saveBase(String dictType, BaseDictDto dto) {
         AbstractDictDao dao = getDao(dictType);
         
         BaseDictEntity entity;
         if (dto.id == null) entity = (BaseDictEntity) dao.newEntity();
         else {
             entity = (BaseDictEntity) dao.get(dto.id);
-            if (entity == null) return SaveBaseResult.NOT_FOUND;
+            if (entity == null) return SaveBaseDictResult.NOT_FOUND;
         }
         
         entity.setCode(dto.code);
@@ -89,7 +101,7 @@ public class DictService {
         
         dao.save(entity);
         
-        return SaveBaseResult.SUCCESS;
+        return SaveBaseDictResult.SUCCESS;
     }
     
     public EnableBaseResult enableBase(String dictType, Long id) {
@@ -154,19 +166,27 @@ public class DictService {
         return SaveDictBudgetResult.SUCCESS;
     }
     
-    public EnableBaseResult enableDictBudget(Long id) {
-        DictBudgetEntity entity = dictBudgetDao.get(id);
-        if (entity == null) return EnableBaseResult.NOT_FOUND;
-        entity.setDisabled(false);
-        dictBudgetDao.save(entity);
-        return EnableBaseResult.SUCCESS;
+    public List<DictCurrencyDto> getDictCurrencies() {
+        List<DictCurrencyDto> result = new ArrayList<>();
+        for (DictCurrencyEntity entity: dictCurrencyDao.all()) result.add(Dtos.complete(entity));
+        return result;
     }
     
-    public DisableBaseResult disableDictBudget(Long id) {
-        DictBudgetEntity entity = dictBudgetDao.get(id);
-        if (entity == null) return DisableBaseResult.NOT_FOUND;
-        entity.setDisabled(true);
-        dictBudgetDao.save(entity);
-        return DisableBaseResult.SUCCESS;
+    public SaveCurrencyResult saveDictCurrency(DictCurrencyDto dto) {
+        DictCurrencyEntity entity;
+        if (dto.id == null) entity = new DictCurrencyEntity();
+        else {
+            entity = dictCurrencyDao.get(dto.id);
+            if (entity == null) return SaveCurrencyResult.NOT_FOUND;
+        }
+        
+        entity.setCode(dto.code);
+        entity.setDisabled(dto.disabled);
+        entity.setName(dto.name);
+        entity.setSymbol(dto.symbol);
+        
+        dictCurrencyDao.save(entity);
+        
+        return SaveCurrencyResult.SUCCESS;
     }
 }

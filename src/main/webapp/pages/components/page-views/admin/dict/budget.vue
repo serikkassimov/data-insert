@@ -91,7 +91,7 @@
 <script>
 (function($){
 	var componentName = 'page-views-admin-dict-budget';
-	var ajaxRoot = WorldClassRestRoot + '/dict/budget';
+	var ajaxRoot = WorldClassRestRoot + '/dict';
 
 	Vue.component(componentName, {
 		template: '#' + componentName,
@@ -168,7 +168,7 @@
 				this.items.loading = true;
 				this.items.items = [];
 				$.ajax({
-					url: ajaxRoot + '/tree',
+					url: ajaxRoot + '/budget/tree',
 					dataType: 'json',
 					context: this,
 					error: function(jqXHR, textStatus, errorThrown) {
@@ -252,7 +252,7 @@
 					}
 
 					$.ajax({
-						url: ajaxRoot + '/save',
+						url: ajaxRoot + '/budget/save',
 						method: 'POST',
 						data: JSON.stringify(data),
 						contentType: 'application/json',
@@ -283,6 +283,16 @@
 								this.$notify.error({
 									title: 'Ошибка',
 									message: 'Ошибка при сохранении элемента: нет кода'
+								});
+							} else if (data === 'NO_DISABLED') {
+								this.$notify.error({
+									title: 'Ошибка',
+									message: 'Ошибка при сохранении элемента: нет признака "выключен"'
+								});
+							} else if (data === 'NO_OUTGO') {
+								this.$notify.error({
+									title: 'Ошибка',
+									message: 'Ошибка при сохранении элемента: нет признака "расход"'
 								});
 							} else if (data === 'NOT_FOUND') {
 								this.$notify.error({
@@ -324,7 +334,7 @@
 
 				this.items.loading = true;
 				$.ajax({
-					url: ajaxRoot + '/enable?id=' + id,
+					url: ajaxRoot + '/base/budget/enable?id=' + id,
 					dataType: 'json',
 					context: this,
 					error: function(jqXHR, textStatus, errorThrown) {
@@ -371,7 +381,7 @@
 
 				this.items.loading = true;
 				$.ajax({
-					url: ajaxRoot + '/disable?id=' + id,
+					url: ajaxRoot + '/base/budget/disable?id=' + id,
 					dataType: 'json',
 					context: this,
 					error: function(jqXHR, textStatus, errorThrown) {

@@ -8,15 +8,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import kz.worldclass.finances.data.dto.entity.base.BaseTreeDictDto;
 import kz.worldclass.finances.data.entity.DictBudgetEntity;
+import kz.worldclass.finances.data.entity.DictCurrencyEntity;
 import kz.worldclass.finances.data.entity.DictOrgEntity;
 import kz.worldclass.finances.data.entity.DictRoleEntity;
 import kz.worldclass.finances.data.entity.UserEntity;
 import kz.worldclass.finances.data.entity.UserRoleLinkEntity;
 import kz.worldclass.finances.data.entity.base.BaseDictEntity;
 import kz.worldclass.finances.data.entity.base.BaseEntity;
-import kz.worldclass.finances.data.entity.base.BaseTreeDictEntity;
 
 public class Dtos {
     /**
@@ -81,6 +80,21 @@ public class Dtos {
                 }
             });
         }
+        return result;
+    }
+    
+    public static DictCurrencyDto less(DictCurrencyEntity source) {
+        DictCurrencyDto result = new DictCurrencyDto();
+        copy(source, result);
+        if (source != null) {
+            result.symbol = source.getSymbol();
+        }
+        return result;
+    }
+    
+    public static DictCurrencyDto complete(DictCurrencyEntity source) {
+        DictCurrencyDto result = less(source);
+        if (source != null) {}
         return result;
     }
     
