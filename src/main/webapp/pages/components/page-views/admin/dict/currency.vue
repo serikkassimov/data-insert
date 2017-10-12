@@ -353,24 +353,6 @@
 			}
 		}
 	});
-
-	WorldClassPlugins.plugins.push({
-		name: componentName,
-		dependencies: [],
-		parameters: ['store', 'router'],
-		install: function(Vue, store, router) {
-			var path = '/admin/dict/currency';
-
-			router.addRoutes([{
-				path: path,
-				component: Vue.component(componentName),
-				meta: {
-					requiresAuthorization: true,
-					requiredRoles: ['ROLE_ADMIN']
-				}
-			}]);
-		}
-	});
 })(jQuery);
 </script>
 <!-- components/page-views/admin/dict/base.vue :: end -->

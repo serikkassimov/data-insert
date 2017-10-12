@@ -420,24 +420,6 @@
 			this.reloadItems();
 		}
 	});
-
-	WorldClassPlugins.plugins.push({
-		name: componentName,
-		dependencies: [],
-		parameters: ['store', 'router'],
-		install: function(Vue, store, router) {
-			var path = '/admin/dict/budget';
-
-			router.addRoutes([{
-				path: path,
-				component: Vue.component(componentName),
-				meta: {
-					requiresAuthorization: true,
-					requiredRoles: ['ROLE_ADMIN']
-				}
-			}]);
-		}
-	});
 })(jQuery);
 </script>
 <!-- components/page-views/admin/dict/budget.vue :: end -->

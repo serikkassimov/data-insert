@@ -67,23 +67,6 @@
                 }
             }
         });
-
-        WorldClassPlugins.plugins.push({
-            parameters: ['store', 'router'],
-            name: componentName,
-            dependencies: [],
-            install: function (Vue, store, router) {
-                router.addRoutes([
-                    {
-                        path: '/request-report', component: Vue.component(componentName),
-                        meta: {
-                            requiresAuthorization: true,
-                            requiredRoles: ['ROLE_ADMIN', 'ROLE_FILIAL_USER']
-                        }
-                    }
-                ]);
-            }
-        });
     })(jQuery);
 </script>
 <!-- components/page-views/request-report.vue :: end -->

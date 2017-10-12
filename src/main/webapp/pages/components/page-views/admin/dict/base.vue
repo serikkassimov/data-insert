@@ -329,36 +329,6 @@
 			}
 		}
 	});
-
-	WorldClassPlugins.plugins.push({
-		name: componentName,
-		dependencies: [],
-		parameters: ['store', 'router'],
-		install: function(Vue, store, router) {
-			var pathPrefix = '/admin/dict/';
-			var dicts = [
-				{type: 'roles', name: 'Роли'},
-				{type: 'orgs', name: 'Организации'},
-				{type: 'budgetStoreTypes', name: 'Типы хранения бюджета'},
-				{type: 'budgetNextChangeTypes', name: 'Типы изменений бюджета'},
-				{type: 'budgetNextChangeStates', name: 'Статусы изменений бюджета'}
-			];
-			for (var index in dicts) {
-				var dict = dicts[index];
-				var path = pathPrefix + dict.type;
-
-				router.addRoutes([{
-					path: path,
-					component: Vue.component(componentName),
-					meta: {
-						requiresAuthorization: true,
-						requiredRoles: ['ROLE_ADMIN'],
-						dict: dict
-					}
-				}]);
-			}
-		}
-	});
 })(jQuery);
 </script>
 <!-- components/page-views/admin/dict/base.vue :: end -->

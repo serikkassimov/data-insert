@@ -516,24 +516,6 @@
 			this.reloadUsers();
 		}
 	});
-
-	WorldClassPlugins.plugins.push({
-		parameters: ['store', 'router'],
-		name: componentName,
-		dependencies: [],
-		install: function(Vue, store, router) {
-			var path = '/admin/auth-manage/users';
-
-			router.addRoutes([{
-				path: path,
-				component: Vue.component(componentName),
-				meta: {
-					requiresAuthorization: true,
-					requiredRoles: ['ROLE_ADMIN']
-				}
-			}]);
-		}
-	});
 })(jQuery);
 </script>
 <!-- components/page-views/admin/auth-manage/users.vue :: end -->

@@ -29,55 +29,89 @@
 </template>
 <!-- components/menu-component.vue :: middle -->
 <script>
-var templates = {
-	ROLE_ADMIN: {
-		requiresAuthorization: true,
-		requiredRoles: ['ROLE_ADMIN']
-	},
-	ROLE_ADMIN_ROLE_FILIAL_USER: {
-		requiresAuthorization: true,
-		requiredRoles: ['ROLE_ADMIN', 'ROLE_FILIAL_USER']
-	}
-};
+(function($){
+	var createMeta = function(requiredRoles, componentName, additional) {
+		var result;
+		if (isObject(additional)) result = $.extend(true, {}, additional);
+		else result = {};
 
-var componentName = 'menu-component';
-Vue.component(componentName, {
-	template: '#' + componentName,
-	data: function() {
-		return {
-			collapsed: false,
-			securityMeta: {
-				'/admin': templates.ROLE_ADMIN,
-				'/admin/dict': templates.ROLE_ADMIN,
-				'/admin/dict/budget': templates.ROLE_ADMIN,
-				'/admin/dict/budgetNextChangeTypes': templates.ROLE_ADMIN,
-				'/admin/dict/budgetNextChangeStates': templates.ROLE_ADMIN,
-				'/admin/dict/budgetStoreTypes': templates.ROLE_ADMIN,
-				'/admin/dict/orgs': templates.ROLE_ADMIN,
-				'/admin/dict/currency': templates.ROLE_ADMIN,
-				'/admin/auth-manage': templates.ROLE_ADMIN,
-				'/admin/auth-manage/users': templates.ROLE_ADMIN,
+		if (isNonEmptyArray(requiredRoles)) {
+			for (var index in requiredRoles) {
+				var role = requiredRoles[index];
+				if (!isNonEmptyString(role)) throw new Error('required role is not non-empty string: ' + role + ' (type ' + (typeof role) + ')');
+			}
+			result.requiredRoles = requiredRoles;
+			result.requiresAuthorization = true;
+		} else result.requiresAuthorization = false;
 
-				'/reports': templates.ROLE_ADMIN_ROLE_FILIAL_USER,
-				'/cash-report': templates.ROLE_ADMIN_ROLE_FILIAL_USER,
-				'/request-report': templates.ROLE_ADMIN_ROLE_FILIAL_USER
+		if (isNonEmptyString(componentName)) result.componentName = componentName;
+
+		return result;
+	};
+
+	var meta = {
+		'/admin': createMeta(['ROLE_ADMIN']),
+		'/admin/dict': createMeta(['ROLE_ADMIN']),
+		'/admin/dict/budget': createMeta(['ROLE_ADMIN'], 'page-views-admin-dict-budget'),
+		'/admin/dict/budgetNextChangeTypes': createMeta(['ROLE_ADMIN'], 'page-views-admin-dict-base', {dict: {type: 'budgetNextChangeTypes', name: 'Типы изменений бюджета'}}),
+		'/admin/dict/budgetNextChangeStates': createMeta(['ROLE_ADMIN'], 'page-views-admin-dict-base', {dict: {type: 'budgetNextChangeStates', name: 'Статусы изменений бюджета'}}),
+		'/admin/dict/budgetStoreTypes': createMeta(['ROLE_ADMIN'], 'page-views-admin-dict-base', {dict: {type: 'budgetStoreTypes', name: 'Типы хранения бюджета'}}),
+		'/admin/dict/orgs': createMeta(['ROLE_ADMIN'], 'page-views-admin-dict-base', {dict: {type: 'orgs', name: 'Организации'}}),
+		'/admin/dict/roles': createMeta(['ROLE_ADMIN'], 'page-views-admin-dict-base', {dict: {type: 'roles', name: 'Роли'}}),
+		'/admin/dict/currency': createMeta(['ROLE_ADMIN'], 'page-views-admin-dict-currency'),
+		'/admin/auth-manage': createMeta(['ROLE_ADMIN']),
+		'/admin/auth-manage/users': createMeta(['ROLE_ADMIN'], 'page-views-admin-auth-manage-users'),
+
+		'/reports': createMeta(['ROLE_ADMIN', 'ROLE_FILIAL_USER']),
+		'/cash-report': createMeta(['ROLE_ADMIN', 'ROLE_FILIAL_USER'], 'components-page-views-cash-report'),
+		'/request-report': createMeta(['ROLE_ADMIN', 'ROLE_FILIAL_USER'], 'components-page-views-request-report')
+	};
+
+	var componentName = 'menu-component';
+	Vue.component(componentName, {
+		template: '#' + componentName,
+		data: function() {
+			return {
+				collapsed: false,
+				meta: meta
+			}
+		},
+		computed: Vuex.mapState({
+			account: state => state.account,
+			activeIndex: function() {
+				return this.$route.fullPath;
+			}
+		}),
+		methods: {
+			isForbidden: function(path) {
+				return isForbidden({meta: this.meta[path]}, this.account);
+			},
+			isAllowed: function(path) {
+				return !isForbidden({meta: this.meta[path]}, this.account);
 			}
 		}
-	},
-	computed: Vuex.mapState({
-		account: state => state.account,
-		activeIndex: function() {
-			return this.$route.fullPath;
+	});
+
+	WorldClassPlugins.plugins.push({
+		name: componentName,
+		dependencies: [],
+		parameters: ['store', 'router'],
+		install: function (Vue, store, router) {
+			var routes = [];
+			for (var index in meta) {
+				if (isNonEmptyString(meta[index].componentName)) {
+					var component = Vue.component(meta[index].componentName);
+					if (!isFunction(component)) throw new Error('no component with name "' + meta[index].componentName + '"');
+					routes.push({
+						path: index,
+						component: component,
+						meta: meta[index]
+					});
+				}
+			}
+			router.addRoutes(routes);
 		}
-	}),
-	methods: {
-		isForbidden: function(metaName) {
-			return isForbidden({meta: this.securityMeta[metaName]}, this.account);
-		},
-		isAllowed: function(metaName) {
-			return !isForbidden({meta: this.securityMeta[metaName]}, this.account);
-		}
-	}
-});
+	});
+})(jQuery);
 </script>
 <!-- components/menu-component.vue :: end -->
