@@ -135,34 +135,6 @@
 			}
 		};
 
-		var isForbidden = function(route, account) {
-			var result = false;
-
-			if (account.restrictRoutes) {
-				var meta = route.meta;
-				if (isObject(meta) && meta.requiresAuthorization) {
-					if (account.anonymousUser || (!account.accountNonExpired) || (!account.accountNonLocked) || (!account.credentialsNonExpired) || (!account.enabled)) result = true;
-					else if (isNonEmptyArray(meta.requiredRoles)) {
-						if (isNonEmptyArray(account.authorities)) {
-							result = true;
-							for (var index in account.authorities) {
-								var authority = account.authorities[index];
-								if (isObject(authority)) {
-									var indexInRequired = meta.requiredRoles.indexOf(authority.name);
-									if (indexInRequired !== -1) {
-										result = false;
-										break;
-									}
-								}
-							}
-						} else result = true;
-					}
-				}
-			}
-
-			return result;
-		}
-
 		var checkRoute = function(route, account) {
 			var forbidden = isForbidden(route, account);
 
@@ -185,7 +157,7 @@
 				}
 			}
 			return undefined;
-		}
+		};
 
 		var checkRouter = function(router, account) {
 			var newPath = checkRoute(router.currentRoute, account);

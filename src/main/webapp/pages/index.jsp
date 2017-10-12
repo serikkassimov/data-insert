@@ -47,7 +47,7 @@
                     </div>
                     <div class="row no-gutters">
                         <div class="col col-12 col-sm-8 col-md-5 col-lg-4 col-xl-3 bg-dark">
-                            <components-menu-menu-component></components-menu-menu-component>
+                            <menu-component></menu-component>
                         </div>
                         <div class="col col-12 col-sm-8 col-md-7 col-lg-8 col-xl-9">
                             <router-view></router-view>

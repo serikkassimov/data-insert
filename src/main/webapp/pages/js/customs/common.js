@@ -247,3 +247,31 @@ walkElementTree.CONTINUE = walkElementTreeContinue;
 walkElementTree.TERMINATE = walkElementTreeTerminate;
 walkElementTree.SKIP_SUBTREE = walkElementTreeSkipSubtree;
 walkElementTree.SKIP_SIBLINGS = walkElementTreeSkipSiblings;
+
+isForbidden = function(route, account) {
+	var result = false;
+
+	if (account.restrictRoutes) {
+		var meta = route.meta;
+		if (isObject(meta) && meta.requiresAuthorization) {
+			if (account.anonymousUser || (!account.accountNonExpired) || (!account.accountNonLocked) || (!account.credentialsNonExpired) || (!account.enabled)) result = true;
+			else if (isNonEmptyArray(meta.requiredRoles)) {
+				if (isNonEmptyArray(account.authorities)) {
+					result = true;
+					for (var index in account.authorities) {
+						var authority = account.authorities[index];
+						if (isObject(authority)) {
+							var indexInRequired = meta.requiredRoles.indexOf(authority.name);
+							if (indexInRequired !== -1) {
+								result = false;
+								break;
+							}
+						}
+					}
+				} else result = true;
+			}
+		}
+	}
+
+	return result;
+};
