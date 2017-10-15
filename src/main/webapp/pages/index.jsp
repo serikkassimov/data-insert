@@ -1,106 +1,60 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html style="height: 100%;">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>World Class Finance</title>
+        <link rel="stylesheet" href="./js/bootstrap.4.0.0-beta.min.css">
         <link rel="stylesheet" href="./js/element-ui.css">
         <style type="text/css">
-            html, body {
-                margin:0;
-                padding:0;
-                height:100%;
-                display: flex;
-                background-color: #324057;
-            }
-            body {
-                position: absolute;
-                left: 0px;
-                right: 0px;
-            }
-            #app {
-                left: 0px;
-                right: 0px;
-                width: 100%;
-            }
-
-            .page-view-enter-active {
-                transition: opacity .5s
-            }
-
-            .page-view-leave-active .page-view-leave {
-                display: none
-            }
-
-            .page-view-enter,
-            .page-view-leave-to {
-                opacity: 0
-            }
-
             /*
-            Element UI grid CSS
+                Merge ElementUI and Bootstrap
             */
-            .el-col {
-                border-radius: 2px;
-            }
-            .el-row--flex > .el-col {
-                display: flex;
-            }
-            .bg-purple {
-                background-color: #324057;
-            }
-            .grid-content {
-                border-radius: 2px;
-                min-height: 36px;
-                border: thin solid #324057;
-            }
-            .el-row--flex > .el-col > .grid-content {
-                height: 100%;
-                width: 100%;
-            }
-            .el-row .danger {
-                background-color: rgba(255,73,73,.1);
-                border-color: rgba(255,73,73,.2);
-            }
+            .bg-dark .el-menu--dark, .bg-dark .el-menu--dark .el-submenu .el-menu{background-color:#343a40!important}
         </style>
         <script>
             WorldClassRestRoot = '<%= request.getContextPath() %>';
         </script>
     </head>
-    <body>
+    <body class="h-100" style="background-color: #F7F7F9;">
+        <div id="loading-layer">
+            <image src="./images/loading.gif" alt="Loading..." style="margin: auto; display: block;"/>
+        </div>
         <div id="app">
             <template>
-                <el-row type="flex" align="middle">
-                    <el-col :xs="8" :sm="6" :md="4" :lg="3">
-                        <div class="grid-content bg-purple">
+                <div class="h-100 w-100" style="position: absolute;">
+                    <div class="row h-100 no-gutters">
+                        <div class="col col-12 col-sm-8 col-md-5 col-lg-4 col-xl-3 bg-dark"></div>
+                        <div class="col col-12 col-sm-8 col-md-7 col-lg-8 col-xl-9 bg-white">
+                        </div>
+                    </div>
+                </div>
+                <div class="h-100 w-100" style="position: absolute;">
+                    <div class="row bg-dark align-items-center no-gutters">
+                        <div class="col">
                             <el-menu theme="dark" mode="horizontal">
                                 <el-menu-item :index="'home'" @click="homePageClick">Домашняя страница</el-menu-item>
                             </el-menu>
                         </div>
-                    </el-col>
-                    <el-col :xs="16" :sm="18" :md="20" :lg="21">
-                        <div class="grid-content bg-purple" style="text-align: right;">
-                            <components-auth-auth-info></components-auth-auth-info>
+                        <div class="col">
+                            <div class="grid-content bg-purple" style="text-align: right;">
+                                <components-auth-auth-info></components-auth-auth-info>
+                            </div>
                         </div>
-                    </el-col>
-                </el-row>
-                <el-row type="flex" style="min-height: 100%;">
-                    <el-col :xs="16" :sm="10" :md="6" :lg="3">
-                        <div class="grid-content bg-purple" style="overflow: auto;">
-                            <components-menu-menu-component></components-menu-menu-component>
+                    </div>
+                    <div class="row no-gutters">
+                        <div class="col col-12 col-sm-8 col-md-5 col-lg-4 col-xl-3 bg-dark">
+                            <menu-component></menu-component>
                         </div>
-                    </el-col>
-                    <el-col :xs="16" :sm="18" :md="20" :lg="21">
-                        <div class="grid-content" style="background-color: white;">
+                        <div class="col col-12 col-sm-8 col-md-7 col-lg-8 col-xl-9">
                             <router-view></router-view>
                         </div>
-                    </el-col>
-                </el-row>
+                    </div>
+                </div>
             </template>
-        </div>
-        <div id="loading-layer" style="position: fixed; left: 0px; top: 0px; right: 0px; bottom: 0px; align-content: center;">
-            <image src="./images/loading.gif" alt="Loading..." style="margin: auto; display: block;"/>
         </div>
         
         <script src="./js/jquery-3.2.1.min.js"></script>

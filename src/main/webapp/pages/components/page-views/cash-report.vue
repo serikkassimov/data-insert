@@ -183,32 +183,6 @@
             }),
             methods: {}
         });
-
-        WorldClassPlugins.plugins.push({
-            parameters: ['store', 'router'],
-            name: componentName,
-            dependencies: [],
-            install: function (Vue, store, router) {
-                router.addRoutes([
-                    {
-                        path: '/cash-report', component: Vue.component(componentName),
-                        meta: {
-                            requiresAuthorization: true,
-                            requiredRoles: ['ROLE_ADMIN', 'ROLE_FILIAL_USER']
-                        }
-                    }
-                ]);
-
-                var info = {
-                    treePath: ['Отчеты', 'Кассовый отчет'],
-                    route: {path: '/cash-report'},
-                    requiresAuthorization: true,
-                    requiredRoles: ['ROLE_ADMIN', 'ROLE_FILIAL_USER'],
-                    order: 0
-                };
-                store.commit('menu/add', info);
-            }
-        });
     })(jQuery);
 </script>
 <!-- components/page-views/cash-report.vue :: end -->

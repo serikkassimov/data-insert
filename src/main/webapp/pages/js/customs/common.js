@@ -174,3 +174,104 @@ booleanComparator = function(boolean1, boolean2) {
 		else return 0;
 	}
 };
+
+var walkElementTreeContinue = 0;
+var walkElementTreeTerminate = walkElementTreeContinue + 1;
+var walkElementTreeSkipSubtree = walkElementTreeTerminate + 1;
+var walkElementTreeSkipSiblings = walkElementTreeSkipSubtree + 1;
+walkElementTree = function(parent, consumer, parentData) {
+	if (!isFunction(consumer)) throw new Error('consumer is not function');
+
+	/*
+	data = {
+		parent: {},
+		index: 0,
+		root: {},
+		level: 0,
+		objectPath: [],
+		indexPath: []
+	}
+	*/
+
+	if (!isObject(parentData)) parentData = {};
+
+	if (((!isObject(parentData.root)) && (!isArray(parentData.root))) || ((!isObject(parentData.parent)) && (!isArray(parentData.parent)))) {
+		parentData.parent = undefined;
+		parentData.index = undefined;
+		parentData.root = parent;
+		parentData.level = 0;
+		parentData.objectPath = [parent];
+		parentData.indexPath = [];
+	} else {
+		if ((!isComparableNumber(parentData.index)) && (!isNonEmptyString(parentData.index))) parentData.index = undefined;
+		if ((!isComparableNumber(parentData.level)) || (parentData.level < 0)) parentData.level = 0;
+	
+		if (!isArray(parentData.objectPath)) parentData.objectPath = [parent];
+		if (parentData.objectPath[parentData.objectPath.length - 1] !== parent) parentData.objectPath.push(parent);
+	
+		if (!isArray(parentData.indexPath)) parentData.indexPath = [];
+	}
+
+	parentData.item = parent;
+
+	var consumerResult = consumer(parentData);
+	if (consumerResult === walkElementTreeContinue) ;
+	else if (consumerResult === walkElementTreeTerminate) return walkElementTreeTerminate;
+	else if (consumerResult === walkElementTreeSkipSubtree) return walkElementTreeContinue;
+	else if (consumerResult === walkElementTreeSkipSiblings) return walkElementTreeSkipSiblings;
+	else throw new Error('unknown consumer result ' + consumerResult);
+
+	if (isArray(parent) || isObject(parent)) {
+		for (var index in parent) {
+			var child = parent[index];
+			var childData = $.extend({}, parentData);
+			childData.parent = parent;
+			childData.index = index;
+			childData.level += 1;
+			childData.objectPath = $.extend([], childData.objectPath);
+			childData.objectPath.push(child);
+			childData.indexPath = $.extend([], childData.indexPath);
+			childData.indexPath.push(index);
+
+			var childResult = walkElementTree(child, consumer, childData);
+			if (childResult === walkElementTreeContinue) ;
+			else if (childResult === walkElementTreeTerminate) return walkElementTreeTerminate;
+			else if (childResult === walkElementTreeSkipSiblings) return walkElementTreeContinue;
+			else throw new Error('unknown child walk result ' + childResult);
+		}
+	}
+
+	return walkElementTreeContinue;
+};
+walkElementTree.CONTINUE = walkElementTreeContinue;
+walkElementTree.TERMINATE = walkElementTreeTerminate;
+walkElementTree.SKIP_SUBTREE = walkElementTreeSkipSubtree;
+walkElementTree.SKIP_SIBLINGS = walkElementTreeSkipSiblings;
+
+isForbidden = function(route, account) {
+	var result = false;
+
+	if (account.restrictRoutes) {
+		var meta = route.meta;
+		if (isObject(meta) && meta.requiresAuthorization) {
+			if (account.anonymousUser || (!account.accountNonExpired) || (!account.accountNonLocked) || (!account.credentialsNonExpired) || (!account.enabled)) result = true;
+			else if (isNonEmptyArray(meta.requiredRoles)) {
+				if (isNonEmptyArray(account.authorities)) {
+					result = true;
+					for (var index in account.authorities) {
+						var authority = account.authorities[index];
+						if (isObject(authority)) {
+							var indexInRequired = meta.requiredRoles.indexOf(authority.name);
+							if (indexInRequired !== -1) {
+								result = false;
+								break;
+							}
+						}
+					}
+				} else result = true;
+			}
+		}
+	}
+
+	return result;
+};

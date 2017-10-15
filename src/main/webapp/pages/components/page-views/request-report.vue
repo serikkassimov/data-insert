@@ -246,32 +246,6 @@
                 }
             }
         });
-
-        WorldClassPlugins.plugins.push({
-            parameters: ['store', 'router'],
-            name: componentName,
-            dependencies: [],
-            install: function (Vue, store, router) {
-                router.addRoutes([
-                    {
-                        path: '/request-report', component: Vue.component(componentName),
-                        meta: {
-                            requiresAuthorization: true,
-                            requiredRoles: ['ROLE_ADMIN', 'ROLE_FILIAL_USER']
-                        }
-                    }
-                ]);
-
-                var info = {
-                    treePath: ['Отчеты', 'Заявка'],
-                    route: {path: '/request-report'},
-                    requiresAuthorization: true,
-                    requiredRoles: ['ROLE_ADMIN', 'ROLE_FILIAL_USER'],
-                    order: 0
-                };
-                store.commit('menu/add', info);
-            }
-        });
     })(jQuery);
 </script>
 <!-- components/page-views/request-report.vue :: end -->

@@ -1,8 +1,8 @@
-<!-- components/page-views/admin/dict/base.vue :: start -->
-<template id="page-views-admin-dict-base">
+<!-- components/page-views/admin/dict/budget.vue :: start -->
+<template id="page-views-admin-dict-budget">
 	<div>
 		<div class="card">
-			<h5 class="card-header">Справочник: {{dict.name}}</h5>
+			<h5 class="card-header">Справочник: Статьи изменений бюджета</h5>
 		</div>
 		<div class="card" v-loading.body="items.loading">
 			<div class="card-header">
@@ -12,10 +12,34 @@
 			<div class="card-body">
 				<el-table
 					border style="width: 100%"
-					:data="items.items" :row-class-name="itemsTableClassName"
+					:data="tableItems" :row-class-name="itemsTableClassName"
 				>
-					<el-table-column prop="code" label="Код"></el-table-column>
-					<el-table-column prop="name" label="Название"></el-table-column>
+					<el-table-column label="Код">
+						<template scope="scope">
+							<template v-for="level in scope.row.level">
+								<i class="el-icon-more text-white"></i>
+							</template>
+							<template v-if="scope.row.children && (scope.row.children.length > 0)">
+								<i class="el-icon-caret-right" @click="toggleExpanded(scope.row.id)" v-if="items.expanded.indexOf(scope.row.id) === -1"></i>
+								<i class="el-icon-caret-bottom" @click="toggleExpanded(scope.row.id)" v-else></i>
+							</template>
+							<template v-else>
+								<i class="el-icon-more text-white"></i>
+							</template>
+							<span>{{scope.row.code}}</span>
+						</template>
+					</el-table-column>
+					<el-table-column label="Название" prop="name"></el-table-column>
+					<el-table-column label="Расход">
+						<template scope="scope">
+							<template v-if="scope.row.outgo">
+								<div class="float-right">Да</div>
+							</template>
+							<template v-else>
+								<div class="float-left">Нет</div>
+							</template>
+						</template>
+					</el-table-column>
 					<el-table-column label="Действия">
 						<template scope="scope">
 							<el-button size="small" @click="editItem(scope.row)">Изменить</el-button>
@@ -35,11 +59,25 @@
 				ref="itemForm" label-width="120px"
 				:model="item.data" :rules="item.rules"
 			>
+				<el-form-item label="Данные">
+					<pre>{{item.data}}</pre>
+				</el-form-item>
 				<el-form-item label="Код" prop="code">
 					<el-input v-model="item.data.code"></el-input>
 				</el-form-item>
 				<el-form-item label="Название" prop="name">
 					<el-input v-model="item.data.name"></el-input>
+				</el-form-item>
+				<el-form-item label="Расход" prop="outgo">
+					<el-switch on-text="" off-text="" v-model="item.data.outgo"></el-switch>
+					<template v-if="item.data.outgo">Да</template>
+					<template v-else>Нет</template>
+				</el-form-item>
+				<el-form-item label="Родитель">
+					<el-select filterable v-model="item.data.parentId">
+						<el-option class="text-secondary" label="<Без родителя>" :value="null"></el-option>
+						<el-option v-for="parent in possibleParents" :key="parent.id" :label="'[' + parent.code + '] ' + parent.name" :value="parent.id"></el-option>
+					</el-select>
 				</el-form-item>
 			</el-form>
 			<span slot="footer" class="dialog-footer">
@@ -49,77 +87,88 @@
 		</el-dialog>
 	</div>
 </template>
-<!-- components/page-views/admin/dict/base.vue :: middle -->
+<!-- components/page-views/admin/dict/budget.vue :: middle -->
 <script>
-(function($) {
-	var componentName = 'page-views-admin-dict-base';
+(function($){
+	var componentName = 'page-views-admin-dict-budget';
 	var ajaxRoot = WorldClassRestRoot + '/dict';
+
 	Vue.component(componentName, {
 		template: '#' + componentName,
 		data: function() {
-			var component = this;
-			var codeDuplicateCheck = function(rule, value, callback) {
-				for (var index in component.items.items) {
-					var item = component.items.items[index];
-					if (item.id === component.item.data.id) continue;
-					if (item.code === value) {
-						callback(new Error('Found another item (ID: ' + item.id + ') with code "' + value + '"'));
-						return;
-					}
-				}
-				callback();
-			};
-
 			return {
-				dictType: undefined,
 				items: {
 					items: [],
-					loading: false
+					loading: false,
+					expanded: []
 				},
 				item: {
 					data: {
 						id: undefined,
 						code: undefined,
 						name: undefined,
-						disabled: undefined
+						disabled: undefined,
+						outgo: undefined,
+						parentId: undefined
 					},
 					original: {
 						id: undefined,
 						code: undefined,
 						name: undefined,
-						disabled: undefined
+						disabled: undefined,
+						outgo: undefined,
+						parentId: undefined
 					},
 					rules: {
 						code: [
 							{required: true, message: 'Необходимо ввести код (макс 50 символов)', trigger: ['change', 'blur']},
 							{min: 1, max: 50, message: 'Необходимо ввести код (макс 50 символов)', trigger: ['change', 'blur']},
-							{validator: codeDuplicateCheck, message: 'Код занят', trigger: ['change', 'blur']}
+							{validator: this.codeDuplicateCheck, message: 'Код занят', trigger: ['change', 'blur']}
 						]
 					},
+					saving: false,
 					dialog: {
 						visible: false
-					},
-					saving: false
+					}
 				}
-			};
+			}
 		},
 		computed: Vuex.mapState({
+			tableItems: function() {
+				var result = [];
+				var expanded = this.items.expanded;
+				walkElementTree(this.items.items, function(walkData) {
+					if (isObject(walkData.item)) {
+						result.push(walkData.item);
+						if (expanded.indexOf(walkData.item.id) === -1) return walkElementTree.SKIP_SUBTREE;
+						else return walkElementTree.CONTINUE;
+					} else return walkElementTree.CONTINUE;
+				});
+				return result;
+			},
+			possibleParents: function() {
+				var result = [];
+				var skippedId = this.item.data.id;
+				walkElementTree(this.items.items, function(walkData) {
+					if (isObject(walkData.item)) {
+						if (walkData.item.id === skippedId) return walkElementTree.SKIP_SUBTREE;
+						else result.push(walkData.item);
+					}
+					return walkElementTree.CONTINUE;
+				});
+				return result;
+			},
 			itemChanged: function() {
 				return !equals(this.item.data, this.item.original);
-			},
-			dict: function() {
-				return this.$route.meta.dict;
 			}
 		}),
 		methods: {
 			reloadItems: function() {
 				if (this.items.loading) return;
-
 				this.items.loading = true;
 				this.items.items = [];
-
 				$.ajax({
-					url: ajaxRoot + '/base/' + this.dict.type + '/list',
+					url: ajaxRoot + '/budget/tree',
 					dataType: 'json',
 					context: this,
 					error: function(jqXHR, textStatus, errorThrown) {
@@ -129,6 +178,16 @@
 						});
 					},
 					success: function(data, textStatus, jqXHR) {
+						walkElementTree(data, function(walkData) {
+							if (isObject(walkData.item)) {
+								walkData.item.level = (walkData.level - 1) / 2;
+								if (walkData.objectPath.length > 3) {
+									var parent = walkData.objectPath[walkData.objectPath.length - 3];
+									if (isObject(parent) && isComparableNumber(parent.id)) walkData.item.parentId = parent.id;
+								}
+							}
+							return walkElementTree.CONTINUE;
+						});
 						this.items.items = data;
 					},
 					complete: function(jqXHR, textStatus) {
@@ -136,25 +195,44 @@
 					}
 				});
 			},
-			itemsTableClassName: function(row, index) {
-				if (row.disabled) return 'bg-danger';
-				else return '';
+			toggleExpanded: function(id) {
+				var index = this.items.expanded.indexOf(id);
+				if (index === -1) this.items.expanded.push(id);
+				else this.items.expanded.splice(index, 1);
+			},
+			codeDuplicateCheck: function(rule, value, callback) {
+				var error;
+				var currentId = this.item.data.id;
+				walkElementTree(this.items.items, function(walkData) {
+					if (isObject(walkData.item)) {
+						if ((walkData.item.id !== currentId) && (walkData.item.code === value)) {
+							error = new Error('Found another item (ID: ' + walkData.item.id + ') with code "' + value + '"');
+							return walkElementTree.TERMINATE;
+						}
+					}
+					return walkElementTree.CONTINUE;
+				});
+				if (isError(error)) callback(error);
+				else callback();
 			},
 			newItem: function() {
-				this.showItemEditDialog();
+				this.showItemDialog();
 			},
 			editItem: function(item) {
-				if (isObject(item)) this.showItemEditDialog(item);
+				this.showItemDialog(item);
 			},
-			showItemEditDialog: function(item) {
+			showItemDialog: function(item) {
 				var actualItem = $.extend(true, {}, item);
-				if (!isNumber(actualItem.id)) actualItem.id = null;
-				if (!isString(actualItem.code)) actualItem.code = '';
-				if (!isString(actualItem.name)) actualItem.name = '';
+				if (!isComparableNumber(actualItem.id)) actualItem.id = null;
+				if (!isNonEmptyString(actualItem.code)) actualItem.code = '';
+				if (!isNonEmptyString(actualItem.name)) actualItem.name = '';
+				if (!isComparableNumber(actualItem.parentId)) actualItem.parentId = null;
+				if (!isBoolean(actualItem.outgo)) actualItem.outgo = false;
 				if (!isBoolean(actualItem.disabled)) actualItem.disabled = false;
+				delete actualItem.children;
 
-				this.item.original = $.extend(true, {}, actualItem);
 				this.item.data = $.extend(true, {}, actualItem);
+				this.item.original = $.extend(true, {}, actualItem);
 				this.item.dialog.visible = true;
 			},
 			saveItem: function() {
@@ -165,11 +243,18 @@
 				if (this.item.saving) return;
 				if (valid) {
 					this.item.saving = true;
-					var data = JSON.stringify(this.item.data);
+
+					var data = $.extend(true, {}, this.item.data);
+					if (isComparableNumber(data.parentId)) {
+						data.parent = {
+							id: data.parentId
+						};
+					}
+
 					$.ajax({
-						url: ajaxRoot + '/base/' + this.dict.type + '/save',
+						url: ajaxRoot + '/budget/save',
 						method: 'POST',
-						data: data,
+						data: JSON.stringify(data),
 						contentType: 'application/json',
 						dataType: 'json',
 						context: this,
@@ -204,10 +289,20 @@
 									title: 'Ошибка',
 									message: 'Ошибка при сохранении элемента: нет признака "выключен"'
 								});
+							} else if (data === 'NO_OUTGO') {
+								this.$notify.error({
+									title: 'Ошибка',
+									message: 'Ошибка при сохранении элемента: нет признака "расход"'
+								});
 							} else if (data === 'NOT_FOUND') {
 								this.$notify.error({
 									title: 'Ошибка',
 									message: 'Ошибка при сохранении элемента: элемент не найден'
+								});
+							} else if (data === 'PARENT_NOT_FOUND') {
+								this.$notify.error({
+									title: 'Ошибка',
+									message: 'Ошибка при сохранении элемента: родитель не найден'
 								});
 							} else {
 								this.$notify.error({
@@ -239,7 +334,7 @@
 
 				this.items.loading = true;
 				$.ajax({
-					url: ajaxRoot + '/base/' + this.dict.type + '/enable?id=' + id,
+					url: ajaxRoot + '/base/budget/enable?id=' + id,
 					dataType: 'json',
 					context: this,
 					error: function(jqXHR, textStatus, errorThrown) {
@@ -286,7 +381,7 @@
 
 				this.items.loading = true;
 				$.ajax({
-					url: ajaxRoot + '/base/' + this.dict.type + '/disable?id=' + id,
+					url: ajaxRoot + '/base/budget/disable?id=' + id,
 					dataType: 'json',
 					context: this,
 					error: function(jqXHR, textStatus, errorThrown) {
@@ -315,20 +410,16 @@
 						this.reloadItems();
 					}
 				});
+			},
+			itemsTableClassName: function(row, index) {
+				if (row.disabled) return 'bg-danger';
+				else return '';
 			}
 		},
 		mounted: function() {
 			this.reloadItems();
-		},
-		updated: function() {
-			if (this.dict) {
-				if (this.dictType !== this.dict.type) {
-					this.dictType = this.dict.type;
-					this.reloadItems();
-				}
-			}
 		}
 	});
 })(jQuery);
 </script>
-<!-- components/page-views/admin/dict/base.vue :: end -->
+<!-- components/page-views/admin/dict/budget.vue :: end -->
