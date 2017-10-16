@@ -8,6 +8,9 @@ import org.springframework.security.core.GrantedAuthority;
 public class Role implements GrantedAuthority {
     private static final String PREFIX = "ROLE_";
     
+    public static final String ANONYMOUS = "ANONYMOUS";
+    public static final String HQ = "HQ";
+    
     private String name;
 
     public String getName() {

@@ -3,6 +3,7 @@ package kz.worldclass.finances.controlers;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import kz.worldclass.finances.auth.User;
+import kz.worldclass.finances.services.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ public abstract class AbstractRestController {
     protected HttpServletRequest request;
     @Autowired
     protected HttpServletResponse response;
+    @Autowired
+    protected AuthService authService;
     
     protected User user() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -42,5 +45,11 @@ public abstract class AbstractRestController {
             ));
             return null;
         }
+    }
+    
+    protected String login() {
+        User user = this.user();
+        if (user == null) return null;
+        else return user.getUsername();
     }
 }

@@ -106,18 +106,22 @@
 			},
 			actions: {
 				update: function(context) {
-					$.ajax({
-						url: WorldClassRestRoot + '/auth/info',
-						context: context,
-						dataType: 'json',
-						error: function(jqXHR, textStatus, errorThrown) {
-							console.error('Error while updating account: ' + textStatus + ' - ' + errorThrown);
-						},
-						success: function(data, textStatus, jqXHR) {
-							data.restrictRoutes = true;
-							this.commit('updateState', data);
-						},
-						complete: function(jqXHR, textStatus) {}
+					return new Promise((resolve, reject) => {
+						$.ajax({
+							url: WorldClassRestRoot + '/auth/info',
+							context: context,
+							dataType: 'json',
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.error('Error while updating account: ' + textStatus + ' - ' + errorThrown);
+							},
+							success: function(data, textStatus, jqXHR) {
+								data.restrictRoutes = true;
+								this.commit('updateState', data);
+							},
+							complete: function(jqXHR, textStatus) {
+								resolve()
+							}
+						});
 					});
 				}
 			},

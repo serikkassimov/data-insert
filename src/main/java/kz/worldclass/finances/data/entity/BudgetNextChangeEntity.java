@@ -1,11 +1,13 @@
 package kz.worldclass.finances.data.entity;
 
+import java.util.Collection;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -83,6 +85,9 @@ public class BudgetNextChangeEntity extends BaseEntity {
             )
     )
     private NoteEntity note;
+    
+    @OneToMany(mappedBy = BudgetNextChangeItemEntity.PROP_CHANGE)
+    private Collection<BudgetNextChangeItemEntity> items;
 
     public DictOrgEntity getOrg() {
         return org;
@@ -114,5 +119,13 @@ public class BudgetNextChangeEntity extends BaseEntity {
 
     public void setNote(NoteEntity note) {
         this.note = note;
+    }
+
+    public Collection<BudgetNextChangeItemEntity> getItems() {
+        return items;
+    }
+
+    public void setItems(Collection<BudgetNextChangeItemEntity> items) {
+        this.items = items;
     }
 }

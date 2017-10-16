@@ -8,10 +8,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import kz.worldclass.finances.data.entity.BudgetNextChangeEntity;
+import kz.worldclass.finances.data.entity.BudgetNextChangeItemEntity;
 import kz.worldclass.finances.data.entity.DictBudgetEntity;
+import kz.worldclass.finances.data.entity.DictBudgetNextChangeStateEntity;
+import kz.worldclass.finances.data.entity.DictBudgetNextChangeTypeEntity;
+import kz.worldclass.finances.data.entity.DictBudgetStoreTypeEntity;
 import kz.worldclass.finances.data.entity.DictCurrencyEntity;
 import kz.worldclass.finances.data.entity.DictOrgEntity;
 import kz.worldclass.finances.data.entity.DictRoleEntity;
+import kz.worldclass.finances.data.entity.NoteEntity;
 import kz.worldclass.finances.data.entity.UserEntity;
 import kz.worldclass.finances.data.entity.UserRoleLinkEntity;
 import kz.worldclass.finances.data.entity.base.BaseDictEntity;
@@ -43,6 +49,44 @@ public class Dtos {
             target.name = source.getName();
             target.disabled = source.getDisabled();
         }
+    }
+    
+    public static BudgetNextChangeDto less(BudgetNextChangeEntity source) {
+        BudgetNextChangeDto result = new BudgetNextChangeDto();
+        copy(source, result);
+        return result;
+    }
+    
+    public static BudgetNextChangeDto complete(BudgetNextChangeEntity source) {
+        BudgetNextChangeDto result = less(source);
+        if (source != null) {
+            result.org = complete(source.getOrg());
+            result.type = complete(source.getType());
+            result.state = complete(source.getState());
+            result.note = complete(source.getNote());
+        }
+        return result;
+    }
+    
+    public static BudgetNextChangeItemDto less(BudgetNextChangeItemEntity source) {
+        BudgetNextChangeItemDto result = new BudgetNextChangeItemDto();
+        copy(source, result);
+        if (source != null) {
+            result.itemValue = source.getItemValue();
+        }
+        return result;
+    }
+    
+    public static BudgetNextChangeItemDto complete(BudgetNextChangeItemEntity source) {
+        BudgetNextChangeItemDto result = less(source);
+        if (source != null) {
+            result.change = complete(source.getChange());
+            result.currency = complete(source.getCurrency());
+            result.storeType = complete(source.getStoreType());
+            result.budgetType = complete(source.getBudgetType());
+            result.note = complete(source.getNote());
+        }
+        return result;
     }
     
     public static DictBudgetDto less(DictBudgetEntity source) {
@@ -80,6 +124,39 @@ public class Dtos {
                 }
             });
         }
+        return result;
+    }
+    
+    public static DictBudgetNextChangeStateDto less(DictBudgetNextChangeStateEntity source) {
+        DictBudgetNextChangeStateDto result = new DictBudgetNextChangeStateDto();
+        copy(source, result);
+        return result;
+    }
+    
+    public static DictBudgetNextChangeStateDto complete(DictBudgetNextChangeStateEntity source) {
+        DictBudgetNextChangeStateDto result = less(source);
+        return result;
+    }
+    
+    public static DictBudgetNextChangeTypeDto less(DictBudgetNextChangeTypeEntity source) {
+        DictBudgetNextChangeTypeDto result = new DictBudgetNextChangeTypeDto();
+        copy(source, result);
+        return result;
+    }
+    
+    public static DictBudgetNextChangeTypeDto complete(DictBudgetNextChangeTypeEntity source) {
+        DictBudgetNextChangeTypeDto result = less(source);
+        return result;
+    }
+    
+    public static DictBudgetStoreTypeDto less(DictBudgetStoreTypeEntity source) {
+        DictBudgetStoreTypeDto result = new DictBudgetStoreTypeDto();
+        copy(source, result);
+        return result;
+    }
+    
+    public static DictBudgetStoreTypeDto complete(DictBudgetStoreTypeEntity source) {
+        DictBudgetStoreTypeDto result = less(source);
         return result;
     }
     
@@ -121,6 +198,20 @@ public class Dtos {
     public static DictRoleDto complete(DictRoleEntity source) {
         DictRoleDto result = less(source);
         if (source != null) {}
+        return result;
+    }
+    
+    public static NoteDto less(NoteEntity source) {
+        NoteDto result = new NoteDto();
+        copy(source, result);
+        if (source != null) {
+            result.noteValue = source.getNoteValue();
+        }
+        return result;
+    }
+    
+    public static NoteDto complete(NoteEntity source) {
+        NoteDto result = less(source);
         return result;
     }
     
