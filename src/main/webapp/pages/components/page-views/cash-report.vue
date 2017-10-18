@@ -6,7 +6,7 @@
                 <h1 class="h1">{{ text }}</h1>
             </el-row>
             <el-row>
-                <el-button type="success">Сохранить</el-button>
+                <el-button type="success" @click="saveData">Сохранить</el-button>
             </el-row>
             <el-row>
                 <el-form>
@@ -129,15 +129,17 @@
 <script>
 
     (function ($) {
-        ELEMENT.locale(ELEMENT.lang.ruRU)
+        ELEMENT.locale(ELEMENT.lang.ruRU);
+        var ajaxRoot = WorldClassRestRoot + '/cash';
         var componentName = 'components-page-views-cash-report';
         Vue.component(componentName, {
             template: '#' + componentName,
             data: function () {
                 return {
                     text: 'Кассовый отчет',
+                    saving: false,
                     formData: {
-                        date: "",
+                        date: new Date(),
                         type1: {
                             text: "Наличный расчет",
                             val1: 0,
@@ -181,7 +183,66 @@
                 },
                 b: state => 'b'
             }),
-            methods: {}
+            methods: {
+                saveData: function () {
+                    var data = JSON.stringify(this.formData);
+                    $.ajax({
+                        url: ajaxRoot  + '/save',
+                        method: 'POST',
+                        data: data,
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        context: this,
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            this.$notify.error({
+                                title: 'Ошибка',
+                                message: 'Ошибка при сохранении элемента: ' + textStatus + ' - ' + errorThrown
+                            });
+                        },
+                        success: function(data, textStatus, jqXHR) {
+                            if (data === 'SUCCESS') {
+                                this.$message.success('Элемент сохранен');
+                            } else if (data === 'INTERNAL_ERROR') {
+                                this.$notify.error({
+                                    title: 'Ошибка',
+                                    message: 'Ошибка при сохранении элемента: внутренняя ошибка'
+                                });
+                            } else if (data === 'NO_DATA') {
+                                this.$notify.error({
+                                    title: 'Ошибка',
+                                    message: 'Ошибка при сохранении элемента: ошибка передачи данных'
+                                });
+                            } else if (data === 'NO_CODE') {
+                                this.$notify.error({
+                                    title: 'Ошибка',
+                                    message: 'Ошибка при сохранении элемента: нет кода'
+                                });
+                            } else if (data === 'NO_DISABLED') {
+                                this.$notify.error({
+                                    title: 'Ошибка',
+                                    message: 'Ошибка при сохранении элемента: нет признака "выключен"'
+                                });
+                            } else if (data === 'NOT_FOUND') {
+                                this.$notify.error({
+                                    title: 'Ошибка',
+                                    message: 'Ошибка при сохранении элемента: элемент не найден'
+                                });
+                            } else {
+                                this.$notify.error({
+                                    title: 'Ошибка',
+                                    message: 'Ошибка при сохранении элемента: неизвестный ответ сервера "' + data + '"'
+                                });
+                            }
+                        },
+                        complete: function(jqXHR, textStatus) {
+                            this.saving = false;
+                        }
+                    });
+                },
+                reloadItems: function () {
+                    console.log("save")
+                }
+            }
         });
     })(jQuery);
 </script>
