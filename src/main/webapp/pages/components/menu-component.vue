@@ -22,6 +22,7 @@
 			<el-submenu index="/reports" v-if="isAllowed('/reports')">
 				<template slot="title">Отчеты</template>
 				<el-menu-item index="/cash-report" v-if="isAllowed('/cash-report')">Кассовый отчет</el-menu-item>
+				<el-menu-item index="/reports/cash-report-affiliate" v-if="isAllowed('/reports/cash-report-affiliate')">Кассовый отчет new</el-menu-item>
 				<el-menu-item index="/request-report" v-if="isAllowed('/request-report')">Заявка</el-menu-item>
 			</el-submenu>
 		</el-menu>
@@ -64,6 +65,7 @@
 
 		'/reports': createMeta(['ROLE_ADMIN', 'ROLE_FILIAL_USER']),
 		'/cash-report': createMeta(['ROLE_ADMIN', 'ROLE_FILIAL_USER'], 'components-page-views-cash-report'),
+		'/reports/cash-report-affiliate': createMeta(['ROLE_FILIAL_USER'], 'page-views-reports-cash-report-affiliate'),
 		'/request-report': createMeta(['ROLE_ADMIN', 'ROLE_FILIAL_USER'], 'components-page-views-request-report')
 	};
 
@@ -83,11 +85,8 @@
 			}
 		}),
 		methods: {
-			isForbidden: function(path) {
-				return isForbidden({meta: this.meta[path]}, this.account);
-			},
 			isAllowed: function(path) {
-				return !isForbidden({meta: this.meta[path]}, this.account);
+				return this.account.restrictRoutes && (!isForbidden({meta: this.meta[path]}, this.account));
 			}
 		}
 	});

@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import static kz.worldclass.finances.data.entity.BudgetNextChangeItem.*;
+import static kz.worldclass.finances.data.entity.BudgetNextChangeItemEntity.*;
 import kz.worldclass.finances.data.entity.base.BaseEntity;
 
 @Entity
@@ -37,7 +37,7 @@ import kz.worldclass.finances.data.entity.base.BaseEntity;
 )
 @SequenceGenerator(name = SEQ, schema = SCHEMA, sequenceName = SEQ + SEP + TABLE, allocationSize = ALLOCATION_SIZE_DEFAULT)
 @SuppressWarnings("PersistenceUnitPresent")
-public class BudgetNextChangeItem extends BaseEntity {
+public class BudgetNextChangeItemEntity extends BaseEntity {
     public static final String TABLE = "BUDGET_NEXT_CHANGE_ITEM";
     public static final String COL_CHANGE_ID = "CHANGE_ID";
     public static final String COL_CURRENCY_ID = "CURRENCY_ID";
@@ -45,6 +45,7 @@ public class BudgetNextChangeItem extends BaseEntity {
     public static final String COL_BUDGET_TYPE_ID = "BUDGET_TYPE_ID";
     public static final String COL_ITEM_VALUE = "ITEM_VALUE";
     public static final String COL_NOTE_ID = "NOTE_ID";
+    public static final String PROP_CHANGE = "change";
     public static final String CONS_CH_CUR_ST_BUD = "CH_CUR_ST_BUD";
     
     @ManyToOne(optional = false)

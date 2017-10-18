@@ -9,7 +9,7 @@ import kz.worldclass.finances.auth.CommonRememberServices;
 import kz.worldclass.finances.data.dto.auth.PublicAuthenticationDto;
 import kz.worldclass.finances.data.dto.auth.Dtos;
 import kz.worldclass.finances.data.dto.auth.LoginResultEnumDto;
-import kz.worldclass.finances.services.AuthService;
+import kz.worldclass.finances.services.impl.AuthServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

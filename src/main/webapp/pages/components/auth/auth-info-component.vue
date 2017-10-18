@@ -12,7 +12,7 @@
 			<el-tag type="danger" v-if="!account.enabled">Недоступен</el-tag>
 			<el-button @click="startLogout">Выйти</el-button>
 		</template>
-		<el-dialog title="Вход" size="tiny" :visible.sync="login.dialog.visible" v-loading.body="login.dialog.loading">
+		<el-dialog title="Вход" size="tiny" :visible.sync="login.dialog.visible">
 			<span slot="title" class="dialog-title">
 				Вход
 			</span>
@@ -96,6 +96,8 @@
 
 						this.login.dialog.loading = true;
 
+						var loadingService = this.$loading({fullscreen: true});
+
 						$.ajax({
 							url: '/data-insert/auth/login',
 							method: 'POST',
@@ -113,6 +115,7 @@
 										var message = this.$message;
 										this.$store.dispatch('account/update').then(function() {
 											message.success('Вход выполнен');
+											loadingService.close();
 										});
 										break;
 									case 1: // EXCEPTION
@@ -136,6 +139,7 @@
 					}
 				},
 				startLogout: function() {
+					var loadingService = this.$loading({fullscreen: true});
 					$.ajax({
 						url: '/data-insert/auth/logout',
 						method: 'GET',
@@ -148,14 +152,19 @@
 							var results = ['SUCCESS'];
 							switch (results.indexOf(data)) {
 								case 0: // SUCCESS
-									this.login.dialog.visible = false;
-									this.$message.success('Выход выполнен');
-									this.$store.dispatch('account/update');
+									var message = this.$message;
+									this.$store.dispatch('account/update').then(function() {
+										message.success('Выход выполнен');
+										loadingService.close();
+									});
 									break;
 								default:
 									this.$message.error('Неизвестный ответ сервера: ' + data);
 									break;
 							};
+						},
+						complete: function(jqXHR, textStatus) {
+							loadingService.close();
 						}
 					});
 				}
