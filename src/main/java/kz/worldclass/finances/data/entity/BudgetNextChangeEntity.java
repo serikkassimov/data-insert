@@ -1,6 +1,8 @@
 package kz.worldclass.finances.data.entity;
 
 import java.util.Collection;
+import java.util.Date;
+import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
@@ -10,6 +12,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import static kz.worldclass.finances.data.entity.BudgetNextChangeEntity.*;
 import kz.worldclass.finances.data.entity.base.BaseEntity;
@@ -24,15 +28,15 @@ import kz.worldclass.finances.data.entity.base.BaseEntity;
                     columnList = COL_ORG_ID
             ),
             @Index(
-                    name = IND + SEP + TABLE + SEP + CONS_ORG_TYPE,
+                    name = IND + SEP + TABLE + SEP + CONS_ORG_TYPE_DATE,
                     unique = true,
-                    columnList = COL_ORG_ID + SEP_COL + COL_TYPE_ID
+                    columnList = COL_ORG_ID + SEP_COL + COL_TYPE_ID + SEP_COL + COL_CHANGE_DATE
             )
         },
         uniqueConstraints = {
             @UniqueConstraint(
-                    name = UNQ + SEP + TABLE + SEP + CONS_ORG_TYPE,
-                    columnNames = {COL_ORG_ID, COL_TYPE_ID}
+                    name = UNQ + SEP + TABLE + SEP + CONS_ORG_TYPE_DATE,
+                    columnNames = {COL_ORG_ID, COL_TYPE_ID, COL_CHANGE_DATE}
             )
         }
 )
@@ -44,7 +48,12 @@ public class BudgetNextChangeEntity extends BaseEntity {
     public static final String COL_TYPE_ID = "TYPE_ID";
     public static final String COL_STATE_ID = "STATE_ID";
     public static final String COL_NOTE_ID = "NOTE_ID";
-    public static final String CONS_ORG_TYPE = "ORG_TYPE";
+    public static final String COL_CHANGE_DATE = "CHANGE_DATE";
+    public static final String CONS_ORG_TYPE_DATE = "ORG_TYPE_DATE";
+    
+    @Temporal(TemporalType.DATE)
+    @Column(name = COL_CHANGE_DATE, nullable = false)
+    private Date changeDate;
     
     @ManyToOne(optional = false)
     @JoinColumn(
@@ -88,6 +97,14 @@ public class BudgetNextChangeEntity extends BaseEntity {
     
     @OneToMany(mappedBy = BudgetNextChangeItemEntity.PROP_CHANGE)
     private Collection<BudgetNextChangeItemEntity> items;
+
+    public Date getChangeDate() {
+        return changeDate;
+    }
+
+    public void setChangeDate(Date changeDate) {
+        this.changeDate = changeDate;
+    }
 
     public DictOrgEntity getOrg() {
         return org;

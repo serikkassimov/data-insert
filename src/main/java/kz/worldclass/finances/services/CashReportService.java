@@ -1,6 +1,7 @@
 package kz.worldclass.finances.services;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -102,7 +103,7 @@ public class CashReportService {
         return result;
     }
     
-    public AffiliateGetDataResult getAffiliateData(String login) {
+    public AffiliateGetDataResult getAffiliateData(String login, Date date) {
         if ((login == null) || login.isEmpty()) return new AffiliateGetDataResult(AffiliateGetDataResult.Type.NO_LOGIN);
         
         UserEntity userEntity = userDao.fetchOneByLogin(login);
@@ -114,7 +115,7 @@ public class CashReportService {
         DictBudgetNextChangeTypeEntity changeTypeEntity = dictBudgetNextChangeTypeDao.getByCode(CASH_REPORT);
         if (changeTypeEntity == null) return new AffiliateGetDataResult(AffiliateGetDataResult.Type.CHANGE_TYPE_NOT_FOUND);
         
-        BudgetNextChangeEntity changeEntity = budgetNextChangeDao.fetchOneForOrgAndType(orgEntity, changeTypeEntity);
+        BudgetNextChangeEntity changeEntity = budgetNextChangeDao.fetchOneForOrgTypeDate(orgEntity, changeTypeEntity, date);
         if (changeEntity == null) return new AffiliateGetDataResult(AffiliateGetDataResult.Type.SUCCESS);
         
         BudgetNextChangeDto changeDto = Dtos.complete(changeEntity);
@@ -171,13 +172,17 @@ public class CashReportService {
         DictBudgetNextChangeStateEntity stateEntity = dictBudgetNextChangeStateDao.getByCode(NEW);
         if (stateEntity == null) return AffiliateSaveDataResult.STATE_NOT_FOUND;
         
-        BudgetNextChangeEntity changeEntity = budgetNextChangeDao.fetchOneForOrgAndType(orgEntity, changeTypeEntity);
-        boolean newChange = (changeEntity == null);
-        if (newChange) {
+        Date changeDate = new Date(dto.changeDate);
+        
+        BudgetNextChangeEntity changeEntity = budgetNextChangeDao.fetchOneForOrgTypeDate(orgEntity, changeTypeEntity, changeDate);
+        boolean newChange;
+        if (changeEntity == null) {
             changeEntity = new BudgetNextChangeEntity();
             changeEntity.setOrg(orgEntity);
             changeEntity.setType(changeTypeEntity);
-        }
+            changeEntity.setChangeDate(changeDate);
+            newChange = true;
+        } else newChange = false;
         changeEntity.setState(stateEntity);
         budgetNextChangeDao.save(changeEntity);
         

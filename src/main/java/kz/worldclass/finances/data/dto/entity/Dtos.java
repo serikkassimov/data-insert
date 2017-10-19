@@ -54,6 +54,9 @@ public class Dtos {
     public static BudgetNextChangeDto less(BudgetNextChangeEntity source) {
         BudgetNextChangeDto result = new BudgetNextChangeDto();
         copy(source, result);
+        if (source != null) {
+            result.changeDate = (source.getChangeDate() == null ? null : source.getChangeDate().getTime());
+        }
         return result;
     }
     
