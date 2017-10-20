@@ -6,6 +6,7 @@
 				Кассовый отчет new
 				<el-button @click="reloadAll">Обновить все</el-button>
 				<el-button @click="reloadData">Обновить данные</el-button>
+				<el-date-picker v-model="data.date" type="date" format="dd.MM.yyyy" :clearable="false" @change="reloadData"></el-date-picker>
 				<template v-if="hasChanges">
 					<el-button type="primary" @click="save">Сохранить</el-button>
 				</template>
@@ -90,6 +91,11 @@
 	Vue.component(componentName, {
 		template: '#' + componentName,
 		data: function() {
+			var date = new Date();
+			date.setMilliseconds(0);
+			date.setSeconds(0);
+			date.setMinutes(0);
+			date.setHours(0);
 			return {
 				dict: {
 					budgetStoreType: {
@@ -106,6 +112,7 @@
 					}
 				},
 				data: {
+					date: date,
 					items: {},
 					original: {},
 					loading: false,
@@ -277,13 +284,19 @@
 			reloadData: function() {
 				if (this.data.loading) return;
 
+				if (!isDate(this.data.date)) {
+					console.error(this.data.date, 'is not date');
+					this.$notify.error({title: 'Ошибка', message: 'Не удалось загрузить данные: ошибка при определении даты'});
+					return;
+				}
+
 				this.data.loading = true;
 				this.data.initialized = false;
 				this.data.items = {};
 				this.data.original = {};
 
 				$.ajax({
-					url: ajaxRoot + '/affiliate/data/get',
+					url: ajaxRoot + '/affiliate/data/get?date=' + this.data.date.getTime(),
 					dataType: 'json',
 					context: this,
 					error: function(jqXHR, textStatus, errorThrown) {
@@ -347,6 +360,12 @@
 			save: function() {
 				if (this.data.loading) return;
 
+				if (!isDate(this.data.date)) {
+					console.error(this.data.date, 'is not date');
+					this.$notify.error({title: 'Ошибка', message: 'Не удалось сохранить данные: ошибка при определении даты'});
+					return;
+				}
+
 				this.data.loading = true;
 
 				var data = [];
@@ -373,7 +392,7 @@
 						}
 					}
 				}
-				data = JSON.stringify({items: data});
+				data = JSON.stringify({items: data, changeDate: this.data.date.getTime()});
 
 				$.ajax({
 					url: ajaxRoot + '/affiliate/data/save',
@@ -397,6 +416,8 @@
 							this.reloadData();
 						} else if (data === 'NO_DATA') {
 							this.$notify.error({title: 'Сохранение данных', message: 'Ошибка при сохранении данных: данные не переданы'});
+						} else if (data === 'NO_DATE') {
+							this.$notify.error({title: 'Сохранение данных', message: 'Ошибка при сохранении данных: дата не передана'});
 						} else if (data === 'NO_LOGIN') {
 							this.$notify.error({title: 'Сохранение данных', message: 'Ошибка при сохранении данных: не определен логин текущего пользователя'});
 						} else if (data === 'USER_NOT_FOUND') {
