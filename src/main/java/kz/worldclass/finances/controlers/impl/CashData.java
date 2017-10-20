@@ -64,11 +64,25 @@ public class CashData extends AbstractRestController {
         sheet.setColumnWidth(9, width);
         // 1 строка
         int rownum = 0;
+        HSSFRow row = sheet.createRow(rownum++);
+        Cell cell = row.createCell(0);
+        cell.setCellValue("Таблица № 1");
+        cell.setCellStyle(styleMap.get("caption"));
         String period = "с 01.07.17 по 31.07.17";
         rownum = doReportPart(styleMap, sheet, rownum, "наличных", "Мега-Фитнес", period, getData());
         rownum = doReportPart(styleMap, sheet, rownum, "безналичных", "Мега-Фитнес", period, getData());
         rownum = doReportPart(styleMap, sheet, rownum, "POS-терминалу", "Мега-Фитнес", period, getData());
         rownum = doReportPart(styleMap, sheet, rownum, "всего", "Мега-Фитнес", period, getData());
+        sheet = workbook.createSheet("Свод 6");
+        rownum = 0;
+        row = sheet.createRow(rownum++);
+        cell = row.createCell(0);
+        cell.setCellValue("Анализ финансово-хозяйственной деятельности ");
+        cell.setCellStyle(styleMap.get("caption"));
+        row = sheet.createRow(rownum++);
+        cell = row.createCell(0);
+        cell.setCellValue("ТОО \"Мега Фитнес\" за октябрь 2017 г");
+        cell.setCellStyle(styleMap.get("caption"));
         return workbook;
     }
 
@@ -93,22 +107,20 @@ public class CashData extends AbstractRestController {
     }
 
     private int doReportPart(Map<String, HSSFCellStyle> styleMap, HSSFSheet sheet, int rownum, String type, String org, String period, ArrayList<Map<String, Double>> data) {
-        HSSFRow row = sheet.createRow(rownum++);
-        Cell cell = row.createCell(0);
-        cell.setCellValue("Таблица № 1");
-        cell.setCellStyle(styleMap.get("caption"));
+        HSSFRow row;
+        Cell cell;
         // 2 строка
         sheet.addMergedRegion(new CellRangeAddress(rownum, rownum, 0, 9));
         row = sheet.createRow(rownum++);
         cell = row.createCell(0);
         cell.setCellValue("Поступление " + type + "  денежных средств " + org + " за период ");
-        cell.setCellStyle(styleMap.get("caption"));
+        cell.setCellStyle(styleMap.get("captionCenter"));
         // 3 строка
         sheet.addMergedRegion(new CellRangeAddress(rownum, rownum, 0, 9));
         row = sheet.createRow(rownum++);
         cell = row.createCell(0);
         cell.setCellValue(period);
-        cell.setCellStyle(styleMap.get("caption"));
+        cell.setCellStyle(styleMap.get("captionCenter"));
         // 4 строка
         row = sheet.createRow(rownum++);
         row.setHeight((short) 600);
@@ -200,62 +212,15 @@ public class CashData extends AbstractRestController {
         font.setFontName("Arial Cyr");
         font.setFontHeightInPoints((short) 8);
 
-
-        HSSFFont fontCaption1 = workbook.createFont();
-        fontCaption1.setColor(HSSFColor.RED.index);
-        HSSFCellStyle styleCaption1 = workbook.createCellStyle();
-        styleCaption1.setAlignment(HSSFCellStyle.ALIGN_LEFT);
-        styleCaption1.setFillBackgroundColor(HSSFColor.LEMON_CHIFFON.index);
-        styleCaption1.setFillPattern(HSSFCellStyle.LESS_DOTS);
-        styleCaption1.setFont(fontCaption1);
-        styleCaption1.setWrapText(true);
-        styleMap.put("styleCaption1", styleCaption1);
-
-        HSSFCellStyle styleCaption = workbook.createCellStyle();
-        styleCaption.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-        styleCaption.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        styleCaption.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-        styleCaption.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-        styleCaption.setBorderRight(HSSFCellStyle.BORDER_THIN);
-        styleCaption.setBorderTop(HSSFCellStyle.BORDER_THIN);
-        styleCaption.setFillBackgroundColor(HSSFColor.GREY_25_PERCENT.index);
-        styleCaption.setFont(font);
-        styleCaption.setWrapText(true);
-        styleMap.put("styleCaption", styleCaption);
-
-        HSSFCellStyle styleCapVert = workbook.createCellStyle();
-        styleCapVert.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-        styleCapVert.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        styleCapVert.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-        styleCapVert.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-        styleCapVert.setBorderRight(HSSFCellStyle.BORDER_THIN);
-        styleCapVert.setBorderTop(HSSFCellStyle.BORDER_THIN);
-        styleCapVert.setFillBackgroundColor(HSSFColor.GREY_25_PERCENT.index);
-        styleCapVert.setRotation((short) 90);
-        styleCapVert.setFont(font);
-        styleCapVert.setWrapText(true);
-        styleMap.put("styleCapVert", styleCapVert);
-
-        HSSFCellStyle styleCapVertCentr = workbook.createCellStyle();
-        styleCapVertCentr.cloneStyleFrom(styleCapVert);
-        styleCapVertCentr.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        styleCapVertCentr.setFillBackgroundColor(HSSFColor.GREY_25_PERCENT.index);
-        styleMap.put("styleCapVertCentr", styleCapVertCentr);
-
-
         HSSFCellStyle styleBody = workbook.createCellStyle();
-        styleBody.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        styleBody.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-        styleBody.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-        styleBody.setBorderRight(HSSFCellStyle.BORDER_THIN);
-        styleBody.setBorderTop(HSSFCellStyle.BORDER_THIN);
-        styleBody.setWrapText(true);
-        styleMap.put("styleBody", styleBody);
+        styleBody.setAlignment(HSSFCellStyle.ALIGN_LEFT);
+        styleBody.setFont(fontBold);
+        styleMap.put("caption", styleBody);
 
         styleBody = workbook.createCellStyle();
         styleBody.setAlignment(HSSFCellStyle.ALIGN_CENTER);
         styleBody.setFont(fontBold);
-        styleMap.put("caption", styleBody);
+        styleMap.put("captionCenter", styleBody);
 
         styleBody = workbook.createCellStyle();
         styleBody.setAlignment(HSSFCellStyle.ALIGN_CENTER);
