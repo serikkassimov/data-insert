@@ -3,15 +3,25 @@
 	<div class="h-100">
 		<div class="card h-100">
 			<h5 class="card-header" v-loading.body="loading || (!data.initialized)">
-				Кассовый отчет new
+				Кассовый отчет
 				<el-button @click="reloadAll">Обновить все</el-button>
 				<el-button @click="reloadData">Обновить данные</el-button>
 				<el-date-picker v-model="data.date" type="date" format="dd.MM.yyyy" :clearable="false" @change="reloadData"></el-date-picker>
-				<template v-if="hasChanges">
-					<el-button type="primary" @click="save">Сохранить</el-button>
+				<template v-if="editable">
+					<template v-if="hasChanges">
+						<el-button type="primary" @click="save">Сохранить</el-button>
+					</template>
+					<template v-else>
+						<el-button type="primary" disabled>Сохранить</el-button>
+					</template>
 				</template>
+			</h5>
+			<h5 class="card-header" v-loading.body="loading || (!data.initialized)">
+				<template v-if="data.state.code === 'READY_FOR_APPROVAL'">Статус: на утверждении</template>
+				<template v-else-if="data.state.code === 'APPROVED'">Статус: утверждено</template>
 				<template v-else>
-					<el-button type="primary" disabled>Сохранить</el-button>
+					Статус: новый отчет
+					<el-button @click="sendToApproval">Отправить на утверждение</el-button>
 				</template>
 			</h5>
 			<div class="card-body" style="overflow: auto;" v-loading.body="loading || (!data.initialized)">
@@ -49,7 +59,12 @@
 													&& (data.items['' + budgetStoreType.id]['' + budget.id]['' + currency.id] > 0)
 											}"
 										>
-											<el-input-number size="small" v-model="data.items['' + budgetStoreType.id]['' + budget.id]['' + currency.id]" :min="0"></el-input-number>
+											<template v-if="editable">
+												<el-input-number size="small" v-model="data.items['' + budgetStoreType.id]['' + budget.id]['' + currency.id]" :min="0"></el-input-number>
+											</template>
+											<template v-else>
+												{{data.items['' + budgetStoreType.id]['' + budget.id]['' + currency.id]}}
+											</template>
 											{{currency.symbol}}
 										</td>
 									</template>
@@ -115,6 +130,9 @@
 					date: date,
 					items: {},
 					original: {},
+					state: {
+						code: null
+					},
 					loading: false,
 					initialized: false
 				}
@@ -164,6 +182,9 @@
 			},
 			hasChanges: function() {
 				return this.data.initialized && (!equals(this.data.items, this.data.original));
+			},
+			editable: function() {
+				return (!isNonEmptyString(this.data.state.code)) || (this.data.state.code === 'NEW');
 			}
 		}),
 		methods: {
@@ -294,6 +315,7 @@
 				this.data.initialized = false;
 				this.data.items = {};
 				this.data.original = {};
+				this.data.state.code = null;
 
 				$.ajax({
 					url: ajaxRoot + '/affiliate/data/get?date=' + this.data.date.getTime(),
@@ -310,45 +332,35 @@
 						if (isObject(data)) {
 							if (data.type === 'SUCCESS') {
 								var prepared = {};
-								if (isObject(data.data) && isNonEmptyArray(data.data.items)) {
-									for (var itemIndex in data.data.items) {
-										var item = data.data.items[itemIndex];
-										var budgetStoreTypeId = '' + item.storeType.id;
-										var budgetId = '' + item.budgetType.id;
-										var currencyId = '' + item.currency.id;
-										if (!isObject(prepared[budgetStoreTypeId])) prepared[budgetStoreTypeId] = {};
-										if (!isObject(prepared[budgetStoreTypeId][budgetId])) prepared[budgetStoreTypeId][budgetId] = {};
-										prepared[budgetStoreTypeId][budgetId][currencyId] = item.itemValue;
+								if (isObject(data.data)) {
+									if (isNonEmptyArray(data.data.items)) {
+										for (var itemIndex in data.data.items) {
+											var item = data.data.items[itemIndex];
+											var budgetStoreTypeId = '' + item.storeType.id;
+											var budgetId = '' + item.budgetType.id;
+											var currencyId = '' + item.currency.id;
+											if (!isObject(prepared[budgetStoreTypeId])) prepared[budgetStoreTypeId] = {};
+											if (!isObject(prepared[budgetStoreTypeId][budgetId])) prepared[budgetStoreTypeId][budgetId] = {};
+											prepared[budgetStoreTypeId][budgetId][currencyId] = item.itemValue;
+										}
+									}
+									if (isObject(data.data.state) && isNonEmptyString(data.data.state.code)) {
+										this.data.state.code = data.data.state.code;
 									}
 								}
 								this.data.items = prepared;
 							} else if (data.type === 'NO_LOGIN') {
-								this.$notify.error({
-									title: 'Ошибка',
-									message: 'Не удалось загрузить данные: нет логина текущего пользователя'
-								});
+								this.$notify.error({title: 'Ошибка', message: 'Не удалось загрузить данные: нет логина текущего пользователя'});
 							} else if (data.type === 'USER_NOT_FOUND') {
-								this.$notify.error({
-									title: 'Ошибка',
-									message: 'Не удалось загрузить данные: не найден текущий пользователь'
-								});
+								this.$notify.error({title: 'Ошибка', message: 'Не удалось загрузить данные: не найден текущий пользователь'});
 							} else if (data.type === 'ORG_NOT_FOUND') {
-								this.$notify.error({
-									title: 'Ошибка',
-									message: 'Не удалось загрузить данные: не найдена организация текущего пользователя'
-								});
+								this.$notify.error({title: 'Ошибка', message: 'Не удалось загрузить данные: не найдена организация текущего пользователя'});
 							} else if (data.type === 'CHANGE_TYPE_NOT_FOUND') {
-								this.$notify.error({
-									title: 'Ошибка',
-									message: 'Не удалось загрузить данные: не найден тип изменения'
-								});
+								this.$notify.error({title: 'Ошибка', message: 'Не удалось загрузить данные: не найден тип изменения'});
 							}
 						} else {
 							console.error('unknown data:', data);
-							this.$notify.error({
-								title: 'Ошибка',
-								message: 'Не удалось загрузить данные: неизвестный ответ сервера'
-							});
+							this.$notify.error({title: 'Ошибка', message: 'Не удалось загрузить данные: неизвестный ответ сервера'});
 						}
 					},
 					complete: function(jqXHR, textStatus) {
@@ -401,7 +413,7 @@
 					data: data,
 					contentType: 'application/json',
 					context: this,
-					error: function() {
+					error: function(jqXHR, textStatus, errorThrown) {
 						this.data.loading = false;
 						console.error('error while saving data:', textStatus, ' - ', errorThrown);
 						this.$notify.error({
@@ -451,6 +463,59 @@
 						}
 					},
 					complete: function(jqXHR, textStatus) {}
+				});
+			},
+			sendToApproval: function() {
+				if (this.data.loading) return;
+
+				if (isNonEmptyString(this.data.state.code) && (this.data.state.code !== 'NEW')) {
+					console.error('invalid state code', this.data.state.code);
+					this.$notify.error({title: 'Отправка на утверждение', message: 'Ошибка при отправке на утверждение: неподходящий статус'});
+					return;
+				}
+
+				if (!isDate(this.data.date)) {
+					console.error(this.data.date, 'is not date');
+					this.$notify.error({title: 'Отправка на утверждение', message: 'Ошибка при отправке на утверждение: ошибка при определении даты'});
+					return;
+				}
+
+				this.data.loading = true;
+
+				$.ajax({
+					url: ajaxRoot + '/affiliate/send-to-approval?date=' + this.data.date.getTime(),
+					dataType: 'json',
+					context: this,
+					error: function(jqXHR, textStatus, errorThrown) {
+						this.data.loading = false;
+						console.error('error while sending to approval:', textStatus, ' - ', errorThrown);
+						this.$notify.error({title: 'Отправка на утверждение', message: 'Ошибка при отправке на утверждение'});
+					},
+					success: function(data, textStatus, jqXHR) {
+						if (data === 'SUCCESS') {
+							this.$notify.success({title: 'Отправка на утверждение', message: 'Данные отправлены'});
+						} else if (data === 'NO_DATE') {
+							this.$notify.error({title: 'Отправка на утверждение', message: 'Ошибка при отправке на утверждение: дата не передана'});
+						} else if (data === 'NO_LOGIN') {
+							this.$notify.error({title: 'Отправка на утверждение', message: 'Ошибка при отправке на утверждение: логин текущего пользователя не определен'});
+						} else if (data === 'USER_NOT_FOUND') {
+							this.$notify.error({title: 'Отправка на утверждение', message: 'Ошибка при отправке на утверждение: текущий пользователь не найден'});
+						} else if (data === 'NO_ORG') {
+							this.$notify.error({title: 'Отправка на утверждение', message: 'Ошибка при отправке на утверждение: организация текущего пользователя не определена'});
+						} else if (data === 'CHANGE_TYPE_NOT_FOUND') {
+							this.$notify.error({title: 'Отправка на утверждение', message: 'Ошибка при отправке на утверждение: не найден тип изменения "кассовый отчет"'});
+						} else if (data === 'STATE_NOT_FOUND') {
+							this.$notify.error({title: 'Отправка на утверждение', message: 'Ошибка при отправке на утверждение: не найдено состояние "отправлен на утверждение"'});
+						} else if (data === 'INCORRECT_STATE') {
+							this.$notify.error({title: 'Отправка на утверждение', message: 'Ошибка при отправке на утверждение: неправильное состояние'});
+						} else {
+							console.error('unknown send result', data);
+						}
+					},
+					complete: function(jqXHR, textStatus) {
+						this.data.loading = false;
+						this.reloadData();
+					}
 				});
 			}
 		},

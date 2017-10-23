@@ -39,6 +39,7 @@ public class BudgetHistoryEntity extends BaseEntity {
     public static final String COL_TYPE_ID = "TYPE_ID";
     public static final String COL_SAVE_DATETIME = "SAVE_DATETIME";
     public static final String COL_NOTE_ID = "NOTE_ID";
+    public static final String COL_CHANGE_DATE = "CHANGE_DATE";
     public static final String CONS_ORG_TYPE = "ORG_TYPE";
     public static final String CONS_ORG_TYPE_SAVE = "ORG_TYPE_SAVE";
     
@@ -75,6 +76,10 @@ public class BudgetHistoryEntity extends BaseEntity {
             )
     )
     private NoteEntity note;
+    
+    @Temporal(TemporalType.DATE)
+    @Column(name = COL_CHANGE_DATE, nullable = false)
+    private Date changeDate;
 
     public DictOrgEntity getOrg() {
         return org;
@@ -98,6 +103,14 @@ public class BudgetHistoryEntity extends BaseEntity {
 
     public void setSaveDatetime(Date saveDatetime) {
         this.saveDatetime = saveDatetime;
+    }
+
+    public Date getChangeDate() {
+        return changeDate;
+    }
+
+    public void setChangeDate(Date changeDate) {
+        this.changeDate = changeDate;
     }
 
     public NoteEntity getNote() {

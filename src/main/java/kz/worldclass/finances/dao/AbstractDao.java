@@ -4,6 +4,7 @@ import com.querydsl.core.dml.DMLClause;
 import com.querydsl.jpa.hibernate.HibernateQuery;
 import com.querydsl.jpa.hibernate.HibernateQueryFactory;
 import java.util.List;
+import org.hibernate.LockOptions;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -157,5 +158,9 @@ public abstract class AbstractDao<T> {
     
     public void refresh(T entity) {
         getCurrentSession().refresh(entity);
+    }
+    
+    public void lock(T entity, LockOptions lockOptions) {
+        getCurrentSession().buildLockRequest(lockOptions).lock(entity);
     }
 }
