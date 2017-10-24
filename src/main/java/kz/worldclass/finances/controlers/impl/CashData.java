@@ -180,8 +180,10 @@ public class CashData extends AbstractRestController {
         doIncomeTableHeader(row, 12, HSSFColor.LIGHT_CORNFLOWER_BLUE.index);
         doIncomeTableHeader(row, 15, HSSFColor.LIGHT_YELLOW.index);
         ArrayList<Map<String, Object>> coasts = getCosts();
+        ArrayList<Integer> coastRowsAgg = new ArrayList<>();
         for (Map<String, Object> coast : coasts) {
             row = sheet.createRow(rownum++);
+            coastRowsAgg.add(Integer.valueOf(row.getRowNum()));
             cell = row.createCell(0);
             cell.setCellStyle(styleMap.get("captionCenter"));
             cell.setCellValue((String) coast.get("code"));
@@ -189,6 +191,7 @@ public class CashData extends AbstractRestController {
             cell.setCellValue((String) coast.get("name"));
             ArrayList<Map<String, String>> subCoasts = (ArrayList<Map<String, String>>) coast.get("subRows");
             columns = "EHKNQ";
+
             for (int i = 0; i < columns.length(); i++) {
                 char c = columns.charAt(i);
                 cell = row.createCell(4 + i * 3);
@@ -216,6 +219,9 @@ public class CashData extends AbstractRestController {
                 String formula = "E" + rowNum + "+H" + rowNum + "+K" + rowNum + "+N" + rowNum + "";
                 cell.setCellFormula(formula);
             }
+        }
+        for (Integer integer : coastRowsAgg) {
+            System.out.println("rows="+integer);
         }
 
     }
