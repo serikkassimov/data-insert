@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import kz.worldclass.finances.data.entity.BudgetHistoryEntity;
+import kz.worldclass.finances.data.entity.BudgetHistoryItemEntity;
 import kz.worldclass.finances.data.entity.BudgetNextChangeEntity;
 import kz.worldclass.finances.data.entity.BudgetNextChangeItemEntity;
 import kz.worldclass.finances.data.entity.DictBudgetEntity;
@@ -49,6 +51,46 @@ public class Dtos {
             target.name = source.getName();
             target.disabled = source.getDisabled();
         }
+    }
+    
+    public static BudgetHistoryDto less(BudgetHistoryEntity source) {
+        BudgetHistoryDto result = new BudgetHistoryDto();
+        copy(source, result);
+        if (source != null) {
+            result.changeDate = (source.getChangeDate() == null ? null : source.getChangeDate().getTime());
+        }
+        return result;
+    }
+    
+    public static BudgetHistoryDto complete(BudgetHistoryEntity source) {
+        BudgetHistoryDto result = less(source);
+        if (source != null) {
+            result.org = complete(source.getOrg());
+            result.type = complete(source.getType());
+            result.note = complete(source.getNote());
+        }
+        return result;
+    }
+    
+    public static BudgetHistoryItemDto less(BudgetHistoryItemEntity source) {
+        BudgetHistoryItemDto result = new BudgetHistoryItemDto();
+        copy(source, result);
+        if (source != null) {
+            result.itemValue = source.getItemValue();
+        }
+        return result;
+    }
+    
+    public static BudgetHistoryItemDto complete(BudgetHistoryItemEntity source) {
+        BudgetHistoryItemDto result = less(source);
+        if (source != null) {
+            result.history = complete(source.getHistory());
+            result.currency = complete(source.getCurrency());
+            result.storeType = complete(source.getStoreType());
+            result.budgetType = complete(source.getBudgetType());
+            result.note = complete(source.getNote());
+        }
+        return result;
     }
     
     public static BudgetNextChangeDto less(BudgetNextChangeEntity source) {

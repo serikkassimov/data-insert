@@ -17,17 +17,38 @@ import javax.servlet.ServletOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import kz.worldclass.finances.data.dto.entity.BudgetHistoryItemDto;
+import kz.worldclass.finances.services.CashDataService;
 
 @RestController
 @RequestMapping(value = "/cash")
 public class CashData extends AbstractRestController {
+    private static final String REPORT_KEY_DATE = "~DATE~";
 
     @Autowired
     private DictService service;
+    @Autowired
+    private CashDataService cashDataService;
+    
+    private static Calendar onlyDate(Long millis) {
+        if (millis == null) millis = System.currentTimeMillis();
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(millis);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.HOUR, 0);
+        return calendar;
+    }
 
     @RequestMapping(value = "/list", produces = APPLICATION_JSON_UTF_8)
     public List<BaseDictDto> baseList(
@@ -47,7 +68,7 @@ public class CashData extends AbstractRestController {
     }
 
 
-    public HSSFWorkbook doreport4() {
+    public HSSFWorkbook doreport4(Calendar startDateCalendar, Calendar endDateCalendar) {
         short width = 5024;
         HSSFWorkbook workbook = new HSSFWorkbook();
         Map<String, HSSFCellStyle> styleMap = setStyles(workbook);
@@ -62,37 +83,90 @@ public class CashData extends AbstractRestController {
         sheet.setColumnWidth(7, width);
         sheet.setColumnWidth(8, width);
         sheet.setColumnWidth(9, width);
+        
+        List<DictBudgetDto> dictBudgets = cashDataService.getEnabledIncomingLeafs();
+        
+        List<BudgetHistoryItemDto> items = cashDataService.getHistoryItems(startDateCalendar.getTime(), endDateCalendar.getTime());
+        
         // 1 строка
         int rownum = 0;
-        String period = "с 01.07.17 по 31.07.17";
-        rownum = doReportPart(styleMap, sheet, rownum, "наличных", "Мега-Фитнес", period, getData());
-        rownum = doReportPart(styleMap, sheet, rownum, "безналичных", "Мега-Фитнес", period, getData());
-        rownum = doReportPart(styleMap, sheet, rownum, "POS-терминалу", "Мега-Фитнес", period, getData());
-        rownum = doReportPart(styleMap, sheet, rownum, "всего", "Мега-Фитнес", period, getData());
+        
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        String period = new StringBuilder("с ")
+                .append(dateFormat.format(startDateCalendar.getTime()))
+                .append(" по ")
+                .append(dateFormat.format(endDateCalendar.getTime()))
+                .toString();
+        rownum = doReportPart(
+                styleMap, sheet, rownum, "наличных", "Мега-Фитнес", period, dictBudgets,
+                getData("CASH", startDateCalendar, endDateCalendar, dictBudgets, items)
+        );
+        rownum = doReportPart(
+                styleMap, sheet, rownum, "безналичных", "Мега-Фитнес", period, dictBudgets,
+                getData("CASHLESS_BANK", startDateCalendar, endDateCalendar, dictBudgets, items)
+        );
+        rownum = doReportPart(
+                styleMap, sheet, rownum, "POS-терминалу", "Мега-Фитнес", period, dictBudgets,
+                getData("CASHLESS_TERMINAL", startDateCalendar, endDateCalendar, dictBudgets, items)
+        );
+        rownum = doReportPart(
+                styleMap, sheet, rownum, "всего", "Мега-Фитнес", period, dictBudgets,
+                getData(null, startDateCalendar, endDateCalendar, dictBudgets, items)
+        );
         return workbook;
     }
-
-
-    private ArrayList<Map<String, Double>> getData() {
+    
+    private ArrayList<Map<String, Double>> getData(String storeTypeCode, Calendar startDateCalendar, Calendar endDateCalendar, List<DictBudgetDto> dictBudgets, List<BudgetHistoryItemDto> items) {
+        Calendar current = new GregorianCalendar();
+        current.setTimeInMillis(startDateCalendar.getTimeInMillis());
+        
+        Calendar next = new GregorianCalendar();
+        next.setTimeInMillis(startDateCalendar.getTimeInMillis());
+        next.set(Calendar.DATE, next.get(Calendar.DATE) + 1);
+        
+        long dayMillis = 1000L * 60 * 60 * 24;
+            
+        long excelDateStart;
+        try {
+            excelDateStart = new SimpleDateFormat("dd.MM.yyyy").parse("30.12.1899").getTime() / dayMillis;
+        } catch (ParseException exception) {
+            throw new RuntimeException("cannot parse excel start date");
+        }
+        
         ArrayList<Map<String, Double>> mapArrayList = new ArrayList<>();
-        for (int i = 0; i < 15; i++) {
+        while (current.before(endDateCalendar)) {
+            long currentMillis = current.getTimeInMillis();
+            long nextMillis = next.getTimeInMillis();
+            
             Map<String, Double> map = new HashMap<>();
-            map.put("0", 4564564D);
-            map.put("1", 4564564D);
-            map.put("2", 4564564D);
-            map.put("3", 4564564D);
-            map.put("4", 4564564D);
-            map.put("5", 4564564D);
-            map.put("6", 4564564D);
-            map.put("7", 4564564D);
-            map.put("8", 4564564D);
-            map.put("9", 4564564D);
             mapArrayList.add(map);
+            
+            map.put(REPORT_KEY_DATE, new Long(current.getTimeInMillis() / dayMillis - excelDateStart).doubleValue());
+            
+            for (DictBudgetDto dictBudget: dictBudgets) {
+                Double sum = 0D;
+                for (BudgetHistoryItemDto item: items) {
+                    if (
+                            ((storeTypeCode == null) || (storeTypeCode.equals(item.storeType.code)))
+                            && (dictBudget.code.equals(item.budgetType.code))
+                            && (item.history.changeDate >= currentMillis)
+                            && (item.history.changeDate < nextMillis)
+                            && (item.itemValue != null)
+                    ) {
+                        sum += item.itemValue;
+                    }
+                }
+                
+                map.put(dictBudget.code, sum);
+            }
+            
+            current.set(Calendar.DATE, current.get(Calendar.DATE) + 1);
+            next.set(Calendar.DATE, next.get(Calendar.DATE) + 1);
         }
         return mapArrayList;
     }
 
-    private int doReportPart(Map<String, HSSFCellStyle> styleMap, HSSFSheet sheet, int rownum, String type, String org, String period, ArrayList<Map<String, Double>> data) {
+    private int doReportPart(Map<String, HSSFCellStyle> styleMap, HSSFSheet sheet, int rownum, String type, String org, String period, List<DictBudgetDto> dictBudgets, ArrayList<Map<String, Double>> data) {
         HSSFRow row = sheet.createRow(rownum++);
         Cell cell = row.createCell(0);
         cell.setCellValue("Таблица № 1");
@@ -145,14 +219,22 @@ public class CashData extends AbstractRestController {
         int firstRowForFormula = rownum + 1;
         for (Map<String, Double> doubleMap : data) {
             row = sheet.createRow(rownum++);
-            for (int i = 0; i < 10; i++) {
-                cell = row.createCell(i);
-                cell.setCellValue(doubleMap.get("" + i));
-                if (i == 0) {
-                    cell.setCellStyle(styleMap.get("dateCell"));
-                } else {
-                    cell.setCellStyle(styleMap.get("dataCell"));
-                }
+//            for (int i = 0; i < 10; i++) {
+//                cell = row.createCell(i);
+//                cell.setCellValue(doubleMap.get("" + i));
+//                if (i == 0) {
+//                    cell.setCellStyle(styleMap.get("dateCell"));
+//                } else {
+//                    cell.setCellStyle(styleMap.get("dataCell"));
+//                }
+//            }
+            cell = row.createCell(0);
+            cell.setCellStyle(styleMap.get("dateCell"));
+            cell.setCellValue(doubleMap.get(REPORT_KEY_DATE));
+            for (int i = 0; i < dictBudgets.size(); i++) {
+                cell = row.createCell(i + 1);
+                cell.setCellValue(doubleMap.get(dictBudgets.get(i).code));
+                cell.setCellStyle(styleMap.get("dataCell"));
             }
         }
         int lastRowForFormula = rownum;
@@ -174,9 +256,37 @@ public class CashData extends AbstractRestController {
     }
 
     @RequestMapping(value = "/report")
-    public void report() {
+    public void report(
+            @RequestParam(name = "start", required = false) Long startDateMillis,
+            @RequestParam(name = "end", required = false) Long endDateMillis
+    ) {
+        Calendar endDateCalendar;
+        if (endDateMillis == null) {
+            endDateMillis = System.currentTimeMillis();
+            endDateCalendar = onlyDate(endDateMillis);
+            endDateCalendar.set(Calendar.MONTH, endDateCalendar.get(Calendar.MONTH) + 1);
+            endDateCalendar.set(Calendar.DAY_OF_MONTH, 1);
+        } else {
+            endDateCalendar = onlyDate(endDateMillis);
+        }
+        
+        Calendar startDateCalendar;
+        if (startDateMillis == null) {
+            startDateCalendar = new GregorianCalendar();
+            startDateCalendar.setTimeInMillis(endDateCalendar.getTimeInMillis());
+            startDateCalendar.set(Calendar.MONTH, startDateCalendar.get(Calendar.MONTH) - 1);
+        } else {
+            startDateCalendar = onlyDate(startDateMillis);
+        }
+        
+        if (startDateCalendar.after(endDateCalendar)) {
+            Calendar temp = startDateCalendar;
+            startDateCalendar = endDateCalendar;
+            endDateCalendar = temp;
+        }
+        
         try (ServletOutputStream sout = response.getOutputStream()) {
-            HSSFWorkbook workbook = doreport4();
+            HSSFWorkbook workbook = doreport4(startDateCalendar, endDateCalendar);
             String file_name = "report";
             response.setHeader("Access-Control-Allow-Origin", "*");
             response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
@@ -185,7 +295,7 @@ public class CashData extends AbstractRestController {
             response.setHeader("Content-Disposition", "inline;filename=" + file_name + ".xls");
             response.setContentType("application/vnd.ms-excel");
             workbook.write(sout);
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             e.printStackTrace();
         }
     }
