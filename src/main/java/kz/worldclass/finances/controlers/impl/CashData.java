@@ -26,6 +26,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import kz.worldclass.finances.data.dto.entity.BudgetHistoryItemDto;
 import kz.worldclass.finances.services.CashDataService;
 
@@ -73,51 +74,6 @@ public class CashData extends AbstractRestController {
         doSheet1(workbook, startDateCalendar, endDateCalendar);
         doSheet2(workbook);
         return workbook;
-       /* short width = 5024;
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        Map<String, HSSFCellStyle> styleMap = setStyles(workbook);
-        HSSFSheet sheet = workbook.createSheet("Филиал");
-        sheet.setColumnWidth(0, width);
-        sheet.setColumnWidth(1, width);
-        sheet.setColumnWidth(2, width);
-        sheet.setColumnWidth(3, width);
-        sheet.setColumnWidth(4, width);
-        sheet.setColumnWidth(5, width);
-        sheet.setColumnWidth(6, width);
-        sheet.setColumnWidth(7, width);
-        sheet.setColumnWidth(8, width);
-        sheet.setColumnWidth(9, width);
-
-        List<DictBudgetDto> dictBudgets = cashDataService.getEnabledIncomingLeafs();
-
-        List<BudgetHistoryItemDto> items = cashDataService.getHistoryItems(startDateCalendar.getTime(), endDateCalendar.getTime());
-
-        // 1 строка
-        int rownum = 0;
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        String period = new StringBuilder("с ")
-                .append(dateFormat.format(startDateCalendar.getTime()))
-                .append(" по ")
-                .append(dateFormat.format(endDateCalendar.getTime()))
-                .toString();
-        rownum = doReportPart(
-                styleMap, sheet, rownum, "наличных", "Мега-Фитнес", period, dictBudgets,
-                getData("CASH", startDateCalendar, endDateCalendar, dictBudgets, items)
-        );
-        rownum = doReportPart(
-                styleMap, sheet, rownum, "безналичных", "Мега-Фитнес", period, dictBudgets,
-                getData("CASHLESS_BANK", startDateCalendar, endDateCalendar, dictBudgets, items)
-        );
-        rownum = doReportPart(
-                styleMap, sheet, rownum, "POS-терминалу", "Мега-Фитнес", period, dictBudgets,
-                getData("CASHLESS_TERMINAL", startDateCalendar, endDateCalendar, dictBudgets, items)
-        );
-        rownum = doReportPart(
-                styleMap, sheet, rownum, "всего", "Мега-Фитнес", period, dictBudgets,
-                getData(null, startDateCalendar, endDateCalendar, dictBudgets, items)
-        );
-        return workbook;*/
     }
 
     private void doIncomeTableHeader(HSSFRow row, int col, short colorIndex) {
@@ -306,7 +262,7 @@ public class CashData extends AbstractRestController {
         ArrayList<Integer> coastRowsAgg = new ArrayList<>();
         for (Map<String, Object> coast : coasts) {
             row = sheet.createRow(rownum++);
-            coastRowsAgg.add(Integer.valueOf(row.getRowNum()));
+            coastRowsAgg.add(Integer.valueOf(row.getRowNum() + 1));
             cell = row.createCell(0);
             cell.setCellStyle(styleMap.get("captionCenter"));
             cell.setCellValue((String) coast.get("code"));
@@ -343,10 +299,24 @@ public class CashData extends AbstractRestController {
                 cell.setCellFormula(formula);
             }
         }
-        for (Integer integer : coastRowsAgg) {
-            System.out.println("rows="+integer);
+        columns = "EHKNQ";
+        row = sheet.createRow(rownum++);
+        cell = row.createCell(0);
+        cell.setCellValue("ВСЕГО");
+        cell.setCellStyle(styleMap.get("sumCellGrey"));
+        for (int i = 0; i < columns.length(); i++) {
+            char c = columns.charAt(i);
+            cell = row.createCell(4 + i * 3);
+            String formula = "";
+            for (int j = 0; j < coastRowsAgg.size(); j++) {
+                formula = formula + c + coastRowsAgg.get(j);
+                if (j < coastRowsAgg.size()-1) {
+                    formula = formula + "+";
+                }
+            }
+            cell.setCellFormula(formula);
+            cell.setCellStyle(styleMap.get("sumCellGrey"));
         }
-
     }
 
     private ArrayList<Map<String, Double>> getData(String storeTypeCode, Calendar startDateCalendar, Calendar endDateCalendar, List<DictBudgetDto> dictBudgets, List<BudgetHistoryItemDto> items) {
@@ -376,9 +346,9 @@ public class CashData extends AbstractRestController {
 
             map.put(REPORT_KEY_DATE, new Long(current.getTimeInMillis() / dayMillis - excelDateStart).doubleValue());
 
-            for (DictBudgetDto dictBudget: dictBudgets) {
+            for (DictBudgetDto dictBudget : dictBudgets) {
                 Double sum = 0D;
-                for (BudgetHistoryItemDto item: items) {
+                for (BudgetHistoryItemDto item : items) {
                     if (
                             ((storeTypeCode == null) || (storeTypeCode.equals(item.storeType.code)))
                                     && (dictBudget.code.equals(item.budgetType.code))
@@ -576,11 +546,15 @@ public class CashData extends AbstractRestController {
             cell = row.createCell(0);
             cell.setCellStyle(styleMap.get("dateCell"));
             cell.setCellValue(doubleMap.get(REPORT_KEY_DATE));
-            for (int i = 0; i < dictBudgets.size(); i++) {
+            int i = 0;
+            for (i = 0; i < dictBudgets.size(); i++) {
                 cell = row.createCell(i + 1);
                 cell.setCellValue(doubleMap.get(dictBudgets.get(i).code));
                 cell.setCellStyle(styleMap.get("dataCell"));
             }
+            cell = row.createCell(i + 1);
+            cell.setCellFormula("SUM(B" + rownum + ":I" + rownum + ")");
+            cell.setCellStyle(styleMap.get("dataCell"));
         }
         int lastRowForFormula = rownum;
         row = sheet.createRow(rownum++);
@@ -589,9 +563,9 @@ public class CashData extends AbstractRestController {
         cell.setCellStyle(styleMap.get("sumCell"));
         String columns = "BCDEFGHIJ";
         for (int i = 0; i < columns.length(); i++) {
-            char c= columns.charAt(i);
-            String strFormula = "SUM("+ c + firstRowForFormula + ":"+ c + lastRowForFormula + ")";
-            cell = row.createCell(i+1);
+            char c = columns.charAt(i);
+            String strFormula = "SUM(" + c + firstRowForFormula + ":" + c + lastRowForFormula + ")";
+            cell = row.createCell(i + 1);
             cell.setCellFormula(strFormula);
             cell.setCellStyle(styleMap.get("sumCellData"));
         }
