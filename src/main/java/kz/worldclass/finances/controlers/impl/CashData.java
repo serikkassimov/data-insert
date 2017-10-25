@@ -17,6 +17,7 @@ import javax.servlet.ServletOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.rmi.MarshalledObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,6 +40,8 @@ public class CashData extends AbstractRestController {
     private DictService service;
     @Autowired
     private CashDataService cashDataService;
+
+    ArrayList<Map<String, Object>> globalData = new ArrayList<>();
 
     private static Calendar onlyDate(Long millis) {
         if (millis == null) millis = System.currentTimeMillis();
@@ -71,7 +74,10 @@ public class CashData extends AbstractRestController {
 
     public HSSFWorkbook doreport4(Calendar startDateCalendar, Calendar endDateCalendar) {
         HSSFWorkbook workbook = new HSSFWorkbook();
-        doSheet1(workbook, startDateCalendar, endDateCalendar);
+        doSheet1(workbook, startDateCalendar, endDateCalendar, "Астана");
+        doSheet1(workbook, startDateCalendar, endDateCalendar, "Актобе");
+        doSheet1(workbook, startDateCalendar, endDateCalendar, "Караганда");
+        doSheet1(workbook, startDateCalendar, endDateCalendar, "Атырау");
         doSheet2(workbook);
         return workbook;
     }
@@ -106,15 +112,17 @@ public class CashData extends AbstractRestController {
 
     private ArrayList<Map<String, String>> getIncomeData6() {
         ArrayList<Map<String, String>> mapArrayList = new ArrayList<>();
-        mapArrayList.add(doMapRow(1, "Продажа клубных карт", 54564, 89766, 8789789.7, 6464.8));
-        mapArrayList.add(doMapRow(2, "Фитнес услуги", 54564.5, 897665.0, 8789789.7, 6464.8));
-        mapArrayList.add(doMapRow(3, "Прочее", 54564.5, 897665.0, 8789789.7, 6464.8));
-        mapArrayList.add(doMapRow(4, "СПА салон", 54564.5, 897665.0, 8789789.7, 6464.8));
-        mapArrayList.add(doMapRow(5, "БАР", 54564.5, 897665.0, 8789789.7, 6464.8));
-        mapArrayList.add(doMapRow(6, "Магазин", 54564.5, 897665.0, 8789789.7, 6464.8));
-        mapArrayList.add(doMapRow(7, "Размещение рекламы в клубе", 54564.5, 897665.0, 8789789.7, 6464.8));
-        mapArrayList.add(doMapRow(8, "Фитнес услуги Radisson", 54564.5, 897665.0, 8789789.7, 6464.8));
-        mapArrayList.add(doMapRow(9, "Спортивное питание", 54564.5, 897665.0, 8789789.7, 6464.8));
+
+        mapArrayList.add(doMapRowFormula(1, "Продажа клубных карт", "B"));
+        mapArrayList.add(doMapRowFormula(1, "Фитнес услуги", "E"));
+        mapArrayList.add(doMapRowFormula(1, "Прочее", "FG"));
+        mapArrayList.add(doMapRowFormula(1, "СПА салон", "C"));
+        mapArrayList.add(doMapRowFormula(1, "БАР", "D"));
+        mapArrayList.add(doMapRowFormula(1, "Магазин", "H"));
+        mapArrayList.add(doMapRowFormula(1, "Размещение рекламы в клубе", "Z"));
+        mapArrayList.add(doMapRowFormula(1, "Фитнес услуги Radisson", "Z"));
+        mapArrayList.add(doMapRowFormula(1, "Спортивное питание", "I"));
+
         return mapArrayList;
     }
 
@@ -130,13 +138,33 @@ public class CashData extends AbstractRestController {
 
     }
 
+    private Map<String, String> doMapRowFormula(int num, String name, String colChar) {
+        Map<String, String> map = new HashMap<>();
+        map.put("num", "" + num);
+        map.put("name", name);
+        for (Map<String, Object> datum : globalData) {
+            String org = ((HSSFSheet) datum.get("sheet")).getSheetName();
+            String f = "";
+            for (int i = 0; i < colChar.length(); i++) {
+                char c = colChar.charAt(i);
+                f = f + "'" + org + "'!" + c + datum.get("lastRow");
+                if (i < colChar.length() - 1) {
+                    f = f + "+";
+                }
+            }
+            map.put(org, f);
+        }
+        return map;
+
+    }
+
     private void doSheet2(HSSFWorkbook workbook) {
         Map<String, HSSFCellStyle> styleMap = setStyles(workbook);
         HSSFSheet sheet;
         int rownum;
         HSSFRow row;
         Cell cell;
-        sheet = workbook.createSheet("Свод 6");
+        sheet = workbook.createSheet("СВОД № 6");
         rownum = 0;
         row = sheet.createRow(rownum++);
         cell = row.createCell(0);
@@ -185,35 +213,34 @@ public class CashData extends AbstractRestController {
             cell = row.createCell(3);
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(4);
-            cell.setCellValue(Double.parseDouble(mapRow.get("ASTANA")));
+            cell.setCellFormula(mapRow.get("Астана"));
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(5);
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(6);
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(7);
-            cell.setCellValue(Double.parseDouble(mapRow.get("AKTOBE")));
+            cell.setCellFormula(mapRow.get("Актобе"));
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(8);
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(9);
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(10);
-            cell.setCellValue(Double.parseDouble(mapRow.get("KARAGANDA")));
+            cell.setCellFormula(mapRow.get("Караганда"));
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(11);
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(12);
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(13);
-            cell.setCellValue(Double.parseDouble(mapRow.get("ATYRAU")));
+            cell.setCellFormula(mapRow.get("Атырау"));
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(14);
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(15);
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(16);
-            cell.setCellValue(Double.parseDouble(mapRow.get("ATYRAU")));
             cell.setCellStyle(styleMap.get("dataCell"));
             cell = row.createCell(17);
             cell.setCellStyle(styleMap.get("dataCell"));
@@ -310,7 +337,7 @@ public class CashData extends AbstractRestController {
             String formula = "";
             for (int j = 0; j < coastRowsAgg.size(); j++) {
                 formula = formula + c + coastRowsAgg.get(j);
-                if (j < coastRowsAgg.size()-1) {
+                if (j < coastRowsAgg.size() - 1) {
                     formula = formula + "+";
                 }
             }
@@ -434,10 +461,12 @@ public class CashData extends AbstractRestController {
         return result;
     }
 
-    private void doSheet1(HSSFWorkbook workbook, Calendar startDateCalendar, Calendar endDateCalendar) {
+    private void doSheet1(HSSFWorkbook workbook, Calendar startDateCalendar, Calendar endDateCalendar, String filialName) {
         short width = 5024;
         Map<String, HSSFCellStyle> styleMap = setStyles(workbook);
-        HSSFSheet sheet = workbook.createSheet("Филиал");
+        HSSFSheet sheet = workbook.createSheet(filialName);
+        Map<String, Object> glob = new HashMap<>();
+        glob.put("sheet", sheet);
         sheet.setColumnWidth(0, width);
         sheet.setColumnWidth(1, width);
         sheet.setColumnWidth(2, width);
@@ -479,6 +508,8 @@ public class CashData extends AbstractRestController {
                 styleMap, sheet, rownum, "всего", "Мега-Фитнес", period, dictBudgets,
                 getData(null, startDateCalendar, endDateCalendar, dictBudgets, items)
         );
+        glob.put("lastRow", rownum - 2);
+        globalData.add(glob);
     }
 
     private int doReportPart(Map<String, HSSFCellStyle> styleMap, HSSFSheet sheet, int rownum, String type, String org, String period, List<DictBudgetDto> dictBudgets, ArrayList<Map<String, Double>> data) {
