@@ -1,5 +1,7 @@
 package kz.worldclass.finances.controlers;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import kz.worldclass.finances.auth.User;
@@ -25,6 +27,17 @@ public abstract class AbstractRestController {
     protected HttpServletResponse response;
     @Autowired
     protected AuthService authService;
+    
+    protected static Calendar onlyDate(Long millis) {
+        if (millis == null) millis = System.currentTimeMillis();
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(millis);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.HOUR, 0);
+        return calendar;
+    }
     
     protected User user() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

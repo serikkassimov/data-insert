@@ -26,4 +26,17 @@ public class DictBudgetDao extends AbstractTreeDictDao<DictBudgetEntity> {
         log(query);
         return query.fetch();
     }
+    
+    public List<DictBudgetEntity> fetchEnabledOutgoingLeafs() {
+        HibernateQuery<DictBudgetEntity> query = getQueryFactory()
+                .select(QDictBudgetEntity.dictBudgetEntity)
+                .from(QDictBudgetEntity.dictBudgetEntity)
+                .where(
+                        QDictBudgetEntity.dictBudgetEntity.disabled.eq(false),
+                        QDictBudgetEntity.dictBudgetEntity.outgo.eq(true),
+                        QDictBudgetEntity.dictBudgetEntity.children.isEmpty()
+                );
+        log(query);
+        return query.fetch();
+    }
 }

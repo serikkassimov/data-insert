@@ -28,17 +28,6 @@ public class CashReportController extends AbstractRestController {
     @Autowired
     private CashReportService service;
     
-    private static Calendar onlyDate(Long millis) {
-        if (millis == null) millis = System.currentTimeMillis();
-        Calendar calendar = new GregorianCalendar();
-        calendar.setTimeInMillis(millis);
-        calendar.set(Calendar.MILLISECOND, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.HOUR, 0);
-        return calendar;
-    }
-    
     @RequestMapping(value = "/dict-budget-store-types", produces = APPLICATION_JSON_UTF_8)
     public List<BaseDictDto> dictBudgetStoreTypes() {
         return service.getDictBudgetStoreTypes();

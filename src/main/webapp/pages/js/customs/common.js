@@ -97,6 +97,7 @@ isObject = function(object) {
 
 equals = function(object1, object2) {
 	if (jQuery.type(object1) !== jQuery.type(object2)) return false;
+	else if (isEmptyArray(object1)) return isEmptyArray(object2);
 	else if (isNonEmptyArray(object1) || isObject(object2)) {
 		var checkedIndices = [];
 		var index;
