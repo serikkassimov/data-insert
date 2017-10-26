@@ -21,7 +21,7 @@
 			</el-submenu>
 			<el-submenu index="/reports" v-if="isAllowed('/reports')">
 				<template slot="title">Отчеты</template>
-				<el-menu-item index="/cash-report" v-if="isAllowed('/cash-report')">Кассовый отчет</el-menu-item>
+				<el-menu-item index="/cash-report" v-if="isAllowed('/cash-report')">Отчеты Excel</el-menu-item>
 				<el-menu-item index="/reports/cash-report-affiliate" v-if="isAllowed('/reports/cash-report-affiliate')">Кассовый отчет new</el-menu-item>
 				<el-menu-item index="/reports/cash-report-hq" v-if="isAllowed('/reports/cash-report-hq')">Кассовые отчеты филиалов</el-menu-item>
 				<el-menu-item index="/request-report" v-if="isAllowed('/request-report')">Заявка</el-menu-item>

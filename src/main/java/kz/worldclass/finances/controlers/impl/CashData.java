@@ -3,8 +3,10 @@ package kz.worldclass.finances.controlers.impl;
 import kz.worldclass.finances.controlers.AbstractRestController;
 import kz.worldclass.finances.data.dto.entity.DictBudgetDto;
 import kz.worldclass.finances.data.dto.entity.DictCurrencyDto;
+import kz.worldclass.finances.data.dto.entity.DictOrgDto;
 import kz.worldclass.finances.data.dto.entity.base.BaseDictDto;
 import kz.worldclass.finances.data.dto.results.dict.*;
+import kz.worldclass.finances.data.entity.DictOrgEntity;
 import kz.worldclass.finances.services.DictService;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
@@ -71,13 +73,22 @@ public class CashData extends AbstractRestController {
         return SaveBaseDictResult.SUCCESS;
     }
 
+    List<DictOrgDto> dictOrgs;
 
     public HSSFWorkbook doreport4(Calendar startDateCalendar, Calendar endDateCalendar) {
         HSSFWorkbook workbook = new HSSFWorkbook();
-        doSheet1(workbook, startDateCalendar, endDateCalendar, "Астана");
-        doSheet1(workbook, startDateCalendar, endDateCalendar, "Актобе");
-        doSheet1(workbook, startDateCalendar, endDateCalendar, "Караганда");
-        doSheet1(workbook, startDateCalendar, endDateCalendar, "Атырау");
+        dictOrgs = cashDataService.getOrgs();
+        for (DictOrgDto dictOrg : dictOrgs) {
+            if (dictOrg.code.equals("HQ")) {
+                dictOrgs.remove(dictOrg);
+                break;
+            }
+        }
+        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(1));
+        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(0));
+        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(3));
+        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(2));
+
         doSheet2(workbook);
         return workbook;
     }
@@ -124,18 +135,6 @@ public class CashData extends AbstractRestController {
         mapArrayList.add(doMapRowFormula(1, "Спортивное питание", "I"));
 
         return mapArrayList;
-    }
-
-    private Map<String, String> doMapRow(int num, String name, double val1, double val2, double val3, double val4) {
-        Map<String, String> map = new HashMap<>();
-        map.put("num", "" + num);
-        map.put("name", name);
-        map.put("ASTANA", String.valueOf(val1));
-        map.put("AKTOBE", String.valueOf(val2));
-        map.put("KARAGANDA", String.valueOf(val3));
-        map.put("ATYRAU", String.valueOf(val4));
-        return map;
-
     }
 
     private Map<String, String> doMapRowFormula(int num, String name, String colChar) {
@@ -210,40 +209,21 @@ public class CashData extends AbstractRestController {
             cell = row.createCell(2);
             cell.setCellValue(mapRow.get("name"));
             cell.setCellStyle(styleMap.get("dataCellLeft"));
-            cell = row.createCell(3);
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(4);
-            cell.setCellFormula(mapRow.get("Астана"));
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(5);
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(6);
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(7);
-            cell.setCellFormula(mapRow.get("Актобе"));
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(8);
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(9);
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(10);
-            cell.setCellFormula(mapRow.get("Караганда"));
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(11);
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(12);
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(13);
-            cell.setCellFormula(mapRow.get("Атырау"));
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(14);
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(15);
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(16);
-            cell.setCellStyle(styleMap.get("dataCell"));
-            cell = row.createCell(17);
-            cell.setCellStyle(styleMap.get("dataCell"));
+            for (int i = 3; i < 18; i++) {
+                cell = row.createCell(i);
+                cell.setCellStyle(styleMap.get("dataCell"));
+            }
+            cell = row.getCell(4);
+            cell.setCellFormula(mapRow.get(dictOrgs.get(1).name));
+            cell = row.getCell(7);
+            cell.setCellFormula(mapRow.get(dictOrgs.get(0).name));
+            cell = row.getCell(10);
+            cell.setCellFormula(mapRow.get(dictOrgs.get(3).name));
+            cell = row.getCell(13);
+            cell.setCellFormula(mapRow.get(dictOrgs.get(2).name));
+            cell = row.getCell(16);
+            String r  = ""+(row.getRowNum()+1);
+            cell.setCellFormula("E"+r+"+H"+r+"+K"+r+"+N"+r);
         }
         int lastRowForFormula = rownum;
         row = sheet.createRow(rownum++);
@@ -265,7 +245,7 @@ public class CashData extends AbstractRestController {
         sheet.addMergedRegion(new CellRangeAddress(rownum, rownum, 0, 2));
         row = sheet.createRow(rownum++);
         cell = row.createCell(0);
-        cell.setCellValue("Расход");
+        cell.setCellValue("Расход - Данные условные");
         cell.setCellStyle(styleMap.get("captionCenter"));
         doIncomeHeader(sheet, row, 3, "АСТАНА");
         doIncomeHeader(sheet, row, 6, "АКТОБЕ");
@@ -346,7 +326,7 @@ public class CashData extends AbstractRestController {
         }
     }
 
-    private ArrayList<Map<String, Double>> getData(String storeTypeCode, Calendar startDateCalendar, Calendar endDateCalendar, List<DictBudgetDto> dictBudgets, List<BudgetHistoryItemDto> items) {
+    private ArrayList<Map<String, Double>> getData(String storeTypeCode, Calendar startDateCalendar, Calendar endDateCalendar, List<DictBudgetDto> dictBudgets, List<BudgetHistoryItemDto> items, DictOrgDto orgDto) {
         Calendar current = new GregorianCalendar();
         current.setTimeInMillis(startDateCalendar.getTimeInMillis());
 
@@ -382,6 +362,7 @@ public class CashData extends AbstractRestController {
                                     && (item.history.changeDate >= currentMillis)
                                     && (item.history.changeDate < nextMillis)
                                     && (item.itemValue != null)
+                                    && (item.history.org.code.equals(orgDto.code))
                             ) {
                         sum += item.itemValue;
                     }
@@ -461,10 +442,11 @@ public class CashData extends AbstractRestController {
         return result;
     }
 
-    private void doSheet1(HSSFWorkbook workbook, Calendar startDateCalendar, Calendar endDateCalendar, String filialName) {
+
+    private void doSheet1(HSSFWorkbook workbook, Calendar startDateCalendar, Calendar endDateCalendar, DictOrgDto org) {
         short width = 5024;
         Map<String, HSSFCellStyle> styleMap = setStyles(workbook);
-        HSSFSheet sheet = workbook.createSheet(filialName);
+        HSSFSheet sheet = workbook.createSheet(org.name);
         Map<String, Object> glob = new HashMap<>();
         glob.put("sheet", sheet);
         sheet.setColumnWidth(0, width);
@@ -494,19 +476,19 @@ public class CashData extends AbstractRestController {
                 .toString();
         rownum = doReportPart(
                 styleMap, sheet, rownum, "наличных", "Мега-Фитнес", period, dictBudgets,
-                getData("CASH", startDateCalendar, endDateCalendar, dictBudgets, items)
+                getData("CASH", startDateCalendar, endDateCalendar, dictBudgets, items, org)
         );
         rownum = doReportPart(
                 styleMap, sheet, rownum, "безналичных", "Мега-Фитнес", period, dictBudgets,
-                getData("CASHLESS_BANK", startDateCalendar, endDateCalendar, dictBudgets, items)
+                getData("CASHLESS_BANK", startDateCalendar, endDateCalendar, dictBudgets, items, org)
         );
         rownum = doReportPart(
                 styleMap, sheet, rownum, "POS-терминалу", "Мега-Фитнес", period, dictBudgets,
-                getData("CASHLESS_TERMINAL", startDateCalendar, endDateCalendar, dictBudgets, items)
+                getData("CASHLESS_TERMINAL", startDateCalendar, endDateCalendar, dictBudgets, items, org)
         );
         rownum = doReportPart(
                 styleMap, sheet, rownum, "всего", "Мега-Фитнес", period, dictBudgets,
-                getData(null, startDateCalendar, endDateCalendar, dictBudgets, items)
+                getData(null, startDateCalendar, endDateCalendar, dictBudgets, items, org)
         );
         glob.put("lastRow", rownum - 2);
         globalData.add(glob);
