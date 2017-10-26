@@ -619,7 +619,7 @@ public class CashData extends AbstractRestController {
 
         try (ServletOutputStream sout = response.getOutputStream()) {
             HSSFWorkbook workbook = doreport4(startDateCalendar, endDateCalendar);
-            String file_name = "report";
+            String file_name = "report_N_4";
             response.setHeader("Access-Control-Allow-Origin", "*");
             response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
             response.setHeader("Access-Control-Max-Age", "3600");
