@@ -80,6 +80,8 @@ public class AuthManageService {
         userEntity.setOrg(orgEntity);
         userEntity.setLocked(userDto.locked);
         
+        if (userEntity.getId() == null) userDao.save(userEntity);
+        
         if (userEntity.getRoleLinks() == null) userEntity.setRoleLinks(new ArrayList<UserRoleLinkEntity>());
 
         Map<Long, UserRoleLinkEntity> redundantLinkMap = new HashMap<>();
