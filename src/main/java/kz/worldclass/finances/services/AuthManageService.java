@@ -1,6 +1,7 @@
 package kz.worldclass.finances.services;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -77,6 +78,9 @@ public class AuthManageService {
         userEntity.setPatronymic(userDto.patronymic);
         userEntity.setEmail(userDto.email);
         userEntity.setOrg(orgEntity);
+        userEntity.setLocked(userDto.locked);
+        
+        if (userEntity.getRoleLinks() == null) userEntity.setRoleLinks(new ArrayList<UserRoleLinkEntity>());
 
         Map<Long, UserRoleLinkEntity> redundantLinkMap = new HashMap<>();
         for (UserRoleLinkEntity linkEntity: userEntity.getRoleLinks()) redundantLinkMap.put(linkEntity.getRole().getId(), linkEntity);
