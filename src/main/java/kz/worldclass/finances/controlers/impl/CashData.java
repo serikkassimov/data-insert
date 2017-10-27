@@ -90,7 +90,123 @@ public class CashData extends AbstractRestController {
         doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(2));
 
         doSheet2(workbook);
+        doSheet3(workbook);
         return workbook;
+    }
+
+    private void doSheet3(HSSFWorkbook workbook) {
+        Map<String, HSSFCellStyle> styleMap = setStyles(workbook);
+        HSSFSheet sheet;
+        int rownum;
+        HSSFRow row;
+        Cell cell;
+        sheet = workbook.createSheet("Остатки");
+        rownum = 1;
+        row = sheet.createRow(rownum++);
+        cell = row.createCell(0);
+        cell.setCellValue("Входящие остатки на 1/10/2017");
+        rownum++;
+        row = sheet.createRow(rownum++);
+        cell = row.createCell(2);
+        cell.setCellValue("Фактические остатки ДС");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 7; i++) {
+            cell = row.createCell(i+2);
+            cell.setCellStyle(styleMap.get("sumCellDataGreen"));
+        }
+        row.getCell(4).setCellValue("АСТАНА");
+        row.getCell(5).setCellValue("АКТОБЕ");
+        row.getCell(6).setCellValue("КАРАГНДА");
+        row.getCell(7).setCellValue("АТЫРАУ");
+        row.getCell(8).setCellValue("ПО СЕТИ");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 7; i++) {
+            cell = row.createCell(i+2);
+            cell.setCellStyle(styleMap.get("dataCell"));
+        }
+        row.getCell(2).setCellValue("МЕГАФИТНЕС");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 7; i++) {
+            cell = row.createCell(i+2);
+            cell.setCellStyle(styleMap.get("dataCell"));
+        }
+        row.getCell(2).setCellValue("касса");
+        row.getCell(3).setCellValue("собственные");
+        row.getCell(8).setCellFormula("SUM(E7:H7)");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 7; i++) {
+            cell = row.createCell(i+2);
+            cell.setCellStyle(styleMap.get("dataCell"));
+        }
+        row.getCell(3).setCellValue("Федерация Аэробики");
+        row.getCell(8).setCellFormula("SUM(E8:H8)");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 7; i++) {
+            cell = row.createCell(i+2);
+            cell.setCellStyle(styleMap.get("dataCell"));
+        }
+        row.getCell(2).setCellValue("банк");
+        row.getCell(3).setCellValue("собственные");
+        row.getCell(8).setCellFormula("SUM(E9:H9)");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 7; i++) {
+            cell = row.createCell(i+2);
+            cell.setCellStyle(styleMap.get("dataCell"));
+        }
+        row.getCell(3).setCellValue("руб в эквиваленте тг");
+        row.getCell(8).setCellFormula("SUM(E10:H10)");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 7; i++) {
+            cell = row.createCell(i+2);
+            cell.setCellStyle(styleMap.get("dataCell"));
+        }
+        row.getCell(2).setCellValue("ЦБ  тенге");
+        row.getCell(8).setCellFormula("SUM(E11:H11)");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 7; i++) {
+            cell = row.createCell(i+2);
+            cell.setCellStyle(styleMap.get("dataCell"));
+        }
+        row.getCell(2).setCellValue("ЦБ долл");
+        row.getCell(8).setCellFormula("SUM(E12:H12)");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 7; i++) {
+            cell = row.createCell(i+2);
+            cell.setCellStyle(styleMap.get("dataCell"));
+        }
+        row.getCell(2).setCellValue("ККБ долл");
+        row.getCell(8).setCellFormula("SUM(E13:H13)");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 7; i++) {
+            cell = row.createCell(i+2);
+            cell.setCellStyle(styleMap.get("dataCell"));
+        }
+        row.getCell(2).setCellValue("ЦБ руб");
+        row.getCell(8).setCellFormula("SUM(E14:H14)");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 7; i++) {
+            cell = row.createCell(i+2);
+            cell.setCellStyle(styleMap.get("dataCell"));
+        }
+        row.getCell(2).setCellValue("терминал");
+        row.getCell(8).setCellFormula("SUM(E14:H14)");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 7; i++) {
+            cell = row.createCell(i+2);
+            cell.setCellStyle(styleMap.get("dataCell"));
+        }
+        row.getCell(2).setCellValue("терминал");
+        row.getCell(8).setCellFormula("SUM(E15:H15)");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 7; i++) {
+            cell = row.createCell(i+2);
+            cell.setCellStyle(styleMap.get("dataCell"));
+        }
+        row.getCell(4).setCellFormula("SUM(E7:E15)");
+        row.getCell(5).setCellFormula("SUM(F7:F15)");
+        row.getCell(6).setCellFormula("SUM(G7:G15)");
+        row.getCell(7).setCellFormula("SUM(H7:H15)");
+        row.getCell(8).setCellFormula("SUM(I7:I15)");
     }
 
     private void doIncomeTableHeader(HSSFRow row, int col, short colorIndex) {
@@ -745,6 +861,18 @@ public class CashData extends AbstractRestController {
         styleBody.setFillForegroundColor(HSSFColor.GREY_25_PERCENT.index);
         styleBody.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
         styleMap.put("sumCellDataGrey", styleBody);
+        styleBody = workbook.createCellStyle();
+        styleBody.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        styleBody.setFont(fontBold);
+        styleBody.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
+        styleBody.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        styleBody.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        styleBody.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        styleBody.setBorderTop(HSSFCellStyle.BORDER_THIN);
+        styleBody.setDataFormat(HSSFDataFormat.getBuiltinFormat("#,##0"));
+        styleBody.setFillForegroundColor(HSSFColor.GREEN.index);
+        styleBody.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        styleMap.put("sumCellDataGreen", styleBody);
         return styleMap;
     }
 
