@@ -53,6 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers("/cash-report/**").hasAnyRole("HQ", "FILIAL_USER")
                         .antMatchers("/cash-report/affiliate/**").hasRole("FILIAL_USER")
                         .antMatchers("/cash-report/hq/**").hasRole("HQ")
+                    .antMatchers("/expenses-request/**").hasAnyRole("HQ", "FILIAL_USER")
                     .anyRequest().authenticated()
                     .and()
 //                .rememberMe()

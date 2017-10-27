@@ -26,6 +26,10 @@
 				<el-menu-item index="/reports/cash-report-hq" v-if="isAllowed('/reports/cash-report-hq')">Кассовые отчеты филиалов</el-menu-item>
 				<el-menu-item index="/request-report" v-if="isAllowed('/request-report')">Заявка</el-menu-item>
 			</el-submenu>
+			<el-submenu index="/requests" v-if="isAllowed('/requests')">
+				<template slot="title">Заявки</template>
+				<el-menu-item index="/requests/expenses-request-affiliate" v-if="isAllowed('/requests/expenses-request-affiliate')">Заявка на расходы</el-menu-item>
+			</el-submenu>
 		</el-menu>
 	</div>
 </template>
@@ -64,10 +68,12 @@
 		'/admin/auth-manage': createMeta(['ROLE_ADMIN']),
 		'/admin/auth-manage/users': createMeta(['ROLE_ADMIN'], 'page-views-admin-auth-manage-users'),
 
-		'/reports': createMeta(['ROLE_ADMIN', 'ROLE_FILIAL_USER']),
+		'/reports': createMeta(['ROLE_HQ', 'ROLE_FILIAL_USER']),
 		'/cash-report': createMeta(['ROLE_ADMIN', 'ROLE_FILIAL_USER'], 'components-page-views-cash-report'),
 		'/reports/cash-report-affiliate': createMeta(['ROLE_FILIAL_USER'], 'page-views-reports-cash-report-affiliate'),
 		'/reports/cash-report-hq': createMeta(['ROLE_HQ'], 'page-views-reports-cash-report-hq'),
+		'/requests': createMeta(['ROLE_HQ', 'ROLE_FILIAL_USER']),
+		'/requests/expenses-request-affiliate': createMeta(['ROLE_FILIAL_USER'], 'page-views-requests-expenses-request-affiliate'),
 		'/request-report': createMeta(['ROLE_ADMIN', 'ROLE_FILIAL_USER'], 'components-page-views-request-report')
 	};
 

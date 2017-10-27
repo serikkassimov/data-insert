@@ -1,0 +1,6 @@
+package kz.worldclass.finances.data.dto.results.expensesrequest;
+
+public enum SaveAffiliateDataResult {
+    SUCCESS, NO_DATA, NO_LOGIN, NO_DATE, NO_BUDGET, NO_CURRENCY, NO_STORE_TYPE, NEGATIVE_VALUE, BUDGET_NOT_FOUND, CURRENCY_NOT_FOUND, STORE_TYPE_NOT_FOUND,
+    USER_NOT_FOUND, ORG_NOT_FOUND, CHANGE_TYPE_NOT_FOUND, STATE_NOT_FOUND
+}

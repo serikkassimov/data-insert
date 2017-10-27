@@ -45,17 +45,6 @@ public class CashData extends AbstractRestController {
 
     ArrayList<Map<String, Object>> globalData = new ArrayList<>();
 
-    private static Calendar onlyDate(Long millis) {
-        if (millis == null) millis = System.currentTimeMillis();
-        Calendar calendar = new GregorianCalendar();
-        calendar.setTimeInMillis(millis);
-        calendar.set(Calendar.MILLISECOND, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.HOUR, 0);
-        return calendar;
-    }
-
     @RequestMapping(value = "/list", produces = APPLICATION_JSON_UTF_8)
     public List<BaseDictDto> baseList(
             @PathVariable(name = "dictType") String dictType
