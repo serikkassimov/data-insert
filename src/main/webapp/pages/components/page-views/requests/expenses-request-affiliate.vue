@@ -246,17 +246,18 @@
 								if (isNonEmptyArray(data.items)) {
 									for (var dataItemIndex in data.items) {
 										var dataItem = data.items[dataItemIndex];
+										//console.log(dataItem);
 										var item = undefined;
-										for (var index in items) {
+										/*for (var index in items) {
 											if (dataItem.budgetType.id === items[index].budgetId) {
 												item = items[index];
 												break;
 											}
 										}
-
+*/
 										if (!isObject(item)) {
 											item = {
-												id: null,
+												id: dataItem.id,
 												budgetId: dataItem.budgetType.id,
 												values: {}
 											};
@@ -270,6 +271,7 @@
 										item.values[dataItem.storeType.code][dataItem.currency.code] = dataItem.itemValue;
 									}
 								}
+								//console.log(items);
 								this.data.items = items;
 							} else if (data.type === 'NO_DATE') {
 								this.$notify.error({title: 'Ошибка загрузки данных', message: 'Не передана дата'});

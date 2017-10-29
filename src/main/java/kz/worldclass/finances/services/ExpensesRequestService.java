@@ -95,7 +95,7 @@ public class ExpensesRequestService {
         BudgetNextChangeEntity changeEntity = budgetNextChangeDao.fetchOneForOrgTypeDate(orgEntity, changeTypeEntity, date);
         if (changeEntity == null) return new GetAffiliateDataResult(GetAffiliateDataResult.Type.SUCCESS);
         else {
-            Map<String, List<BudgetNextChangeItemDto>> map = new TreeMap<>();
+            Map<Long, List<BudgetNextChangeItemDto>> map = new TreeMap<>();
             for (BudgetNextChangeItemEntity entity: changeEntity.getItems()) {
                 BudgetNextChangeItemDto dto = Dtos.less(entity);
                 dto.budgetType = Dtos.less(entity.getBudgetType());
@@ -103,10 +103,10 @@ public class ExpensesRequestService {
                 dto.note = Dtos.less(entity.getNote());
                 dto.storeType = Dtos.less(entity.getStoreType());
                 
-                List<BudgetNextChangeItemDto> itemDtos = map.get(dto.budgetType.code);
+                List<BudgetNextChangeItemDto> itemDtos = map.get(dto.budgetType.id);
                 if (itemDtos == null) {
                     itemDtos = new ArrayList<>();
-                    map.put(dto.budgetType.code, itemDtos);
+                    map.put(dto.budgetType.id, itemDtos);
                 }
                 itemDtos.add(dto);
             }
