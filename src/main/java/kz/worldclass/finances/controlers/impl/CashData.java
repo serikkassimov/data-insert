@@ -469,7 +469,8 @@ public class CashData extends AbstractRestController {
                                     && (item.itemValue != null)
                                     && (item.history.org.code.equals(orgDto.code))
                             ) {
-                        sum += item.itemValue;
+                        if (dictBudget.outgo) sum -= item.itemValue;
+                        else sum += item.itemValue;
                     }
                 }
 
