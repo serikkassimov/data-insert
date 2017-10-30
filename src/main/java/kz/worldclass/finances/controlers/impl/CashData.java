@@ -89,12 +89,19 @@ public class CashData extends AbstractRestController {
                 break;
             }
         }
-
+        HSSFSheet sheet = book1.getSheetAt(0);
+        ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
+        sheet = book1.getSheetAt(1);
+        ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
+        sheet = book1.getSheetAt(2);
+        ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
+        sheet = book1.getSheetAt(3);
+        ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
 //        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(1));
 //        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(0));
 //        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(3));
 //        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(2));
-        HSSFSheet sheet = book1.getSheetAt(4);
+        sheet = book1.getSheetAt(4);
         ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
         sheet = book1.getSheetAt(5);
         ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
