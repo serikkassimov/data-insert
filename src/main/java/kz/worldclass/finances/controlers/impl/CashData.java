@@ -8,21 +8,21 @@ import kz.worldclass.finances.data.dto.entity.base.BaseDictDto;
 import kz.worldclass.finances.data.dto.results.dict.*;
 import kz.worldclass.finances.data.entity.DictOrgEntity;
 import kz.worldclass.finances.services.DictService;
+import kz.worldclass.finances.services.ExcelCopy;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.ServletOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.rmi.MarshalledObject;
 import java.text.ParseException;
@@ -72,6 +72,15 @@ public class CashData extends AbstractRestController {
     List<DictOrgDto> dictOrgs;
 
     public HSSFWorkbook doreport4(Calendar startDateCalendar, Calendar endDateCalendar) {
+        HSSFWorkbook book1 = null;
+        try {
+            FileInputStream fileInputStream = new FileInputStream("template.xls");
+            book1 = new HSSFWorkbook(fileInputStream);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         HSSFWorkbook workbook = new HSSFWorkbook();
         dictOrgs = cashDataService.getOrgs();
         for (DictOrgDto dictOrg : dictOrgs) {
@@ -80,16 +89,23 @@ public class CashData extends AbstractRestController {
                 break;
             }
         }
-        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(1));
-        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(0));
-        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(3));
-        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(2));
 
-        doSheet2(workbook);
-        doSheet3(workbook);
-        doSheet4(workbook);
+//        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(1));
+//        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(0));
+//        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(3));
+//        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(2));
+        HSSFSheet sheet = book1.getSheetAt(4);
+        ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
+        sheet = book1.getSheetAt(5);
+        ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
+//
+//        doSheet2(workbook);
+//        doSheet3(workbook);
+//        doSheet4(workbook);
         return workbook;
     }
+
+
 
     private void doSheet3(HSSFWorkbook workbook) {
         Map<String, HSSFCellStyle> styleMap = setStyles(workbook);
