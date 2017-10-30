@@ -59,4 +59,10 @@ public class CashDataService {
         for (DictOrgEntity entity: dictOrgDao.allEnabled()) result.add(Dtos.less(entity));
         return result;
     }
+
+    public List<DictBudgetDto> getBudget() {
+        List<DictBudgetDto> result = new ArrayList<>();
+        for (DictBudgetEntity entity: dictBudgetDao.allEnabled()) result.add(Dtos.complete(entity));
+        return result;
+    }
 }

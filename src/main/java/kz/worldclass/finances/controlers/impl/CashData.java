@@ -11,7 +11,11 @@ import kz.worldclass.finances.services.DictService;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +23,7 @@ import javax.servlet.ServletOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.rmi.MarshalledObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -42,6 +47,8 @@ public class CashData extends AbstractRestController {
     private DictService service;
     @Autowired
     private CashDataService cashDataService;
+    @Autowired
+    private SessionFactory sessionFactory;
 
     ArrayList<Map<String, Object>> globalData = new ArrayList<>();
 
@@ -80,6 +87,7 @@ public class CashData extends AbstractRestController {
 
         doSheet2(workbook);
         doSheet3(workbook);
+        doSheet4(workbook);
         return workbook;
     }
 
@@ -100,7 +108,7 @@ public class CashData extends AbstractRestController {
         cell.setCellValue("Фактические остатки ДС");
         row = sheet.createRow(rownum++);
         for (int i = 0; i < 7; i++) {
-            cell = row.createCell(i+2);
+            cell = row.createCell(i + 2);
             cell.setCellStyle(styleMap.get("sumCellDataGreen"));
         }
         row.getCell(4).setCellValue("АСТАНА");
@@ -110,13 +118,13 @@ public class CashData extends AbstractRestController {
         row.getCell(8).setCellValue("ПО СЕТИ");
         row = sheet.createRow(rownum++);
         for (int i = 0; i < 7; i++) {
-            cell = row.createCell(i+2);
+            cell = row.createCell(i + 2);
             cell.setCellStyle(styleMap.get("dataCell"));
         }
         row.getCell(2).setCellValue("МЕГАФИТНЕС");
         row = sheet.createRow(rownum++);
         for (int i = 0; i < 7; i++) {
-            cell = row.createCell(i+2);
+            cell = row.createCell(i + 2);
             cell.setCellStyle(styleMap.get("dataCell"));
         }
         row.getCell(2).setCellValue("касса");
@@ -124,14 +132,14 @@ public class CashData extends AbstractRestController {
         row.getCell(8).setCellFormula("SUM(E7:H7)");
         row = sheet.createRow(rownum++);
         for (int i = 0; i < 7; i++) {
-            cell = row.createCell(i+2);
+            cell = row.createCell(i + 2);
             cell.setCellStyle(styleMap.get("dataCell"));
         }
         row.getCell(3).setCellValue("Федерация Аэробики");
         row.getCell(8).setCellFormula("SUM(E8:H8)");
         row = sheet.createRow(rownum++);
         for (int i = 0; i < 7; i++) {
-            cell = row.createCell(i+2);
+            cell = row.createCell(i + 2);
             cell.setCellStyle(styleMap.get("dataCell"));
         }
         row.getCell(2).setCellValue("банк");
@@ -139,56 +147,56 @@ public class CashData extends AbstractRestController {
         row.getCell(8).setCellFormula("SUM(E9:H9)");
         row = sheet.createRow(rownum++);
         for (int i = 0; i < 7; i++) {
-            cell = row.createCell(i+2);
+            cell = row.createCell(i + 2);
             cell.setCellStyle(styleMap.get("dataCell"));
         }
         row.getCell(3).setCellValue("руб в эквиваленте тг");
         row.getCell(8).setCellFormula("SUM(E10:H10)");
         row = sheet.createRow(rownum++);
         for (int i = 0; i < 7; i++) {
-            cell = row.createCell(i+2);
+            cell = row.createCell(i + 2);
             cell.setCellStyle(styleMap.get("dataCell"));
         }
         row.getCell(2).setCellValue("ЦБ  тенге");
         row.getCell(8).setCellFormula("SUM(E11:H11)");
         row = sheet.createRow(rownum++);
         for (int i = 0; i < 7; i++) {
-            cell = row.createCell(i+2);
+            cell = row.createCell(i + 2);
             cell.setCellStyle(styleMap.get("dataCell"));
         }
         row.getCell(2).setCellValue("ЦБ долл");
         row.getCell(8).setCellFormula("SUM(E12:H12)");
         row = sheet.createRow(rownum++);
         for (int i = 0; i < 7; i++) {
-            cell = row.createCell(i+2);
+            cell = row.createCell(i + 2);
             cell.setCellStyle(styleMap.get("dataCell"));
         }
         row.getCell(2).setCellValue("ККБ долл");
         row.getCell(8).setCellFormula("SUM(E13:H13)");
         row = sheet.createRow(rownum++);
         for (int i = 0; i < 7; i++) {
-            cell = row.createCell(i+2);
+            cell = row.createCell(i + 2);
             cell.setCellStyle(styleMap.get("dataCell"));
         }
         row.getCell(2).setCellValue("ЦБ руб");
         row.getCell(8).setCellFormula("SUM(E14:H14)");
         row = sheet.createRow(rownum++);
         for (int i = 0; i < 7; i++) {
-            cell = row.createCell(i+2);
+            cell = row.createCell(i + 2);
             cell.setCellStyle(styleMap.get("dataCell"));
         }
         row.getCell(2).setCellValue("терминал");
         row.getCell(8).setCellFormula("SUM(E14:H14)");
         row = sheet.createRow(rownum++);
         for (int i = 0; i < 7; i++) {
-            cell = row.createCell(i+2);
+            cell = row.createCell(i + 2);
             cell.setCellStyle(styleMap.get("dataCell"));
         }
         row.getCell(2).setCellValue("терминал");
         row.getCell(8).setCellFormula("SUM(E15:H15)");
         row = sheet.createRow(rownum++);
         for (int i = 0; i < 7; i++) {
-            cell = row.createCell(i+2);
+            cell = row.createCell(i + 2);
             cell.setCellStyle(styleMap.get("dataCell"));
         }
         row.getCell(4).setCellFormula("SUM(E7:E15)");
@@ -196,6 +204,241 @@ public class CashData extends AbstractRestController {
         row.getCell(6).setCellFormula("SUM(G7:G15)");
         row.getCell(7).setCellFormula("SUM(H7:H15)");
         row.getCell(8).setCellFormula("SUM(I7:I15)");
+    }
+
+    private void doSheet4(HSSFWorkbook workbook) {
+        Map<String, HSSFCellStyle> styleMap = setStyles(workbook);
+        HSSFSheet sheet;
+        int rownum;
+        HSSFRow row;
+        Cell cell;
+        sheet = workbook.createSheet("4_свод");
+        rownum = 1;
+        row = sheet.createRow(rownum++);
+        cell = row.createCell(3);
+        cell.setCellValue("Расходование ДС");
+        row = sheet.createRow(rownum++);
+        cell = row.createCell(1);
+        cell.setCellValue("Расход");
+        row.createCell(4).setCellValue("АСТАНА");
+        row.createCell(7).setCellValue("АКТОБЕ");
+        row.createCell(10).setCellValue("КАРАГНДА");
+        row.createCell(13).setCellValue("АТЫРАУ");
+        row = sheet.createRow(rownum++);
+        for (int i = 0; i < 17; i++) {
+            cell = row.createCell(i);
+            cell.setCellStyle(styleMap.get("sumCellDataGreen"));
+        }
+        row.getCell(0).setCellValue("Дата");
+        row.getCell(1).setCellValue("код статьи");
+        row.getCell(3).setCellValue("Статья бюджета");
+        row.getCell(4).setCellValue("Собственные");
+        row.getCell(5).setCellValue("СПА");
+        row.getCell(6).setCellValue("КАФЕ");
+        row.getCell(7).setCellValue("Собственные");
+        row.getCell(8).setCellValue("СПА");
+        row.getCell(9).setCellValue("КАФЕ");
+        row.getCell(10).setCellValue("Собственные");
+        row.getCell(11).setCellValue("СПА");
+        row.getCell(12).setCellValue("КАФЕ");
+        row.getCell(13).setCellValue("Собственные");
+        row.getCell(14).setCellValue("СПА");
+        row.getCell(15).setCellValue("КАФЕ");
+        ArrayList<Map<String, Object>> data = loadDataFor_4_Rep();
+        ArrayList<Integer> rowsNumUpper = new ArrayList<>();
+        for (Map<String, Object> datum : data) {
+            row = sheet.createRow(rownum++);
+            rowsNumUpper.add(rownum);
+            HSSFRow sumRowUp = row;
+            cell = row.createCell(1);
+            cell.setCellValue((String) datum.get("code"));
+            cell.setCellStyle(styleMap.get("sumCellGrey"));
+            cell = row.createCell(3);
+            cell.setCellValue((String) datum.get("name"));
+            cell.setCellStyle(styleMap.get("sumCellGrey"));
+            ArrayList<Map<String, Object>> child = (ArrayList<Map<String, Object>>) datum.get("child");
+            ArrayList<Integer> rowsNumUp = new ArrayList<>();
+            for (Map<String, Object> children : child) {
+                row = sheet.createRow(rownum++);
+                rowsNumUp.add(rownum);
+                HSSFRow sumRow = row;
+                cell = row.createCell(2);
+                cell.setCellValue((String) children.get("code"));
+                cell.setCellStyle(styleMap.get("sumCellGrey"));
+                cell = row.createCell(3);
+                cell.setCellValue((String) children.get("name"));
+                cell.setCellStyle(styleMap.get("sumCellGrey"));
+                ArrayList<Map<String, Object>> subchild = (ArrayList<Map<String, Object>>) children.get("child");
+                ArrayList<Integer> rowsNum = new ArrayList<>();
+                for (Map<String, Object> subchildren : subchild) {
+                    row = sheet.createRow(rownum++);
+                    rowsNum.add(rownum);
+                    CellStyle cellStyle = workbook.createCellStyle();
+                    CreationHelper createHelper = workbook.getCreationHelper();
+                    cellStyle.setDataFormat(
+                            createHelper.createDataFormat().getFormat("dd.mm.yyyy"));
+                    cell = row.createCell(0);
+                    cell.setCellValue((Date) subchildren.get("date"));
+                    cell.setCellStyle(cellStyle);
+                    cell.getCellType();
+                    cell = row.createCell(3);
+                    cell.setCellValue((String) subchildren.get("note"));
+                    Long org = ((BigInteger) subchildren.get("org")).longValue();
+                    int cellCol = 4;
+                    switch (org.intValue()) {
+                        case 1:
+                            cellCol = 4;
+                            break;
+                        case 3:
+                            cellCol = 7;
+                            break;
+                        case 4:
+                            cellCol = 10;
+                            break;
+                        case 5:
+                            cellCol = 13;
+                            break;
+                    }
+                    cell = row.createCell(cellCol);
+                    cell.setCellValue((Double) subchildren.get("item_value"));
+
+                }
+                String columns = "EFGHIJKLMNOP";
+                for (int i = 0; i < columns.length(); i++) {
+                    char c = columns.charAt(i);
+                    cell = sumRow.createCell(i + 4);
+                    String f = "";
+                    for (int j = 0; j < rowsNum.size(); j++) {
+                        f = f + c + rowsNum.get(j);
+                        if (j < rowsNum.size() - 1) {
+                            f = f + "+";
+                        }
+                    }
+                    if (rowsNum.size() > 0) {
+                        cell.setCellFormula(f);
+                        cell.setCellStyle(styleMap.get("sumCellGrey"));
+                    }
+                }
+            }
+            String columns = "EFGHIJKLMNOP";
+            for (int i = 0; i < columns.length(); i++) {
+                char c = columns.charAt(i);
+                cell = sumRowUp.createCell(i + 4);
+                String f = "";
+                for (int j = 0; j < rowsNumUp.size(); j++) {
+                    f = f + c + rowsNumUp.get(j);
+                    if (j < rowsNumUp.size() - 1) {
+                        f = f + "+";
+                    }
+                }
+                if (rowsNumUp.size() > 0) {
+                    cell.setCellFormula(f);
+                    cell.setCellStyle(styleMap.get("sumCellGrey"));
+                }
+            }
+        }
+        String columns = "EFGHIJKLMNOP";
+        row = sheet.createRow(rownum++);
+        cell = row.createCell(3);
+        cell.setCellValue("ИТОГО");
+        cell.setCellStyle(styleMap.get("sumCellGrey"));
+        for (int i = 0; i < columns.length(); i++) {
+            char c = columns.charAt(i);
+            cell = row.createCell(i + 4);
+            String f = "";
+            for (int j = 0; j < rowsNumUpper.size(); j++) {
+                f = f + c + rowsNumUpper.get(j);
+                if (j < rowsNumUpper.size() - 1) {
+                    f = f + "+";
+                }
+            }
+            if (rowsNumUpper.size() > 0) {
+                cell.setCellFormula(f);
+                cell.setCellStyle(styleMap.get("sumCellGrey"));
+            }
+        }
+    }
+
+    private ArrayList<Map<String, Object>> loadDataFor_4_Rep() {
+        Map<Long, Object> budRows = new HashMap<>();
+        ArrayList<Map<String, Object>> res = new ArrayList<>();
+        List<DictBudgetDto> budgetDtoList = cashDataService.getBudget();
+        for (DictBudgetDto dictBudgetDto : budgetDtoList) {
+            if (dictBudgetDto.outgo) {
+                if (dictBudgetDto.parent.id == null) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("code", dictBudgetDto.code);
+                    row.put("id", dictBudgetDto.id);
+                    row.put("name", dictBudgetDto.name);
+                    ArrayList<Map<String, Object>> child = new ArrayList<>();
+                    row.put("child", child);
+                    res.add(row);
+                    budRows.put(dictBudgetDto.id, row);
+                }
+            }
+        }
+        for (DictBudgetDto dictBudgetDto : budgetDtoList) {
+            if (dictBudgetDto.outgo) {
+                if (dictBudgetDto.parent.id != null) {
+                    Map<String, Object> row = new HashMap<>();
+                    for (Map<String, Object> addrows : res) {
+                        if (addrows.get("id").equals(dictBudgetDto.parent.id)) {
+                            ArrayList<Map<String, Object>> child = (ArrayList<Map<String, Object>>) addrows.get("child");
+                            child.add(row);
+                            row.put("code", dictBudgetDto.code);
+                            row.put("id", dictBudgetDto.id);
+                            row.put("name", dictBudgetDto.name);
+                            child = new ArrayList<>();
+                            row.put("child", child);
+                            budRows.put(dictBudgetDto.id, row);
+                            break;
+                        }
+                    }
+
+                    //   res.add(row);
+                }
+            }
+        }
+        addDBData(res, budRows);
+        return res;
+    }
+
+    private void addDBData(ArrayList<Map<String, Object>> res, Map<Long, Object> budRows) {
+        Session session = sessionFactory.openSession();
+        String sql = "select\n" +
+                "    nc.CHANGE_DATE,\n" +
+                "    nc.ORG_ID,\n" +
+                "    nci.ITEM_VALUE,\n" +
+                "    nci.BUDGET_TYPE_ID,\n" +
+                "    n.NOTE_VALUE\n" +
+                "from\n" +
+                "    DICT_BUDGET_NEXT_CHANGE_TYPE dnct,\n" +
+                "    BUDGET_NEXT_CHANGE nc,\n" +
+                "    BUDGET_NEXT_CHANGE_ITEM nci,\n" +
+                "    NOTES n\n" +
+                "where\n" +
+                "    dnct.CODE = 'EXPENSES_REQUEST'\n" +
+                "    and\n" +
+                "    nc.TYPE_ID = dnct.ID\n" +
+                "    and\n" +
+                "    nci.CHANGE_ID = nc.ID \n" +
+                "and \n" +
+                "nci.NOTE_ID=n.id";
+        List<Object[]> objects = session.createSQLQuery(sql).list();
+        session.close();
+        for (Object[] data : objects) {
+            Long id = ((BigInteger) data[3]).longValue();
+            Map<String, Object> row = (Map<String, Object>) budRows.get(id);
+            if (row != null) {
+                ArrayList<Map<String, Object>> child = (ArrayList<Map<String, Object>>) row.get("child");
+                Map<String, Object> subrow = new HashMap<>();
+                subrow.put("org", data[1]);
+                subrow.put("date", data[0]);
+                subrow.put("item_value", data[2]);
+                subrow.put("note", data[4]);
+                child.add(subrow);
+            }
+        }
     }
 
     private void doIncomeTableHeader(HSSFRow row, int col, short colorIndex) {
@@ -327,8 +570,8 @@ public class CashData extends AbstractRestController {
             cell = row.getCell(13);
             cell.setCellFormula(mapRow.get(dictOrgs.get(2).name));
             cell = row.getCell(16);
-            String r  = ""+(row.getRowNum()+1);
-            cell.setCellFormula("E"+r+"+H"+r+"+K"+r+"+N"+r);
+            String r = "" + (row.getRowNum() + 1);
+            cell.setCellFormula("E" + r + "+H" + r + "+K" + r + "+N" + r);
         }
         int lastRowForFormula = rownum;
         row = sheet.createRow(rownum++);
