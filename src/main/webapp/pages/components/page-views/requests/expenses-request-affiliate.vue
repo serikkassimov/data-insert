@@ -47,7 +47,7 @@
 							</td>
 							<td>
 								<el-select filterable v-model="item.budgetId">
-									<el-option v-for="budget in dict.budget.items" :key="budget.id" :label="budget.name" :value="budget.id"></el-option>
+									<el-option v-for="budget in dict.budget.items" :key="budget.id" :label="'[' + budget.code + '] ' + budget.name" :value="budget.id"></el-option>
 								</el-select>
 							</td>
 							<td>
