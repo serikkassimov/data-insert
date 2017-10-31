@@ -86,6 +86,47 @@ public class ExcelCopy {
     }
 
     /**
+     * @param srcSheet the sheet to copy.
+     * @param destSheet the sheet to create.
+     * @param srcRow the row to copy.
+     * @param destRow the row to create.
+     */
+    public static void copyRow(HSSFSheet srcSheet, HSSFSheet destSheet, HSSFRow srcRow, HSSFRow destRow) {
+        // manage a list of merged zone in order to not insert two times a merged zone
+        Set<CellRangeAddressWrapper> mergedRegions = new TreeSet<CellRangeAddressWrapper>();
+        destRow.setHeight(srcRow.getHeight());
+        Map<Integer, HSSFCellStyle> styleMap = new HashMap<>();
+        // reckoning delta rows
+        int deltaRows = destRow.getRowNum()-srcRow.getRowNum();
+        // pour chaque row
+        for (int j = srcRow.getFirstCellNum(); j <= srcRow.getLastCellNum(); j++) {
+            HSSFCell oldCell = srcRow.getCell(j);   // ancienne cell
+            HSSFCell newCell = destRow.getCell(j);  // new cell
+            if (oldCell != null) {
+                if (newCell == null) {
+                    newCell = destRow.createCell(j);
+                }
+                // copy chaque cell
+                copyCell(oldCell, newCell, styleMap);
+                // copy les informations de fusion entre les cellules
+                //System.out.println("row num: " + srcRow.getRowNum() + " , col: " + (short)oldCell.getColumnIndex());
+                CellRangeAddress mergedRegion = getMergedRegion(srcSheet, srcRow.getRowNum(), (short)oldCell.getColumnIndex());
+
+                if (mergedRegion != null) {
+                    //System.out.println("Selected merged region: " + mergedRegion.toString());
+                    CellRangeAddress newMergedRegion = new CellRangeAddress(mergedRegion.getFirstRow()+deltaRows, mergedRegion.getLastRow()+deltaRows, mergedRegion.getFirstColumn(),  mergedRegion.getLastColumn());
+                    //System.out.println("New merged region: " + newMergedRegion.toString());
+                    CellRangeAddressWrapper wrapper = new CellRangeAddressWrapper(newMergedRegion);
+                    if (isNewMergedRegion(wrapper, mergedRegions)) {
+                        mergedRegions.add(wrapper);
+                        destSheet.addMergedRegion(wrapper.range);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * @param oldCell
      * @param newCell
      * @param styleMap

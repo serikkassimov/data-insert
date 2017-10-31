@@ -74,8 +74,10 @@ public class CashData extends AbstractRestController {
     public HSSFWorkbook doreport4(Calendar startDateCalendar, Calendar endDateCalendar) {
         HSSFWorkbook book1 = null;
         try {
-            FileInputStream fileInputStream = new FileInputStream("template.xls");
-            book1 = new HSSFWorkbook(fileInputStream);
+            ClassLoader classLoader = getClass().getClassLoader();
+            File file = new File(classLoader.getResource("template.xls").getFile());
+          //  FileInputStream fileInputStream = new FileInputStream("template.xls");
+            book1 = new HSSFWorkbook(new FileInputStream(file));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -89,22 +91,38 @@ public class CashData extends AbstractRestController {
                 break;
             }
         }
-        HSSFSheet sheet = book1.getSheetAt(0);
-        ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
+        HSSFSheet hssfSheet = null;
+        HSSFSheet sheet = null;
+
+       sheet = book1.getSheetAt(0);
+        hssfSheet = workbook.createSheet(sheet.getSheetName());
+        ExcelCopy.copySheets(hssfSheet, sheet, true);
+        doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(1));
+
         sheet = book1.getSheetAt(1);
-        ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
+        hssfSheet = workbook.createSheet(sheet.getSheetName());
+        ExcelCopy.copySheets(hssfSheet, sheet, true);
+        doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(0));
+
         sheet = book1.getSheetAt(2);
-        ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
+        hssfSheet = workbook.createSheet(sheet.getSheetName());
+        ExcelCopy.copySheets(hssfSheet, sheet, true);
+        doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(3));
+
         sheet = book1.getSheetAt(3);
-        ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
-//        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(1));
-//        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(0));
-//        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(3));
-//        doSheet1(workbook, startDateCalendar, endDateCalendar, dictOrgs.get(2));
+        hssfSheet = workbook.createSheet(sheet.getSheetName());
+        ExcelCopy.copySheets(hssfSheet, sheet, true);
+        doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(2));
+
         sheet = book1.getSheetAt(4);
         ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
         sheet = book1.getSheetAt(5);
         ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
+
+        sheet = book1.getSheetAt(6);
+        hssfSheet = workbook.createSheet(sheet.getSheetName());
+        ExcelCopy.copySheets(hssfSheet, sheet, true);
+        doSheet6(hssfSheet);
 //
 //        doSheet2(workbook);
 //        doSheet3(workbook);
@@ -112,6 +130,130 @@ public class CashData extends AbstractRestController {
         return workbook;
     }
 
+    private void doSheet6(HSSFSheet hssfSheet) {
+        HSSFSheet sheet;
+        int rownum;
+        HSSFRow row;
+        Cell cell;
+        sheet = hssfSheet;
+        rownum = 7;
+        ArrayList<Map<String, Object>> data = loadDataFor_4_Rep();
+        ArrayList<Integer> rowsNumUpper = new ArrayList<>();
+        for (Map<String, Object> datum : data) {
+            sheet.shiftRows(rownum, sheet.getLastRowNum()+1, 1);
+            row = sheet.getRow(rownum++);
+            ExcelCopy.copyRow(sheet, sheet, sheet.getRow(4), row);
+            rowsNumUpper.add(rownum);
+            HSSFRow sumRowUp = row;
+            cell = row.getCell(1);
+            cell.setCellValue((String) datum.get("code"));
+            cell = row.getCell(3);
+            cell.setCellValue((String) datum.get("name"));
+            ArrayList<Map<String, Object>> child = (ArrayList<Map<String, Object>>) datum.get("child");
+            ArrayList<Integer> rowsNumUp = new ArrayList<>();
+            for (Map<String, Object> children : child) {
+                sheet.shiftRows(rownum, sheet.getLastRowNum()+1, 1);
+                row = sheet.getRow(rownum++);
+                ExcelCopy.copyRow(sheet, sheet, sheet.getRow(5), row);
+                rowsNumUp.add(rownum);
+                HSSFRow sumRow = row;
+                cell = row.getCell(2);
+                cell.setCellValue((String) children.get("code"));
+
+                cell = row.getCell(3);
+                cell.setCellValue((String) children.get("name"));
+
+                ArrayList<Map<String, Object>> subchild = (ArrayList<Map<String, Object>>) children.get("child");
+                ArrayList<Integer> rowsNum = new ArrayList<>();
+                for (Map<String, Object> subchildren : subchild) {
+                    sheet.shiftRows(rownum, sheet.getLastRowNum()+1, 1);
+                    row = sheet.getRow(rownum++);
+                    ExcelCopy.copyRow(sheet, sheet, sheet.getRow(6), row);
+                    rowsNum.add(rownum);
+                    cell = row.getCell(0);
+                    cell.setCellValue((Date) subchildren.get("date"));
+                    cell.getCellType();
+                    cell = row.getCell(3);
+                    cell.setCellValue((String) subchildren.get("note"));
+                    Long org = ((BigInteger) subchildren.get("org")).longValue();
+                    int cellCol = 4;
+                    switch (org.intValue()) {
+                        case 1:
+                            cellCol = 4;
+                            break;
+                        case 3:
+                            cellCol = 7;
+                            break;
+                        case 4:
+                            cellCol = 10;
+                            break;
+                        case 5:
+                            cellCol = 13;
+                            break;
+                    }
+                    cell = row.getCell(cellCol);
+                    cell.setCellValue((Double) subchildren.get("item_value"));
+
+                }
+                String columns = "EFGHIJKLMNOP";
+                for (int i = 0; i < columns.length(); i++) {
+                    char c = columns.charAt(i);
+                    cell = sumRow.getCell(i + 4);
+                    String f = "";
+                    for (int j = 0; j < rowsNum.size(); j++) {
+                        f = f + c + rowsNum.get(j);
+                        if (j < rowsNum.size() - 1) {
+                            f = f + "+";
+                        }
+                    }
+                    if (rowsNum.size() > 0) {
+                        cell.setCellFormula(f);
+
+                    }
+                }
+            }
+            String columns = "EFGHIJKLMNOP";
+            for (int i = 0; i < columns.length(); i++) {
+                char c = columns.charAt(i);
+                cell = sumRowUp.getCell(i + 4);
+                String f = "";
+                for (int j = 0; j < rowsNumUp.size(); j++) {
+                    f = f + c + rowsNumUp.get(j);
+                    if (j < rowsNumUp.size() - 1) {
+                        f = f + "+";
+                    }
+                }
+                if (rowsNumUp.size() > 0) {
+                    cell.setCellFormula(f);
+
+                }
+            }
+        }
+        String columns = "EFGHIJKLMNOP";
+       // sheet.shiftRows(rownum, sheet.getLastRowNum()+1, 1);
+        row = sheet.getRow(rownum++);
+        cell = row.getCell(3);
+        cell.setCellValue("ИТОГО");
+
+        for (int i = 0; i < columns.length(); i++) {
+            char c = columns.charAt(i);
+            cell = row.getCell(i + 4);
+            String f = "";
+            for (int j = 0; j < rowsNumUpper.size(); j++) {
+                f = f + c + rowsNumUpper.get(j);
+                if (j < rowsNumUpper.size() - 1) {
+                    f = f + "+";
+                }
+            }
+            if (rowsNumUpper.size() > 0) {
+                cell.setCellFormula(f);
+
+            }
+        }
+        sheet.shiftRows(4, sheet.getLastRowNum(), -1);
+        sheet.shiftRows(4, sheet.getLastRowNum(), -1);
+        sheet.shiftRows(4, sheet.getLastRowNum(), -1);
+    }
 
 
     private void doSheet3(HSSFWorkbook workbook) {
@@ -812,6 +954,32 @@ public class CashData extends AbstractRestController {
         row.put("subRows", subRowsList);
         result.add(row);
         return result;
+    }
+
+    private void doSheet1(HSSFSheet sheet, Calendar startDateCalendar, Calendar endDateCalendar, DictOrgDto org) {
+        List<DictBudgetDto> dictBudgets = cashDataService.getEnabledIncomingLeafs();
+        List<BudgetHistoryItemDto> items = cashDataService.getHistoryItems(startDateCalendar.getTime(), endDateCalendar.getTime());
+        doIncomeRows(sheet, startDateCalendar, endDateCalendar, org, dictBudgets, items, 4, "CASH");
+        doIncomeRows(sheet, startDateCalendar, endDateCalendar, org, dictBudgets, items, 41, "CASHLESS_BANK");
+        doIncomeRows(sheet, startDateCalendar, endDateCalendar, org, dictBudgets, items, 78, "CASHLESS_TERMINAL");
+
+
+    }
+
+    private void doIncomeRows(HSSFSheet sheet, Calendar startDateCalendar, Calendar endDateCalendar, DictOrgDto org, List<DictBudgetDto> dictBudgets, List<BudgetHistoryItemDto> items, int rowmum, String type) {
+        ArrayList<Map<String, Double>> maps = getData(type, startDateCalendar, endDateCalendar, dictBudgets, items, org);
+        HSSFRow row = null;
+        HSSFCell cell = null;
+        for (Map<String, Double> dataRow : maps) {
+            row = sheet.getRow(rowmum++);
+            cell = row.getCell(0);
+            cell.setCellValue(dataRow.get(REPORT_KEY_DATE));
+            int i = 0;
+            for (i = 0; i < dictBudgets.size(); i++) {
+                cell = row.getCell(i + 1);
+                cell.setCellValue(dataRow.get(dictBudgets.get(i).code));
+            }
+        }
     }
 
 
