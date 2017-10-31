@@ -34,6 +34,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import kz.worldclass.finances.data.dto.entity.BudgetHistoryItemDto;
 import kz.worldclass.finances.services.CashDataService;
@@ -93,26 +94,28 @@ public class CashData extends AbstractRestController {
         }
         HSSFSheet hssfSheet = null;
         HSSFSheet sheet = null;
+        
+        List<BudgetHistoryItemDto> items = cashDataService.getHistoryItems(startDateCalendar.getTime(), endDateCalendar.getTime());
 
        sheet = book1.getSheetAt(0);
         hssfSheet = workbook.createSheet(sheet.getSheetName());
         ExcelCopy.copySheets(hssfSheet, sheet, true);
-        doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(1));
+        doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(1), items);
 
         sheet = book1.getSheetAt(1);
         hssfSheet = workbook.createSheet(sheet.getSheetName());
         ExcelCopy.copySheets(hssfSheet, sheet, true);
-        doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(0));
+        doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(0), items);
 
         sheet = book1.getSheetAt(2);
         hssfSheet = workbook.createSheet(sheet.getSheetName());
         ExcelCopy.copySheets(hssfSheet, sheet, true);
-        doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(3));
+        doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(3), items);
 
         sheet = book1.getSheetAt(3);
         hssfSheet = workbook.createSheet(sheet.getSheetName());
         ExcelCopy.copySheets(hssfSheet, sheet, true);
-        doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(2));
+        doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(2), items);
 
         sheet = book1.getSheetAt(4);
         ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
@@ -844,7 +847,7 @@ public class CashData extends AbstractRestController {
         current.setTimeInMillis(startDateCalendar.getTimeInMillis());
 
         Calendar next = new GregorianCalendar();
-        next.setTimeInMillis(startDateCalendar.getTimeInMillis());
+        next.setTimeInMillis(current.getTimeInMillis());
         next.set(Calendar.DATE, next.get(Calendar.DATE) + 1);
 
         ArrayList<Map<String, Double>> mapArrayList = new ArrayList<>();
@@ -855,7 +858,7 @@ public class CashData extends AbstractRestController {
             Map<String, Double> map = new HashMap<>();
             mapArrayList.add(map);
 
-            map.put(REPORT_KEY_DATE, new Long(current.getTimeInMillis()).doubleValue());
+            map.put(REPORT_KEY_DATE, new Long(currentMillis).doubleValue());
 
             for (DictBudgetDto dictBudget : dictBudgets) {
                 Double sum = 0D;
@@ -947,9 +950,8 @@ public class CashData extends AbstractRestController {
         return result;
     }
 
-    private void doSheet1(HSSFSheet sheet, Calendar startDateCalendar, Calendar endDateCalendar, DictOrgDto org) {
+    private void doSheet1(HSSFSheet sheet, Calendar startDateCalendar, Calendar endDateCalendar, DictOrgDto org, List<BudgetHistoryItemDto> items) {
         List<DictBudgetDto> dictBudgets = cashDataService.getEnabledIncomingLeafs();
-        List<BudgetHistoryItemDto> items = cashDataService.getHistoryItems(startDateCalendar.getTime(), endDateCalendar.getTime());
         doIncomeRows(sheet, startDateCalendar, endDateCalendar, org, dictBudgets, items, 4, "CASH");
         doIncomeRows(sheet, startDateCalendar, endDateCalendar, org, dictBudgets, items, 41, "CASHLESS_BANK");
         doIncomeRows(sheet, startDateCalendar, endDateCalendar, org, dictBudgets, items, 78, "CASHLESS_TERMINAL");
