@@ -847,15 +847,6 @@ public class CashData extends AbstractRestController {
         next.setTimeInMillis(startDateCalendar.getTimeInMillis());
         next.set(Calendar.DATE, next.get(Calendar.DATE) + 1);
 
-        long dayMillis = 1000L * 60 * 60 * 24;
-
-        long excelDateStart;
-        try {
-            excelDateStart = new SimpleDateFormat("dd.MM.yyyy").parse("30.12.1899").getTime() / dayMillis;
-        } catch (ParseException exception) {
-            throw new RuntimeException("cannot parse excel start date");
-        }
-
         ArrayList<Map<String, Double>> mapArrayList = new ArrayList<>();
         while (current.before(endDateCalendar)) {
             long currentMillis = current.getTimeInMillis();
@@ -864,7 +855,7 @@ public class CashData extends AbstractRestController {
             Map<String, Double> map = new HashMap<>();
             mapArrayList.add(map);
 
-            map.put(REPORT_KEY_DATE, new Long(current.getTimeInMillis() / dayMillis - excelDateStart).doubleValue());
+            map.put(REPORT_KEY_DATE, new Long(current.getTimeInMillis()).doubleValue());
 
             for (DictBudgetDto dictBudget : dictBudgets) {
                 Double sum = 0D;
@@ -973,7 +964,14 @@ public class CashData extends AbstractRestController {
         for (Map<String, Double> dataRow : maps) {
             row = sheet.getRow(rowmum++);
             cell = row.getCell(0);
-            cell.setCellValue(dataRow.get(REPORT_KEY_DATE));
+
+            Double dateDouble = dataRow.get(REPORT_KEY_DATE);
+            if (dateDouble != null) {
+                long dateMillis = dateDouble.longValue();
+                Date date = new Date(dateMillis);
+                cell.setCellValue(date);
+            }
+            
             int i = 0;
             for (i = 0; i < dictBudgets.size(); i++) {
                 cell = row.getCell(i + 1);
@@ -1098,7 +1096,7 @@ public class CashData extends AbstractRestController {
 //            }
             cell = row.createCell(0);
             cell.setCellStyle(styleMap.get("dateCell"));
-            cell.setCellValue(doubleMap.get(REPORT_KEY_DATE));
+            cell.setCellValue(new Date(doubleMap.get(REPORT_KEY_DATE).longValue()));
             int i = 0;
             for (i = 0; i < dictBudgets.size(); i++) {
                 cell = row.createCell(i + 1);
