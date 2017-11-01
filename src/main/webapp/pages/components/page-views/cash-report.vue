@@ -1,8 +1,13 @@
 <!-- components/page-views/cash-report.vue :: start -->
 <template id="components-page-views-cash-report">
     <div class="report">
-        <a href="cash/report">Загрузить отчет 4</a>
+        <p><a href="cash/report">Загрузить отчет 4</a>
             <router-view></router-view>
+        </p>
+        <p>
+            <!--<a href="cash/report_zip">Загрузить архив отчета 4</a>-->
+        </p>
+        <router-view></router-view>
     </div>
 </template>
 <!-- components/page-views/cash-report.vue :: middle -->
@@ -40,9 +45,7 @@
                 },
                 b: state => 'b'
             }),
-            methods: {
-
-            }
+            methods: {}
         });
     })(jQuery);
 </script>

@@ -12,6 +12,7 @@ import kz.worldclass.finances.services.ExcelCopy;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.util.ZipInputStreamZipEntrySource;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.hibernate.Session;
@@ -35,6 +36,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import kz.worldclass.finances.data.dto.entity.BudgetHistoryItemDto;
 import kz.worldclass.finances.services.CashDataService;
@@ -1132,33 +1135,8 @@ public class CashData extends AbstractRestController {
             @RequestParam(name = "start", required = false) Long startDateMillis,
             @RequestParam(name = "end", required = false) Long endDateMillis
     ) {
-        Calendar endDateCalendar;
-        if (endDateMillis == null) {
-            endDateMillis = System.currentTimeMillis();
-            endDateCalendar = onlyDate(endDateMillis);
-            endDateCalendar.set(Calendar.MONTH, endDateCalendar.get(Calendar.MONTH) + 1);
-            endDateCalendar.set(Calendar.DAY_OF_MONTH, 1);
-        } else {
-            endDateCalendar = onlyDate(endDateMillis);
-        }
-
-        Calendar startDateCalendar;
-        if (startDateMillis == null) {
-            startDateCalendar = new GregorianCalendar();
-            startDateCalendar.setTimeInMillis(endDateCalendar.getTimeInMillis());
-            startDateCalendar.set(Calendar.MONTH, startDateCalendar.get(Calendar.MONTH) - 1);
-        } else {
-            startDateCalendar = onlyDate(startDateMillis);
-        }
-
-        if (startDateCalendar.after(endDateCalendar)) {
-            Calendar temp = startDateCalendar;
-            startDateCalendar = endDateCalendar;
-            endDateCalendar = temp;
-        }
-
+        HSSFWorkbook workbook = getWorkbook(startDateMillis, endDateMillis);
         try (ServletOutputStream sout = response.getOutputStream()) {
-            HSSFWorkbook workbook = doreport4(startDateCalendar, endDateCalendar);
             String file_name = "report_N_4";
             response.setHeader("Access-Control-Allow-Origin", "*");
             response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
@@ -1170,6 +1148,61 @@ public class CashData extends AbstractRestController {
         } catch (IOException | RuntimeException e) {
             e.printStackTrace();
         }
+    }
+
+    @RequestMapping(value = "/report_zip", produces="application/zip")
+    public void reportzip(
+            @RequestParam(name = "start", required = false) Long startDateMillis,
+            @RequestParam(name = "end", required = false) Long endDateMillis
+    ) {
+
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", "attachment; filename=file.zip");
+        HSSFWorkbook workbook = getWorkbook(startDateMillis, endDateMillis);
+
+      /*  try (ZipOutputStream zippedOUt = new ZipOutputStream(response.getOutputStream())) {
+            ZipEntry e = new ZipInputStreamZipEntrySource.FakeZipEntry();
+            // Configure the zip entry, the properties of the file
+            e.setSize(resource.contentLength());
+            e.setTime(System.currentTimeMillis());
+            // etc.
+            zippedOUt.putNextEntry(e);
+            // And the content of the resource:
+            StreamUtils.copy(resource.getInputStream(), zippedOut);
+            zippedOUt.closeEntry();
+            zippedOUt.finish();
+        } catch (Exception e) {
+            // Do something with Exception
+        }*/
+    }
+
+    private HSSFWorkbook getWorkbook(@RequestParam(name = "start", required = false) Long startDateMillis, @RequestParam(name = "end", required = false) Long endDateMillis) {
+        Calendar endDateCalendar;
+        int startMonth = Calendar.MONTH;
+        if (endDateMillis == null) {
+            endDateMillis = System.currentTimeMillis();
+            endDateCalendar = onlyDate(endDateMillis);
+            endDateCalendar.set(startMonth, endDateCalendar.get(startMonth) + 1);
+            endDateCalendar.set(Calendar.DAY_OF_MONTH, 1);
+        } else {
+            endDateCalendar = onlyDate(endDateMillis);
+        }
+
+        Calendar startDateCalendar;
+        if (startDateMillis == null) {
+            startDateCalendar = new GregorianCalendar();
+            startDateCalendar.setTimeInMillis(endDateCalendar.getTimeInMillis());
+            startDateCalendar.set(startMonth, startDateCalendar.get(startMonth) - 2);
+        } else {
+            startDateCalendar = onlyDate(startDateMillis);
+        }
+
+        if (startDateCalendar.after(endDateCalendar)) {
+            Calendar temp = startDateCalendar;
+            startDateCalendar = endDateCalendar;
+            endDateCalendar = temp;
+        }
+        return doreport4(startDateCalendar, endDateCalendar);
     }
 
     private Map<String, HSSFCellStyle> setStyles(HSSFWorkbook workbook) {
