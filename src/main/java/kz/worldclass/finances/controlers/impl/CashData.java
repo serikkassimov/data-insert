@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.ServletOutputStream;
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.rmi.MarshalledObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -1154,11 +1155,17 @@ public class CashData extends AbstractRestController {
     public void reportzip(
             @RequestParam(name = "start", required = false) Long startDateMillis,
             @RequestParam(name = "end", required = false) Long endDateMillis
-    ) {
+    ) throws IOException {
 
         response.setContentType("application/zip");
-        response.setHeader("Content-Disposition", "attachment; filename=file.zip");
+        response.setHeader("Content-Disposition", "attachment; filename=report_N_4.xls.zip");
         HSSFWorkbook workbook = getWorkbook(startDateMillis, endDateMillis);
+        
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream(), StandardCharsets.UTF_8)) {
+            zipOutputStream.putNextEntry(new ZipEntry("report_N_4.xls"));
+            workbook.write(zipOutputStream);
+            zipOutputStream.flush();
+        }
 
       /*  try (ZipOutputStream zippedOUt = new ZipOutputStream(response.getOutputStream())) {
             ZipEntry e = new ZipInputStreamZipEntrySource.FakeZipEntry();
