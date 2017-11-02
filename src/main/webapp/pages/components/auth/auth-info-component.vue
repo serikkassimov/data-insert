@@ -106,6 +106,7 @@
 							dataType: 'json',
 							error: function(jqXHR, textStatus, errorThrown) {
 								this.login.dialog.error = textStatus + ': ' + errorThrown;
+								loadingService.close();
 							},
 							success: function(data, textStatus, jqXHR) {
 								var results = ['SUCCESS', 'EXCEPTION', 'BAD_CREDENTIALS'];
@@ -120,12 +121,15 @@
 										break;
 									case 1: // EXCEPTION
 										this.login.dialog.error = 'Неизвестная ошибка входа';
+										loadingService.close();
 										break;
 									case 2: // BAD_CREDENTIALS
 										this.login.dialog.error = 'Неправильный логин или пароль';
+										loadingService.close();
 										break;
 									default:
 										this.login.dialog.error = 'Неизвестный ответ сервера: ' + data;
+										loadingService.close();
 										break;
 								}
 							},
