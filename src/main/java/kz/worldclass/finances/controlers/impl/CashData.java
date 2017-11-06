@@ -9,6 +9,8 @@ import kz.worldclass.finances.data.dto.results.dict.*;
 import kz.worldclass.finances.data.entity.DictOrgEntity;
 import kz.worldclass.finances.services.DictService;
 import kz.worldclass.finances.services.ExcelCopy;
+import org.apache.poi.hpsf.SummaryInformation;
+import org.apache.poi.hpsf.UnexpectedPropertySetTypeException;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -89,6 +91,11 @@ public class CashData extends AbstractRestController {
         }
 
         HSSFWorkbook workbook = new HSSFWorkbook();
+        workbook.createInformationProperties();
+        SummaryInformation summaryInfo = workbook.getSummaryInformation();
+        summaryInfo.setAuthor("robot");
+        summaryInfo.setCreateDateTime(new Date());
+        summaryInfo.setEditTime(new Date().getTime());
         dictOrgs = cashDataService.getOrgs();
         for (DictOrgDto dictOrg : dictOrgs) {
             if (dictOrg.code.equals("HQ")) {

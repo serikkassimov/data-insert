@@ -18,10 +18,10 @@
 					<template slot="title">Авторизация</template>
 					<el-menu-item index="/admin/auth-manage/users" v-if="isAllowed('/admin/auth-manage/users')">Пользователи</el-menu-item>
 				</el-submenu>
-			</el-submenu>ц0
+			</el-submenu>
 			<el-submenu index="/reports" v-if="isAllowed('/reports')">
 				<template slot="title">Отчеты</template>
-				<el-menu-item index="/cash-report" v-if="isAllowed('/cash-report')">Отчеты Excel</el-menu-item>
+				<el-menu-item index="/cash-report" v-if="isAllowed('/reports/cash-report-hq')">Отчеты Excel</el-menu-item>
 				<el-menu-item index="/reports/cash-report-affiliate" v-if="isAllowed('/reports/cash-report-affiliate')">Кассовый отчет филиала</el-menu-item>
 				<el-menu-item index="/reports/cash-report-hq" v-if="isAllowed('/reports/cash-report-hq')">Кассовые отчеты филиалов</el-menu-item>
 
