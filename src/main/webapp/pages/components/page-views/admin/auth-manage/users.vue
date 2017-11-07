@@ -22,7 +22,7 @@
 				<el-table-column prop="patronymic" label="Отчество"></el-table-column>
 				<el-table-column prop="email" label="E-Mail"></el-table-column>
 				<el-table-column label="Действия">
-					<template scope="scope">
+					<template slot-scope="scope">
 						<el-button size="small" @click="editUser(scope.row, scope.$index)">Изменить</el-button>
 						<el-button size="small" type="danger" @click="unlockUser(scope.row, scope.$index)" v-if="scope.row.locked">Разблокировать</el-button>
 						<el-button size="small" type="danger" @click="lockUser(scope.row, scope.$index)" v-else>Заблокировать</el-button>
@@ -79,10 +79,10 @@
 			>
 				<el-table-column type="selection" width="55"></el-table-column>
 				<el-table-column label="Код">
-					<template scope="scope">{{ scope.row.code }}</template>
+					<template slot-scope="scope">{{ scope.row.code }}</template>
 				</el-table-column>
 				<el-table-column label="Название">
-					<template scope="scope">{{ scope.row.name }}</template>
+					<template slot-scope="scope">{{ scope.row.name }}</template>
 				</el-table-column>
 			</el-table>
 			<span slot="footer" class="dialog-footer">

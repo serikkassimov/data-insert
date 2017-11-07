@@ -18,7 +18,7 @@
 					<el-table-column prop="name" label="Название"></el-table-column>
 					<el-table-column prop="symbol" label="Символ"></el-table-column>
 					<el-table-column label="Действия">
-						<template scope="scope">
+						<template slot-scope="scope">
 							<el-button size="small" @click="editItem(scope.row)">Изменить</el-button>
 							<el-button size="small" type="danger" v-if="scope.row.disabled" @click="enableItem(scope.row)">Включить</el-button>
 							<el-button size="small" type="danger" v-else @click="disableItem(scope.row)">Выключить</el-button>

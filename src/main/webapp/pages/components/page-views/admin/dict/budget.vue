@@ -15,7 +15,7 @@
 					:data="tableItems" :row-class-name="itemsTableClassName"
 				>
 					<el-table-column label="Код">
-						<template scope="scope">
+						<template slot-scope="scope">
 							<template v-for="level in scope.row.level">
 								<i class="el-icon-more text-white"></i>
 							</template>
@@ -31,7 +31,7 @@
 					</el-table-column>
 					<el-table-column label="Название" prop="name"></el-table-column>
 					<el-table-column label="Расход">
-						<template scope="scope">
+						<template slot-scope="scope">
 							<template v-if="scope.row.outgo">
 								<div class="float-right">Да</div>
 							</template>
@@ -41,7 +41,7 @@
 						</template>
 					</el-table-column>
 					<el-table-column label="Действия">
-						<template scope="scope">
+						<template slot-scope="scope">
 							<el-button size="small" @click="editItem(scope.row)">Изменить</el-button>
 							<el-button size="small" type="danger" v-if="scope.row.disabled" @click="enableItem(scope.row)">Включить</el-button>
 							<el-button size="small" type="danger" v-else @click="disableItem(scope.row)">Выключить</el-button>
