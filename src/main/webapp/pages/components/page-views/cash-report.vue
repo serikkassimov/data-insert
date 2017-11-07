@@ -6,7 +6,7 @@
                 type="month"
                 placeholder="Pick a month">
         </el-date-picker>
-        <p><a href="cash/report">Загрузить отчет 4</a>
+        <p><a @click="loadReport" href="">Загрузить отчет 4</a>
            
         </p>
         <p><a @click="loadReport">Загрузить отчет 4</a>
@@ -44,7 +44,7 @@
             data: function () {
                 return {
                     text: 'Кассовый отчет',
-                    month: "2017-10-01T00:00:00.000Z",
+                    month: new Date(),
                 }
             },
             computed: Vuex.mapState({
@@ -56,8 +56,9 @@
             }),
             methods: {
                 loadReport: function () {
-                    var begin = this.month.getTime();
-                    window.open("cash/report/"+begin+"/"+begin,"_self")
+                    var firstDay = new Date(this.month.getFullYear(), this.month.getMonth(), 1);
+                    var lastDay = new Date(this.month.getFullYear(), this.month.getMonth() + 1, 1);
+                    window.open("cash/report?start="+firstDay.getTime()+"&end="+lastDay.getTime(),"_top")
                 }
             }
         });

@@ -44,6 +44,12 @@
                 </el-select>
             </el-form-item>
         </el-form>
+        <el-date-picker
+                v-model="month"
+                type="month"
+                placeholder="Pick a month">
+        </el-date-picker>
+        <el-button @click="doClick">Data</el-button>
         <el-table
                 :data="dataAll"
                 height="450"
@@ -94,6 +100,7 @@
         el: '#el',
 
         data: {
+            month: new Date(),
             rules: {
                 date: [
                     {type: 'date', required: true, message: 'Обязательно выберете дату', trigger: 'change'}
@@ -108,7 +115,7 @@
             incomeTypes: [],
 
             formData: {
-                filial: ${filial},
+                filial: 1,
                 date: "",
                 datas: []
             },
@@ -129,6 +136,13 @@
                     date: new Date(parts[0], parts[1] - 1, parts[2]),
                     datas: dat
                 };
+            },
+            doClick() {
+
+                var firstDay = new Date(this.month.getFullYear(), this.month.getMonth(), 1);
+                var lastDay = new Date(this.month.getFullYear(), this.month.getMonth() + 1, 1);
+                console.log(firstDay.getTime());
+                console.log(lastDay.getTime());
             },
             changeFilial() {
                 this.loadDatas();

@@ -1206,7 +1206,7 @@ public class CashData extends AbstractRestController {
         if (startDateMillis == null) {
             startDateCalendar = new GregorianCalendar();
             startDateCalendar.setTimeInMillis(endDateCalendar.getTimeInMillis());
-            startDateCalendar.set(startMonth, startDateCalendar.get(startMonth) - 2);
+            startDateCalendar.set(startMonth, startDateCalendar.get(startMonth) - 1);
         } else {
             startDateCalendar = onlyDate(startDateMillis);
         }
@@ -1216,6 +1216,8 @@ public class CashData extends AbstractRestController {
             startDateCalendar = endDateCalendar;
             endDateCalendar = temp;
         }
+        System.out.println(startDateCalendar.MONTH+" "+startDateCalendar.DAY_OF_MONTH+ " " +startDateCalendar);
+        System.out.println(endDateCalendar.MONTH+" "+endDateCalendar.DAY_OF_MONTH+ " " +endDateCalendar);
         return doreport4(startDateCalendar, endDateCalendar);
     }
 
