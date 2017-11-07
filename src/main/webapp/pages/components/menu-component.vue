@@ -1,7 +1,7 @@
 <!-- components/menu-component.vue :: start -->
 <template id="menu-component">
 	<div>
-		<el-menu theme="dark" :unique-opened="true" :router="true" :default-active="activeIndex" :collapse="collapsed">
+		<el-menu :unique-opened="true" :router="true" :default-active="activeIndex" :collapse="collapsed">
 			<el-submenu index="/admin" v-if="isAllowed('/admin')">
 				<template slot="title">Администрирование</template>
 				<el-submenu index="/admin/dict" v-if="isAllowed('/admin/dict')">

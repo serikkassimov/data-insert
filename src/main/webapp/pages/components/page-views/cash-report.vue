@@ -36,7 +36,6 @@
 <script>
 
     (function ($) {
-        ELEMENT.locale(ELEMENT.lang.ruRU);
         var ajaxRoot = WorldClassRestRoot + '/cash';
         var componentName = 'components-page-views-cash-report';
         Vue.component(componentName, {

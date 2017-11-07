@@ -13,7 +13,21 @@
             /*
                 Merge ElementUI and Bootstrap
             */
-            .bg-dark .el-menu--dark, .bg-dark .el-menu--dark .el-submenu .el-menu{background-color:#343a40!important}
+            .bg-dark .el-menu, .bg-dark .el-submenu__title, .bg-dark .el-menu-item {
+                background-color: #343a40; color: #E9ECEF;
+            }
+
+            .bg-dark .el-menu-item.is-active {
+                color: #7EBDFF!important;
+            }
+
+            .bg-dark .el-submenu__title:hover, .bg-dark .el-menu-item:hover {
+                background-color: #5C646C; color: #E9ECEF;
+            }
+
+            .el-menu--horizontal {
+                border-bottom: none;
+            }
         </style>
         <script>
             WorldClassRestRoot = '<%= request.getContextPath() %>';
@@ -68,6 +82,8 @@
         
         <script>
             (function($) {
+                ELEMENT.locale(ELEMENT.lang.ruRU);
+
                 const store = new Vuex.Store({});
     
                 const routes = [];

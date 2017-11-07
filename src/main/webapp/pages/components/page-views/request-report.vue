@@ -157,7 +157,6 @@
 <script>
 
     (function ($) {
-        ELEMENT.locale(ELEMENT.lang.ruRU)
         var componentName = 'components-page-views-request-report';
         Vue.component(componentName, {
             template: '#' + componentName,
