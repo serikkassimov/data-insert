@@ -6,15 +6,11 @@
                 type="month"
                 placeholder="Pick a month">
         </el-date-picker>
-        <p><a @click="loadReport" href="">Загрузить отчет 4</a>
-           
-        </p>
-        <p><a @click="loadReport">Загрузить отчет 4</a>
-            
-        </p>
-        <p>
-            <a href="cash/report_zip">Загрузить архив отчета 4</a>
-        </p>
+
+        <el-button @click="loadReport">Загрузить отчет 4</el-button>
+
+        <el-button @click="loadReportZip">Загрузить архив отчета 4</el-button>
+
         <router-view></router-view>
     </div>
 </template>
@@ -57,7 +53,12 @@
                 loadReport: function () {
                     var firstDay = new Date(this.month.getFullYear(), this.month.getMonth(), 1);
                     var lastDay = new Date(this.month.getFullYear(), this.month.getMonth() + 1, 1);
-                    window.open("cash/report?start="+firstDay.getTime()+"&end="+lastDay.getTime(),"_top")
+                    window.open("cash/report?start=" + firstDay.getTime() + "&end=" + lastDay.getTime(), "_top")
+                },
+                loadReportZip: function () {
+                    var firstDay = new Date(this.month.getFullYear(), this.month.getMonth(), 1);
+                    var lastDay = new Date(this.month.getFullYear(), this.month.getMonth() + 1, 1);
+                    window.open("cash/report_zip?start=" + firstDay.getTime() + "&end=" + lastDay.getTime(), "_top")
                 }
             }
         });

@@ -136,7 +136,7 @@ public class CashData extends AbstractRestController {
         sheet = book1.getSheetAt(6);
         hssfSheet = workbook.createSheet(sheet.getSheetName());
         ExcelCopy.copySheets(hssfSheet, sheet, true);
-        doSheet6(hssfSheet);
+        doSheet6(hssfSheet, startDateCalendar, endDateCalendar);
 //
 //        doSheet2(workbook);
 //        doSheet3(workbook);
@@ -144,14 +144,14 @@ public class CashData extends AbstractRestController {
         return workbook;
     }
 
-    private void doSheet6(HSSFSheet hssfSheet) {
+    private void doSheet6(HSSFSheet hssfSheet, Calendar startDateCalendar, Calendar endDateCalendar) {
         HSSFSheet sheet;
         int rownum;
         HSSFRow row;
         Cell cell;
         sheet = hssfSheet;
         rownum = 7;
-        ArrayList<Map<String, Object>> data = loadDataFor_4_Rep();
+        ArrayList<Map<String, Object>> data = loadDataFor_4_Rep(startDateCalendar, endDateCalendar);
         ArrayList<Integer> rowsNumUpper = new ArrayList<>();
         for (Map<String, Object> datum : data) {
             sheet.shiftRows(rownum, sheet.getLastRowNum()+1, 1);
@@ -385,7 +385,7 @@ public class CashData extends AbstractRestController {
         row.getCell(8).setCellFormula("SUM(I7:I15)");
     }
 
-    private void doSheet4(HSSFWorkbook workbook) {
+    private void doSheet4(HSSFWorkbook workbook, Calendar startDateCalendar, Calendar endDateCalendar) {
         Map<String, HSSFCellStyle> styleMap = setStyles(workbook);
         HSSFSheet sheet;
         int rownum;
@@ -423,7 +423,7 @@ public class CashData extends AbstractRestController {
         row.getCell(13).setCellValue("Собственные");
         row.getCell(14).setCellValue("СПА");
         row.getCell(15).setCellValue("КАФЕ");
-        ArrayList<Map<String, Object>> data = loadDataFor_4_Rep();
+        ArrayList<Map<String, Object>> data = loadDataFor_4_Rep(startDateCalendar, endDateCalendar);
         ArrayList<Integer> rowsNumUpper = new ArrayList<>();
         for (Map<String, Object> datum : data) {
             row = sheet.createRow(rownum++);
@@ -538,7 +538,7 @@ public class CashData extends AbstractRestController {
         }
     }
 
-    private ArrayList<Map<String, Object>> loadDataFor_4_Rep() {
+    private ArrayList<Map<String, Object>> loadDataFor_4_Rep(Calendar startDateCalendar, Calendar endDateCalendar) {
         Map<Long, Object> budRows = new HashMap<>();
         ArrayList<Map<String, Object>> res = new ArrayList<>();
         List<DictBudgetDto> budgetDtoList = cashDataService.getBudget();
@@ -561,7 +561,7 @@ public class CashData extends AbstractRestController {
                 if (dictBudgetDto.parent.id != null) {
                     Map<String, Object> row = new HashMap<>();
                     for (Map<String, Object> addrows : res) {
-                        if (addrows.get("id").equals(dictBudgetDto.parent.id)) {
+                        if (addrows.get("id").equals(dictBudgetDto.parent.id)){
                             ArrayList<Map<String, Object>> child = (ArrayList<Map<String, Object>>) addrows.get("child");
                             child.add(row);
                             row.put("code", dictBudgetDto.code);
@@ -578,11 +578,11 @@ public class CashData extends AbstractRestController {
                 }
             }
         }
-        addDBData(res, budRows);
+        addDBData(res, budRows, startDateCalendar, endDateCalendar);
         return res;
     }
 
-    private void addDBData(ArrayList<Map<String, Object>> res, Map<Long, Object> budRows) {
+    private void addDBData(ArrayList<Map<String, Object>> res, Map<Long, Object> budRows, Calendar startDateCalendar, Calendar endDateCalendar) {
         Session session = sessionFactory.openSession();
         String sql = "select\n" +
                 "    nc.CHANGE_DATE,\n" +
@@ -602,8 +602,9 @@ public class CashData extends AbstractRestController {
                 "    and\n" +
                 "    nci.CHANGE_ID = nc.ID \n" +
                 "and \n" +
-                "nci.NOTE_ID=n.id";
-        List<Object[]> objects = session.createSQLQuery(sql).list();
+                "nci.NOTE_ID=n.id and nc.CHANGE_DATE>=:p1 and nc.CHANGE_DATE<:p2 order by nc.CHANGE_DATE";
+        List<Object[]> objects = session.createSQLQuery(sql)
+                .setDate("p1", startDateCalendar.getTime()).setDate("p2", endDateCalendar.getTime()).list();
         session.close();
         for (Object[] data : objects) {
             Long id = ((BigInteger) data[3]).longValue();
