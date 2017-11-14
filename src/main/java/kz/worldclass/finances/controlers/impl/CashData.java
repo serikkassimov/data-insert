@@ -1,12 +1,12 @@
 package kz.worldclass.finances.controlers.impl;
 
 import kz.worldclass.finances.controlers.AbstractRestController;
-import kz.worldclass.finances.data.dto.entity.DictBudgetDto;
-import kz.worldclass.finances.data.dto.entity.DictCurrencyDto;
-import kz.worldclass.finances.data.dto.entity.DictOrgDto;
+import kz.worldclass.finances.data.dto.entity.*;
 import kz.worldclass.finances.data.dto.entity.base.BaseDictDto;
+import kz.worldclass.finances.data.dto.results.cashreport.AffiliateGetDataResult;
 import kz.worldclass.finances.data.dto.results.dict.*;
 import kz.worldclass.finances.data.entity.DictOrgEntity;
+import kz.worldclass.finances.services.CashReportService;
 import kz.worldclass.finances.services.DictService;
 import kz.worldclass.finances.services.ExcelCopy;
 import org.apache.poi.hpsf.SummaryInformation;
@@ -31,18 +31,10 @@ import java.nio.charset.StandardCharsets;
 import java.rmi.MarshalledObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import kz.worldclass.finances.data.dto.entity.BudgetHistoryItemDto;
 import kz.worldclass.finances.services.CashDataService;
 
 @RestController
@@ -56,6 +48,8 @@ public class CashData extends AbstractRestController {
     private CashDataService cashDataService;
     @Autowired
     private SessionFactory sessionFactory;
+    @Autowired
+    private CashReportService cashReportService;
 
     ArrayList<Map<String, Object>> globalData = new ArrayList<>();
 
@@ -83,7 +77,7 @@ public class CashData extends AbstractRestController {
         try {
             ClassLoader classLoader = getClass().getClassLoader();
             File file = new File(classLoader.getResource("template.xls").getFile());
-          //  FileInputStream fileInputStream = new FileInputStream("template.xls");
+            //  FileInputStream fileInputStream = new FileInputStream("template.xls");
             book1 = new HSSFWorkbook(new FileInputStream(file));
 
         } catch (IOException e) {
@@ -105,10 +99,10 @@ public class CashData extends AbstractRestController {
         }
         HSSFSheet hssfSheet = null;
         HSSFSheet sheet = null;
-        
+
         List<BudgetHistoryItemDto> items = cashDataService.getHistoryItems(startDateCalendar.getTime(), endDateCalendar.getTime());
 
-       sheet = book1.getSheetAt(0);
+        sheet = book1.getSheetAt(0);
         hssfSheet = workbook.createSheet(sheet.getSheetName());
         ExcelCopy.copySheets(hssfSheet, sheet, true);
         doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(1), items);
@@ -154,7 +148,7 @@ public class CashData extends AbstractRestController {
         ArrayList<Map<String, Object>> data = loadDataFor_4_Rep(startDateCalendar, endDateCalendar);
         ArrayList<Integer> rowsNumUpper = new ArrayList<>();
         for (Map<String, Object> datum : data) {
-            sheet.shiftRows(rownum, sheet.getLastRowNum()+1, 1);
+            sheet.shiftRows(rownum, sheet.getLastRowNum() + 1, 1);
             row = sheet.getRow(rownum++);
             ExcelCopy.copyRow(sheet, sheet, sheet.getRow(4), row);
             rowsNumUpper.add(rownum);
@@ -166,7 +160,7 @@ public class CashData extends AbstractRestController {
             ArrayList<Map<String, Object>> child = (ArrayList<Map<String, Object>>) datum.get("child");
             ArrayList<Integer> rowsNumUp = new ArrayList<>();
             for (Map<String, Object> children : child) {
-                sheet.shiftRows(rownum, sheet.getLastRowNum()+1, 1);
+                sheet.shiftRows(rownum, sheet.getLastRowNum() + 1, 1);
                 row = sheet.getRow(rownum++);
                 ExcelCopy.copyRow(sheet, sheet, sheet.getRow(5), row);
                 rowsNumUp.add(rownum);
@@ -180,7 +174,7 @@ public class CashData extends AbstractRestController {
                 ArrayList<Map<String, Object>> subchild = (ArrayList<Map<String, Object>>) children.get("child");
                 ArrayList<Integer> rowsNum = new ArrayList<>();
                 for (Map<String, Object> subchildren : subchild) {
-                    sheet.shiftRows(rownum, sheet.getLastRowNum()+1, 1);
+                    sheet.shiftRows(rownum, sheet.getLastRowNum() + 1, 1);
                     row = sheet.getRow(rownum++);
                     ExcelCopy.copyRow(sheet, sheet, sheet.getRow(6), row);
                     rowsNum.add(rownum);
@@ -244,7 +238,7 @@ public class CashData extends AbstractRestController {
             }
         }
         String columns = "EFGHIJKLMNOP";
-       // sheet.shiftRows(rownum, sheet.getLastRowNum()+1, 1);
+        // sheet.shiftRows(rownum, sheet.getLastRowNum()+1, 1);
         row = sheet.getRow(rownum++);
         cell = row.getCell(3);
         cell.setCellValue("ИТОГО");
@@ -561,7 +555,7 @@ public class CashData extends AbstractRestController {
                 if (dictBudgetDto.parent.id != null) {
                     Map<String, Object> row = new HashMap<>();
                     for (Map<String, Object> addrows : res) {
-                        if (addrows.get("id").equals(dictBudgetDto.parent.id)){
+                        if (addrows.get("id").equals(dictBudgetDto.parent.id)) {
                             ArrayList<Map<String, Object>> child = (ArrayList<Map<String, Object>>) addrows.get("child");
                             child.add(row);
                             row.put("code", dictBudgetDto.code);
@@ -985,7 +979,7 @@ public class CashData extends AbstractRestController {
                 Date date = new Date(dateMillis);
                 cell.setCellValue(date);
             }
-            
+
             int i = 0;
             for (i = 0; i < dictBudgets.size(); i++) {
                 cell = row.getCell(i + 1);
@@ -1159,7 +1153,7 @@ public class CashData extends AbstractRestController {
         }
     }
 
-    @RequestMapping(value = "/report_zip", produces="application/zip")
+    @RequestMapping(value = "/report_zip", produces = "application/zip")
     public void reportzip(
             @RequestParam(name = "start", required = false) Long startDateMillis,
             @RequestParam(name = "end", required = false) Long endDateMillis
@@ -1168,7 +1162,7 @@ public class CashData extends AbstractRestController {
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "attachment; filename=report_N_4.xls.zip");
         HSSFWorkbook workbook = getWorkbook(startDateMillis, endDateMillis);
-        
+
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream(), StandardCharsets.UTF_8)) {
             zipOutputStream.putNextEntry(new ZipEntry("report_N_4.xls"));
             workbook.write(zipOutputStream);
@@ -1189,6 +1183,121 @@ public class CashData extends AbstractRestController {
         } catch (Exception e) {
             // Do something with Exception
         }*/
+    }
+
+    @RequestMapping(value = "/cash_report")
+    public void cash_report(
+            @RequestParam(name = "start", required = false) Long startDateMillis
+    ) {
+        HSSFWorkbook workbook = getCashWorkbook(startDateMillis);
+        try (ServletOutputStream sout = response.getOutputStream()) {
+            String file_name = "cash_report";
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+            response.setHeader("Access-Control-Max-Age", "3600");
+            response.setHeader("Access-Control-Allow-Headers", "x-requested-with");
+            response.setHeader("Content-Disposition", "inline;filename=" + file_name + ".xls");
+            response.setContentType("application/vnd.ms-excel");
+            workbook.write(sout);
+        } catch (IOException | RuntimeException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private HSSFWorkbook getCashWorkbook(Long startDateMillis) {
+        Calendar endDateCalendar;
+        int startMonth = Calendar.MONTH;
+
+        Calendar startDateCalendar;
+        if (startDateMillis == null) {
+            startDateCalendar = new GregorianCalendar();
+            // startDateCalendar.setTimeInMillis(endDateCalendar.getTimeInMillis());
+            startDateCalendar.set(startMonth, startDateCalendar.get(startMonth) - 1);
+        } else {
+            startDateCalendar = onlyDate(startDateMillis);
+        }
+
+        return doCashReport(startDateCalendar);
+    }
+
+    private HSSFWorkbook doCashReport(Calendar startDateCalendar) {
+        HSSFWorkbook book1 = null;
+        try {
+            ClassLoader classLoader = getClass().getClassLoader();
+            File file = new File(classLoader.getResource("template.xls").getFile());
+            //  FileInputStream fileInputStream = new FileInputStream("template.xls");
+            book1 = new HSSFWorkbook(new FileInputStream(file));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        workbook.createInformationProperties();
+        SummaryInformation summaryInfo = workbook.getSummaryInformation();
+        summaryInfo.setAuthor("robot");
+        summaryInfo.setCreateDateTime(new Date());
+        summaryInfo.setEditTime(new Date().getTime());
+        dictOrgs = cashDataService.getOrgs();
+        for (DictOrgDto dictOrg : dictOrgs) {
+            if (dictOrg.code.equals("HQ")) {
+                dictOrgs.remove(dictOrg);
+                break;
+            }
+        }
+        HSSFSheet hssfSheet = null;
+        HSSFSheet sheet = null;
+        AffiliateGetDataResult dataResult = cashReportService.getAffiliateData(login(), startDateCalendar.getTime());
+        List<BudgetNextChangeItemDto> items = Arrays.asList(dataResult.data.items);
+
+        sheet = book1.getSheetAt(8);
+        hssfSheet = workbook.createSheet(sheet.getSheetName());
+        ExcelCopy.copySheets(hssfSheet, sheet, true);
+        doCashSheet(hssfSheet, items);
+        return workbook;
+    }
+
+    private void doCashSheet(HSSFSheet hssfSheet, List<BudgetNextChangeItemDto> items) {
+        HSSFCell cell = hssfSheet.getRow(0).getCell(0);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        Date currDate = new Date();
+        currDate.setTime(items.get(0).change.changeDate);
+        String date = dateFormat.format(currDate);
+        cell.setCellValue("ОТЧЕТ за " + date);
+        addCellValue(hssfSheet, items, 1, 3, 35);
+        addCellValue(hssfSheet, items, 1, 4, 38);
+        addCellValue(hssfSheet, items, 1, 5, 34);
+        addCellValue(hssfSheet, items, 1, 6, 36);
+        addCellValue(hssfSheet, items, 1, 7, 37);
+        addCellValue(hssfSheet, items, 1, 8, 39);
+        addCellValue(hssfSheet, items, 1, 9, 40);
+        addCellValue(hssfSheet, items, 1, 10, 41);
+        addCellValue(hssfSheet, items, 3, 13, 35);
+        addCellValue(hssfSheet, items, 3, 14, 38);
+        addCellValue(hssfSheet, items, 3, 15, 34);
+        addCellValue(hssfSheet, items, 3, 16, 36);
+        addCellValue(hssfSheet, items, 3, 17, 37);
+        addCellValue(hssfSheet, items, 3, 18, 39);
+        addCellValue(hssfSheet, items, 3, 19, 40);
+        addCellValue(hssfSheet, items, 3, 20, 41);
+        addCellValue(hssfSheet, items, 2, 23, 35);
+        addCellValue(hssfSheet, items, 2, 24, 36);
+        addCellValue(hssfSheet, items, 2, 25, 37);
+        addCellValue(hssfSheet, items, 2, 26, 41);
+    }
+
+    private void addCellValue(HSSFSheet hssfSheet, List<BudgetNextChangeItemDto> items, int storeType, int rowNum, int budType) {
+        hssfSheet.getRow(rowNum).getCell(2).setCellValue(findInItems(items, storeType, budType));
+    }
+
+    private Double findInItems(List<BudgetNextChangeItemDto> items, int storeType, int budType) {
+        Double res = 0D;
+        for (BudgetNextChangeItemDto item : items) {
+            if ((item.storeType.id.intValue() == storeType) & (item.budgetType.id.intValue() == budType)) {
+                return item.itemValue.doubleValue();
+            }
+        }
+        return res;
     }
 
     private HSSFWorkbook getWorkbook(@RequestParam(name = "start", required = false) Long startDateMillis, @RequestParam(name = "end", required = false) Long endDateMillis) {
@@ -1217,8 +1326,6 @@ public class CashData extends AbstractRestController {
             startDateCalendar = endDateCalendar;
             endDateCalendar = temp;
         }
-        System.out.println(startDateCalendar.MONTH+" "+startDateCalendar.DAY_OF_MONTH+ " " +startDateCalendar);
-        System.out.println(endDateCalendar.MONTH+" "+endDateCalendar.DAY_OF_MONTH+ " " +endDateCalendar);
         return doreport4(startDateCalendar, endDateCalendar);
     }
 

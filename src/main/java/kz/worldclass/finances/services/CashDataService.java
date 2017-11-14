@@ -8,13 +8,16 @@ import java.util.List;
 import kz.worldclass.finances.dao.impl.BudgetHistoryItemDao;
 import kz.worldclass.finances.dao.impl.DictBudgetDao;
 import kz.worldclass.finances.dao.impl.DictOrgDao;
+import kz.worldclass.finances.dao.impl.UserDao;
 import kz.worldclass.finances.data.dto.entity.BudgetHistoryItemDto;
 import kz.worldclass.finances.data.dto.entity.DictBudgetDto;
 import kz.worldclass.finances.data.dto.entity.DictOrgDto;
 import kz.worldclass.finances.data.dto.entity.Dtos;
+import kz.worldclass.finances.data.dto.results.cashreport.AffiliateSaveDataResult;
 import kz.worldclass.finances.data.entity.BudgetHistoryItemEntity;
 import kz.worldclass.finances.data.entity.DictBudgetEntity;
 import kz.worldclass.finances.data.entity.DictOrgEntity;
+import kz.worldclass.finances.data.entity.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +33,8 @@ public class CashDataService {
     private DictOrgDao dictOrgDao ;
     @Autowired
     private BudgetHistoryItemDao budgetHistoryItemDao;
+    @Autowired
+    private UserDao userDao;
     
     public List<DictBudgetDto> getEnabledIncomingLeafs() {
         List<DictBudgetDto> result = new ArrayList<>();
@@ -40,6 +45,27 @@ public class CashDataService {
     public List<BudgetHistoryItemDto> getHistoryItems(Date startDate, Date endDate) {
         List<BudgetHistoryItemDto> result = new ArrayList<>();
         for (BudgetHistoryItemEntity entity: budgetHistoryItemDao.fetchBetweenDates(CURRENCY_CODE_KZT, startDate, endDate)) {
+            BudgetHistoryItemDto dto = Dtos.less(entity);
+            result.add(dto);
+            dto.history = Dtos.less(entity.getHistory());
+            if (entity.getHistory() != null) {
+                dto.history.org = Dtos.less(entity.getHistory().getOrg());
+            }
+            dto.budgetType = Dtos.less(entity.getBudgetType());
+            dto.currency = Dtos.less(entity.getCurrency());
+            dto.storeType = Dtos.less(entity.getStoreType());
+        }
+        return result;
+    }
+
+
+    public List<BudgetHistoryItemDto> getHistoryItems(Date currDate, String login) {
+        List<BudgetHistoryItemDto> result = new ArrayList<>();
+        UserEntity userEntity = userDao.fetchOneByLogin(login);
+        if (userEntity == null) return null;
+        DictOrgEntity orgEntity = userEntity.getOrg();
+        if (orgEntity == null) return null;
+        for (BudgetHistoryItemEntity entity: budgetHistoryItemDao.fetchByDate(CURRENCY_CODE_KZT, currDate, orgEntity)) {
             BudgetHistoryItemDto dto = Dtos.less(entity);
             result.add(dto);
             dto.history = Dtos.less(entity.getHistory());

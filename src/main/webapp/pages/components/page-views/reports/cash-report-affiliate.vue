@@ -7,6 +7,7 @@
 				<el-button @click="reloadAll">Обновить все</el-button>
 				<el-button @click="reloadData">Обновить данные</el-button>
 				<el-date-picker v-model="data.date" type="date" format="dd.MM.yyyy" :clearable="false" @change="reloadData"></el-date-picker>
+				<el-button @click="getCashReport">Кассовый Excel</el-button>
 				<template v-if="editable">
 					<template v-if="hasChanges">
 						<el-button type="primary" @click="save">Сохранить</el-button>
@@ -369,6 +370,11 @@
 					}
 				});
 			},
+            getCashReport: function () {
+                console.log("getCashReport");
+                var firstDay = this.data.date;
+                window.open("cash/cash_report?start=" + firstDay.getTime(), "_top")
+            },
 			save: function() {
 				if (this.data.loading) return;
 
