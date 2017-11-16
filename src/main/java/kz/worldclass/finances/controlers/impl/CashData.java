@@ -5,10 +5,9 @@ import kz.worldclass.finances.data.dto.entity.*;
 import kz.worldclass.finances.data.dto.entity.base.BaseDictDto;
 import kz.worldclass.finances.data.dto.results.cashreport.AffiliateGetDataResult;
 import kz.worldclass.finances.data.dto.results.dict.*;
+import kz.worldclass.finances.data.dto.results.expensesrequest.GetAffiliateDataResult;
 import kz.worldclass.finances.data.entity.DictOrgEntity;
-import kz.worldclass.finances.services.CashReportService;
-import kz.worldclass.finances.services.DictService;
-import kz.worldclass.finances.services.ExcelCopy;
+import kz.worldclass.finances.services.*;
 import org.apache.poi.hpsf.SummaryInformation;
 import org.apache.poi.hpsf.UnexpectedPropertySetTypeException;
 import org.apache.poi.hssf.usermodel.*;
@@ -35,8 +34,6 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import kz.worldclass.finances.services.CashDataService;
-
 @RestController
 @RequestMapping(value = "/cash")
 public class CashData extends AbstractRestController {
@@ -50,6 +47,8 @@ public class CashData extends AbstractRestController {
     private SessionFactory sessionFactory;
     @Autowired
     private CashReportService cashReportService;
+    @Autowired
+    private ExpensesRequestService expensesRequestService;
 
     ArrayList<Map<String, Object>> globalData = new ArrayList<>();
 
@@ -74,16 +73,7 @@ public class CashData extends AbstractRestController {
 
     public HSSFWorkbook doreport4(Calendar startDateCalendar, Calendar endDateCalendar) {
         HSSFWorkbook book1 = null;
-        try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            File file = new File(classLoader.getResource("template.xls").getFile());
-            //  FileInputStream fileInputStream = new FileInputStream("template.xls");
-            book1 = new HSSFWorkbook(new FileInputStream(file));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        book1 = getHssfWorkbookTemplate(book1);
         HSSFWorkbook workbook = new HSSFWorkbook();
         workbook.createInformationProperties();
         SummaryInformation summaryInfo = workbook.getSummaryInformation();
@@ -1204,6 +1194,25 @@ public class CashData extends AbstractRestController {
         }
     }
 
+    @RequestMapping(value = "/request_report")
+    public void request_report(
+            @RequestParam(name = "start", required = false) Long startDateMillis
+    ) {
+        HSSFWorkbook workbook = getRequestWorkbook(startDateMillis);
+        try (ServletOutputStream sout = response.getOutputStream()) {
+            String file_name = "request_report";
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+            response.setHeader("Access-Control-Max-Age", "3600");
+            response.setHeader("Access-Control-Allow-Headers", "x-requested-with");
+            response.setHeader("Content-Disposition", "inline;filename=" + file_name + ".xls");
+            response.setContentType("application/vnd.ms-excel");
+            workbook.write(sout);
+        } catch (IOException | RuntimeException e) {
+            e.printStackTrace();
+        }
+    }
+
     private HSSFWorkbook getCashWorkbook(Long startDateMillis) {
         Calendar endDateCalendar;
         int startMonth = Calendar.MONTH;
@@ -1220,17 +1229,25 @@ public class CashData extends AbstractRestController {
         return doCashReport(startDateCalendar);
     }
 
+    private HSSFWorkbook getRequestWorkbook(Long startDateMillis) {
+        Calendar endDateCalendar;
+        int startMonth = Calendar.MONTH;
+
+        Calendar startDateCalendar;
+        if (startDateMillis == null) {
+            startDateCalendar = new GregorianCalendar();
+            // startDateCalendar.setTimeInMillis(endDateCalendar.getTimeInMillis());
+            startDateCalendar.set(startMonth, startDateCalendar.get(startMonth) - 1);
+        } else {
+            startDateCalendar = onlyDate(startDateMillis);
+        }
+
+        return doRequestReport(startDateCalendar);
+    }
+
     private HSSFWorkbook doCashReport(Calendar startDateCalendar) {
         HSSFWorkbook book1 = null;
-        try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            File file = new File(classLoader.getResource("template.xls").getFile());
-            //  FileInputStream fileInputStream = new FileInputStream("template.xls");
-            book1 = new HSSFWorkbook(new FileInputStream(file));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        book1 = getHssfWorkbookTemplate(book1);
 
         HSSFWorkbook workbook = new HSSFWorkbook();
         workbook.createInformationProperties();
@@ -1248,13 +1265,59 @@ public class CashData extends AbstractRestController {
         HSSFSheet hssfSheet = null;
         HSSFSheet sheet = null;
         AffiliateGetDataResult dataResult = cashReportService.getAffiliateData(login(), startDateCalendar.getTime());
-        List<BudgetNextChangeItemDto> items = Arrays.asList(dataResult.data.items);
-
         sheet = book1.getSheetAt(8);
         hssfSheet = workbook.createSheet(sheet.getSheetName());
         ExcelCopy.copySheets(hssfSheet, sheet, true);
-        doCashSheet(hssfSheet, items);
+        if (dataResult.data != null) {
+            List<BudgetNextChangeItemDto> items = Arrays.asList(dataResult.data.items);
+            doCashSheet(hssfSheet, items);
+        }
         return workbook;
+    }
+
+    private HSSFWorkbook doRequestReport(Calendar startDateCalendar) {
+        HSSFWorkbook book1 = null;
+        book1 = getHssfWorkbookTemplate(book1);
+
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        workbook.createInformationProperties();
+        SummaryInformation summaryInfo = workbook.getSummaryInformation();
+        summaryInfo.setAuthor("robot");
+        summaryInfo.setCreateDateTime(new Date());
+        summaryInfo.setEditTime(new Date().getTime());
+        dictOrgs = cashDataService.getOrgs();
+        for (DictOrgDto dictOrg : dictOrgs) {
+            if (dictOrg.code.equals("HQ")) {
+                dictOrgs.remove(dictOrg);
+                break;
+            }
+        }
+        HSSFSheet hssfSheet = null;
+        HSSFSheet sheet = null;
+        GetAffiliateDataResult dataResult = expensesRequestService.getAffiliateData(login(), startDateCalendar.getTime());
+
+
+        sheet = book1.getSheetAt(9);
+        hssfSheet = workbook.createSheet(sheet.getSheetName());
+        ExcelCopy.copySheets(hssfSheet, sheet, true);
+        if (dataResult.items != null) {
+            List<BudgetNextChangeItemDto> items = Arrays.asList(dataResult.items);
+            doRequestSheet(hssfSheet, items, startDateCalendar, dataResult.dictOrgDto);
+        }
+        return workbook;
+    }
+
+    private HSSFWorkbook getHssfWorkbookTemplate(HSSFWorkbook book1) {
+        try {
+            ClassLoader classLoader = getClass().getClassLoader();
+            File file = new File(classLoader.getResource("template.xls").getFile());
+            //  FileInputStream fileInputStream = new FileInputStream("template.xls");
+            book1 = new HSSFWorkbook(new FileInputStream(file));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return book1;
     }
 
     private void doCashSheet(HSSFSheet hssfSheet, List<BudgetNextChangeItemDto> items) {
@@ -1284,6 +1347,39 @@ public class CashData extends AbstractRestController {
         addCellValue(hssfSheet, items, 2, 24, 36);
         addCellValue(hssfSheet, items, 2, 25, 37);
         addCellValue(hssfSheet, items, 2, 26, 41);
+    }
+
+    private void doRequestSheet(HSSFSheet sheet, List<BudgetNextChangeItemDto> items, Calendar startDateCalendar, DictOrgDto dictOrgDto) {
+        HSSFCell cell = sheet.getRow(0).getCell(2);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        Date currDate = new Date();
+        currDate.setTime(startDateCalendar.getTimeInMillis());
+        String date = dateFormat.format(currDate);
+        cell.setCellValue(date);
+        HSSFRow row = null;
+        int rownum = 3;
+        sheet.getRow(2).getCell(3).setCellValue(dictOrgDto.name);
+        for (BudgetNextChangeItemDto item : items) {
+            sheet.shiftRows(rownum, sheet.getLastRowNum() + 1, 1);
+            row = sheet.getRow(rownum++);
+            ExcelCopy.copyRow(sheet, sheet, sheet.getRow(rownum), row);
+            row.getCell(1).setCellValue(rownum - 3);
+            row.getCell(3).setCellValue(item.note.noteValue);
+            if (item.storeType.id == 1) {
+                row.getCell(4).setCellValue(item.itemValue);
+            }
+            if (item.storeType.id == 2) {
+                row.getCell(5).setCellValue(item.itemValue);
+            }
+        }
+        row = sheet.getRow(rownum+2);
+        cell = row.getCell(4);
+        cell.setCellFormula("SUM(E"+4+":E"+rownum+")");
+        cell = row.getCell(5);
+        cell.setCellFormula("SUM(F"+4+":F"+rownum+")");
+        cell = row.getCell(6);
+        cell.setCellFormula("SUM(G"+4+":G"+rownum+")");
+
     }
 
     private void addCellValue(HSSFSheet hssfSheet, List<BudgetNextChangeItemDto> items, int storeType, int rowNum, int budType) {

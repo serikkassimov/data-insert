@@ -15,12 +15,7 @@ import kz.worldclass.finances.dao.impl.DictBudgetStoreTypeDao;
 import kz.worldclass.finances.dao.impl.DictCurrencyDao;
 import kz.worldclass.finances.dao.impl.NoteDao;
 import kz.worldclass.finances.dao.impl.UserDao;
-import kz.worldclass.finances.data.dto.entity.BudgetNextChangeDto;
-import kz.worldclass.finances.data.dto.entity.BudgetNextChangeItemDto;
-import kz.worldclass.finances.data.dto.entity.DictBudgetDto;
-import kz.worldclass.finances.data.dto.entity.DictBudgetStoreTypeDto;
-import kz.worldclass.finances.data.dto.entity.DictCurrencyDto;
-import kz.worldclass.finances.data.dto.entity.Dtos;
+import kz.worldclass.finances.data.dto.entity.*;
 import kz.worldclass.finances.data.dto.results.expensesrequest.GetAffiliateDataResult;
 import kz.worldclass.finances.data.dto.results.expensesrequest.SaveAffiliateDataResult;
 import kz.worldclass.finances.data.entity.BudgetNextChangeEntity;
@@ -113,8 +108,8 @@ public class ExpensesRequestService {
             
             List<BudgetNextChangeItemDto> result = new ArrayList<>();
             for (List<BudgetNextChangeItemDto> itemDtos: map.values()) result.addAll(itemDtos);
-            
-            return new GetAffiliateDataResult(result.toArray(new BudgetNextChangeItemDto[result.size()]));
+            DictOrgDto dictOrgDto = Dtos.less(orgEntity);
+            return new GetAffiliateDataResult(result.toArray(new BudgetNextChangeItemDto[result.size()]), dictOrgDto);
         }
     }
     

@@ -12,6 +12,7 @@
 				<span class="text-secondary">|</span>
 				<el-button @click="addItem">Добавить</el-button>
 				<span class="text-secondary">|</span>
+				<el-button @click="getCashReport">Заявка Excel</el-button>
 				<el-button @click="save" :disabled="!changed">Сохранить</el-button>
 			</h5>
 			<div class="card-body" style="overflow: auto;" v-loading.body="loading">
@@ -150,6 +151,11 @@
 				this.reloadCurrencies();
 				this.reloadData();
 			},
+            getCashReport: function () {
+                console.log("getCashReport");
+                var firstDay = this.data.date;
+                window.open("cash/request_report?start=" + firstDay.getTime(), "_top")
+            },
 			reloadBudgets: function() {
 				if (this.dict.budget.loading) return;
 
