@@ -22,6 +22,7 @@ import kz.worldclass.finances.data.entity.DictRoleEntity;
 import kz.worldclass.finances.data.entity.NoteEntity;
 import kz.worldclass.finances.data.entity.UserEntity;
 import kz.worldclass.finances.data.entity.UserRoleLinkEntity;
+import kz.worldclass.finances.data.entity.XIncomingEntity;
 import kz.worldclass.finances.data.entity.base.BaseDictEntity;
 import kz.worldclass.finances.data.entity.base.BaseEntity;
 
@@ -290,6 +291,26 @@ public class Dtos {
             }
             result.roles = roleDtos.toArray(new DictRoleDto[roleDtos.size()]);
             
+            result.org = complete(source.getOrg());
+        }
+        return result;
+    }
+    
+    public static XIncomingDto less(XIncomingEntity source) {
+        XIncomingDto result = new XIncomingDto();
+        copy(source, result);
+        if (source != null) {
+            result.date = (source.getDate() == null ? null : source.getDate().getTime());
+            result.note = source.getNote();
+            result.value = source.getValue();
+            result.orderNumber = source.getOrderNumber();
+        }
+        return result;
+    }
+    
+    public static XIncomingDto complete(XIncomingEntity source) {
+        XIncomingDto result = less(source);
+        if (source != null) {
             result.org = complete(source.getOrg());
         }
         return result;
