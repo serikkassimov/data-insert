@@ -9,10 +9,6 @@
 			<el-date-picker v-model="data.date" type="date" format="dd.MM.yyyy" :clearable="false" @change="reloadData"></el-date-picker>
 		</h5>
 		<h5 class="card-header" v-loading.body="loading">
-			<el-select v-model="data.cash">
-				<el-option :value="true" :label="'Наличные'"></el-option>
-				<el-option :value="false" :label="'Банк'"></el-option>
-			</el-select>
 			<el-button @click="addItem">Добавить</el-button>
 			<el-button v-if="changed" @click="save">Сохранить</el-button>
 			<el-button v-else disabled>Сохранить</el-button>
@@ -24,17 +20,24 @@
 						<th>#</th>
 						<th>Назначение</th>
 						<th>Сумма</th>
+						<th>Наличные/банк</th>
 						<th></th>
 					</tr>
 				</thead>
 				<tbody style="overflow: scroll;">
-					<tr v-for="(item, index) in filteredItems" :key="index">
+					<tr v-for="(item, index) in data.items" :key="index">
 						<th>{{index + 1}}</th>
 						<th>
 							<el-input placeholder="Назначение" v-model="item.note"></el-input>
 						</th>
 						<th>
 							<el-input-number v-model="item.value"></el-input-number>
+						</th>
+						<th>
+							<el-select v-model="item.cash">
+								<el-option :value="true" :label="'Наличные'"></el-option>
+								<el-option :value="false" :label="'Банк'"></el-option>
+							</el-select>
 						</th>
 						<th>
 							<el-dropdown
@@ -91,13 +94,6 @@
 			},
 			changed: function() {
 				return !equals($.extend(true, [], this.data.items), $.extend(true, [], this.data.original));
-			},
-			filteredItems: function() {
-				var result = [];
-				for (var i = 0; i < this.data.items.length; i ++) {
-					if (this.data.items[i].cash === this.data.cash) result.push(this.data.items[i]);
-				}
-				return result;
 			}
 		}),
 		methods: {
