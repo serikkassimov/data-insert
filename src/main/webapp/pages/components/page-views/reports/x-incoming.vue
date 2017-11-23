@@ -9,6 +9,10 @@
 			<el-date-picker v-model="data.date" type="date" format="dd.MM.yyyy" :clearable="false" @change="reloadData"></el-date-picker>
 		</h5>
 		<h5 class="card-header" v-loading.body="loading">
+			<el-select v-model="data.cash">
+				<el-option :value="true" :label="'Наличные'"></el-option>
+				<el-option :value="false" :label="'Банк'"></el-option>
+			</el-select>
 			<el-button @click="addItem">Добавить</el-button>
 			<el-button v-if="changed" @click="save">Сохранить</el-button>
 			<el-button v-else disabled>Сохранить</el-button>
@@ -24,7 +28,7 @@
 					</tr>
 				</thead>
 				<tbody style="overflow: scroll;">
-					<tr v-for="(item, index) in data.items" :key="index">
+					<tr v-for="(item, index) in filteredItems" :key="index">
 						<th>{{index + 1}}</th>
 						<th>
 							<el-input placeholder="Назначение" v-model="item.note"></el-input>
@@ -74,6 +78,7 @@
 			return {
 				data: {
 					date: date,
+					cash: true,
 					items: [],
 					original: [],
 					loading: false
@@ -86,6 +91,13 @@
 			},
 			changed: function() {
 				return !equals($.extend(true, [], this.data.items), $.extend(true, [], this.data.original));
+			},
+			filteredItems: function() {
+				var result = [];
+				for (var i = 0; i < this.data.items.length; i ++) {
+					if (this.data.items[i].cash === this.data.cash) result.push(this.data.items[i]);
+				}
+				return result;
 			}
 		}),
 		methods: {
@@ -116,6 +128,7 @@
 									if (!isString(item.note)) item.note = '';
 									if (!isComparableNumber(item.value)) item.value = 0;
 									if (!isComparableNumber(item.orderNumber)) item.orderNumber = 0;
+									if (!isBoolean(item.cash)) item.cash = true;
 								}
 
 								sort(function(item1, item2) {
@@ -171,7 +184,8 @@
 			addItem: function() {
 				var item = {
 					note: '',
-					value: 0
+					value: 0,
+					cash: this.data.cash
 				};
 				this.data.items.push(item);
 			},
@@ -185,7 +199,8 @@
 					var item = this.data.items[index];
 					if (isComparableNumber(item.value)) {
 						var savedItem = {
-							value: item.value
+							value: item.value,
+							cash: item.cash
 						};
 						if (isNonEmptyString(item.note)) savedItem.note = item.note;
 						if (isComparableNumber(item.id)) savedItem.id = item.id;

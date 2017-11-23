@@ -304,6 +304,7 @@ public class Dtos {
             result.note = source.getNote();
             result.value = source.getValue();
             result.orderNumber = source.getOrderNumber();
+            result.cash = source.getCash();
         }
         return result;
     }

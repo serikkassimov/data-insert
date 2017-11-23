@@ -7,6 +7,7 @@ public class XIncomingDto extends BaseDto {
     public String note;
     public Double value;
     public Long orderNumber;
+    public Boolean cash;
     
     public DictOrgDto org;
 }

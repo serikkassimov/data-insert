@@ -60,6 +60,7 @@ public class XIncomingService {
             }
             xIncomingEntity.setNote(xIncomingDto.note);
             xIncomingEntity.setOrderNumber(xIncomingDto.orderNumber);
+            xIncomingEntity.setCash(xIncomingDto.cash);
             xIncomingEntity.setValue(xIncomingDto.value);
             xIncomingDao.saveOrUpdate(xIncomingEntity);
         }

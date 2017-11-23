@@ -24,6 +24,7 @@ public class XIncomingEntity extends BaseEntity {
     public static final String COL_NOTE = "NOTE";
     public static final String COL_VALUE = "C_VALUE";
     public static final String COL_ORDER_NUMBER = "ORDER_NUMBER";
+    public static final String COL_CASH = "CASH";
     
     @ManyToOne(optional = false)
     @JoinColumn(name = COL_ORG_ID, nullable = false, foreignKey = @ForeignKey(name = FK + SEP + TABLE + SEP + COL_ORG_ID))
@@ -41,6 +42,9 @@ public class XIncomingEntity extends BaseEntity {
     
     @Column(name = COL_ORDER_NUMBER, nullable = false)
     private Long orderNumber;
+    
+    @Column(name = COL_CASH, nullable = false)
+    private Boolean cash;
 
     public DictOrgEntity getOrg() {
         return org;
@@ -80,5 +84,13 @@ public class XIncomingEntity extends BaseEntity {
 
     public void setOrderNumber(Long orderNumber) {
         this.orderNumber = orderNumber;
+    }
+
+    public Boolean getCash() {
+        return cash;
+    }
+
+    public void setCash(Boolean cash) {
+        this.cash = cash;
     }
 }
