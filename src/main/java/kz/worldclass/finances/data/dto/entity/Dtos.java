@@ -18,8 +18,12 @@ import kz.worldclass.finances.data.entity.DictBudgetNextChangeTypeEntity;
 import kz.worldclass.finances.data.entity.DictBudgetStoreTypeEntity;
 import kz.worldclass.finances.data.entity.DictCurrencyEntity;
 import kz.worldclass.finances.data.entity.DictOrgEntity;
+import kz.worldclass.finances.data.entity.DictOrgPartEntity;
 import kz.worldclass.finances.data.entity.DictRoleEntity;
 import kz.worldclass.finances.data.entity.NoteEntity;
+import kz.worldclass.finances.data.entity.OutgoingRequestCellEntity;
+import kz.worldclass.finances.data.entity.OutgoingRequestEntity;
+import kz.worldclass.finances.data.entity.OutgoingRequestRowEntity;
 import kz.worldclass.finances.data.entity.UserEntity;
 import kz.worldclass.finances.data.entity.UserRoleLinkEntity;
 import kz.worldclass.finances.data.entity.XIncomingEntity;
@@ -234,6 +238,17 @@ public class Dtos {
         return result;
     }
     
+    public static DictOrgPartDto less(DictOrgPartEntity source) {
+        DictOrgPartDto result = new DictOrgPartDto();
+        copy(source, result);
+        return result;
+    }
+    
+    public static DictOrgPartDto complete(DictOrgPartEntity source) {
+        DictOrgPartDto result = less(source);
+        return result;
+    }
+    
     public static DictRoleDto less(DictRoleEntity source) {
         DictRoleDto result = new DictRoleDto();
         copy(source, result);
@@ -258,6 +273,62 @@ public class Dtos {
     
     public static NoteDto complete(NoteEntity source) {
         NoteDto result = less(source);
+        return result;
+    }
+    
+    public static OutgoingRequestDto less(OutgoingRequestEntity source) {
+        OutgoingRequestDto result = new OutgoingRequestDto();
+        copy(source, result);
+        if (source != null) {
+            result.date = (source.getDate() == null ? null : source.getDate().getTime());
+        }
+        return result;
+    }
+    
+    public static OutgoingRequestDto complete(OutgoingRequestEntity source) {
+        OutgoingRequestDto result = less(source);
+        if (source != null) {
+            result.org = complete(source.getOrg());
+        }
+        return result;
+    }
+    
+    public static OutgoingRequestCellDto less(OutgoingRequestCellEntity source) {
+        OutgoingRequestCellDto result = new OutgoingRequestCellDto();
+        copy(source, result);
+        if (source != null) {
+            result.value = source.getValue();
+        }
+        return result;
+    }
+    
+    public static OutgoingRequestCellDto complete(OutgoingRequestCellEntity source) {
+        OutgoingRequestCellDto result = less(source);
+        if (source != null) {
+            result.currency = complete(source.getCurrency());
+            result.orgPart = complete(source.getOrgPart());
+            result.row = complete(source.getRow());
+            result.storeType = complete(source.getStoreType());
+        }
+        return result;
+    }
+    
+    public static OutgoingRequestRowDto less(OutgoingRequestRowEntity source) {
+        OutgoingRequestRowDto result = new OutgoingRequestRowDto();
+        copy(source, result);
+        if (source != null) {
+            result.note = source.getNote();
+            result.orderNumber = source.getOrderNumber();
+        }
+        return result;
+    }
+    
+    public static OutgoingRequestRowDto complete(OutgoingRequestRowEntity source) {
+        OutgoingRequestRowDto result = less(source);
+        if (source != null) {
+            result.budget = complete(source.getBudget());
+            result.request = complete(source.getRequest());
+        }
         return result;
     }
     
