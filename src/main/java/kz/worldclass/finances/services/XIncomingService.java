@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import kz.worldclass.finances.dao.impl.DictOrgDao;
 import kz.worldclass.finances.dao.impl.UserDao;
 import kz.worldclass.finances.dao.impl.XIncomingDao;
 import kz.worldclass.finances.data.dto.entity.Dtos;
@@ -24,6 +26,8 @@ public class XIncomingService {
     @Autowired
     private UserDao userDao;
     @Autowired
+    private DictOrgDao dictOrgDao;
+    @Autowired
     private XIncomingDao xIncomingDao;
     
     public GetDataResult getData(Date date, String login) {
@@ -35,6 +39,15 @@ public class XIncomingService {
         
         List<XIncomingDto> xIncomingDtos = new ArrayList<>();
         for (XIncomingEntity xIncomingEntity: xIncomingDao.fetchByOrgAndDate(userOrgEntity, date)) xIncomingDtos.add(Dtos.less(xIncomingEntity));
+        return new GetDataResult(xIncomingDtos.toArray(new XIncomingDto[xIncomingDtos.size()]));
+    }
+
+    public GetDataResult getData(Date begdate, Date enddate, long org) {
+        DictOrgEntity userOrgEntity = dictOrgDao.get(org);
+        if (userOrgEntity == null) return new GetDataResult(GetDataResult.Type.ORG_NOT_FOUND);
+
+        List<XIncomingDto> xIncomingDtos = new ArrayList<>();
+        for (XIncomingEntity xIncomingEntity: xIncomingDao.fetchByOrgAndBetweenDate(userOrgEntity, begdate, enddate)) xIncomingDtos.add(Dtos.less(xIncomingEntity));
         return new GetDataResult(xIncomingDtos.toArray(new XIncomingDto[xIncomingDtos.size()]));
     }
     

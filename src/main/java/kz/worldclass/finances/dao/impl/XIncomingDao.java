@@ -27,4 +27,16 @@ public class XIncomingDao extends AbstractDao<XIncomingEntity> {
         log(query);
         return query.fetch();
     }
+
+    public List<XIncomingEntity> fetchByOrgAndBetweenDate(DictOrgEntity org, Date begdate, Date enddate) {
+        HibernateQuery<XIncomingEntity> query = getQueryFactory()
+                .select(QXIncomingEntity.xIncomingEntity)
+                .from(QXIncomingEntity.xIncomingEntity)
+                .where(
+                        QXIncomingEntity.xIncomingEntity.org.eq(org),
+                        QXIncomingEntity.xIncomingEntity.date.between(begdate, enddate)
+                );
+        log(query);
+        return query.fetch();
+    }
 }

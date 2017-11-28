@@ -6,6 +6,7 @@ import kz.worldclass.finances.data.dto.entity.base.BaseDictDto;
 import kz.worldclass.finances.data.dto.results.cashreport.AffiliateGetDataResult;
 import kz.worldclass.finances.data.dto.results.dict.*;
 import kz.worldclass.finances.data.dto.results.expensesrequest.GetAffiliateDataResult;
+import kz.worldclass.finances.data.dto.results.xincoming.GetDataResult;
 import kz.worldclass.finances.data.entity.DictOrgEntity;
 import kz.worldclass.finances.services.*;
 import org.apache.poi.hpsf.SummaryInformation;
@@ -49,6 +50,8 @@ public class CashData extends AbstractRestController {
     private CashReportService cashReportService;
     @Autowired
     private ExpensesRequestService expensesRequestService;
+    @Autowired
+    private XIncomingService xIncomingService;
 
     ArrayList<Map<String, Object>> globalData = new ArrayList<>();
 
@@ -112,10 +115,12 @@ public class CashData extends AbstractRestController {
         ExcelCopy.copySheets(hssfSheet, sheet, true);
         doSheet1(hssfSheet, startDateCalendar, endDateCalendar, dictOrgs.get(2), items);
 
-        sheet = book1.getSheetAt(4);
+        sheet = book1.getSheetAt(4); //остатки
         ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
-        sheet = book1.getSheetAt(5);
-        ExcelCopy.copySheets(workbook.createSheet(sheet.getSheetName()), sheet, true);
+        sheet = book1.getSheetAt(5); // остатки и поступления
+        hssfSheet = workbook.createSheet(sheet.getSheetName());
+        ExcelCopy.copySheets(hssfSheet, sheet, true);
+        doSheet5(hssfSheet, startDateCalendar, endDateCalendar);
 
         sheet = book1.getSheetAt(6);
         hssfSheet = workbook.createSheet(sheet.getSheetName());
@@ -126,6 +131,62 @@ public class CashData extends AbstractRestController {
 //        doSheet3(workbook);
 //        doSheet4(workbook);
         return workbook;
+    }
+
+    private void doSheet5(HSSFSheet hssfSheet, Calendar startDateCalendar, Calendar endDateCalendar) {
+        HSSFSheet sheet;
+        int rownum;
+        HSSFRow row;
+        Cell cell;
+        sheet = hssfSheet;
+        GetDataResult result = xIncomingService.getData(startDateCalendar.getTime(), endDateCalendar.getTime(), 1L);
+        rownum = 7;
+        fillCash(sheet, rownum, result);
+        rownum = 12;
+        fillNoCash(sheet, rownum, result);
+        result = xIncomingService.getData(startDateCalendar.getTime(), endDateCalendar.getTime(), 3L);
+        rownum = 39;
+        fillCash(sheet, rownum, result);
+        rownum = 34;
+        fillNoCash(sheet, rownum, result);
+        result = xIncomingService.getData(startDateCalendar.getTime(), endDateCalendar.getTime(), 4L);
+        rownum = 60;
+        fillCash(sheet, rownum, result);
+        rownum = 61;
+        fillNoCash(sheet, rownum, result);
+        result = xIncomingService.getData(startDateCalendar.getTime(), endDateCalendar.getTime(), 5L);
+        rownum = 83;
+        fillCash(sheet, rownum, result);
+        rownum = 84;
+        fillNoCash(sheet, rownum, result);
+    }
+
+    private void fillNoCash(HSSFSheet sheet, int rownum, GetDataResult result) {
+        HSSFRow row;
+        for (XIncomingDto item : result.items) {
+            if (item.cash) {
+                row = sheet.getRow(rownum++);
+                Date date = new Date();
+                date.setTime(item.date);
+                row.getCell(5).setCellValue(date);
+                row.getCell(6).setCellValue(item.note);
+                row.getCell(8).setCellValue(item.value);
+            }
+        }
+    }
+
+    private void fillCash(HSSFSheet sheet, int rownum, GetDataResult result) {
+        HSSFRow row;
+        for (XIncomingDto item : result.items) {
+            if (!item.cash) {
+                row = sheet.getRow(rownum++);
+                Date date = new Date();
+                date.setTime(item.date);
+                row.getCell(0).setCellValue(date);
+                row.getCell(1).setCellValue(item.note);
+                row.getCell(3).setCellValue(item.value);
+            }
+        }
     }
 
     private void doSheet6(HSSFSheet hssfSheet, Calendar startDateCalendar, Calendar endDateCalendar) {
@@ -969,10 +1030,35 @@ public class CashData extends AbstractRestController {
                 Date date = new Date(dateMillis);
                 cell.setCellValue(date);
             }
-
+//35, 38, 34, 36, 41, 37, 40, 39
             int i = 0;
             for (i = 0; i < dictBudgets.size(); i++) {
-                cell = row.getCell(i + 1);
+                switch (dictBudgets.get(i).id.intValue()) {
+                    case 35:
+                        cell = row.getCell(1);
+                        break;
+                    case 38:
+                        cell = row.getCell(2);
+                        break;
+                    case 34:
+                        cell = row.getCell(3);
+                        break;
+                    case 36:
+                        cell = row.getCell(4);
+                        break;
+                    case 41:
+                        cell = row.getCell(5);
+                        break;
+                    case 37:
+                        cell = row.getCell(6);
+                        break;
+                    case 40:
+                        cell = row.getCell(7);
+                        break;
+                    case 39:
+                        cell = row.getCell(8);
+                        break;
+                }
                 cell.setCellValue(dataRow.get(dictBudgets.get(i).code));
             }
         }
@@ -1372,13 +1458,13 @@ public class CashData extends AbstractRestController {
                 row.getCell(5).setCellValue(item.itemValue);
             }
         }
-        row = sheet.getRow(rownum+2);
+        row = sheet.getRow(rownum + 2);
         cell = row.getCell(4);
-        cell.setCellFormula("SUM(E"+4+":E"+rownum+")");
+        cell.setCellFormula("SUM(E" + 4 + ":E" + rownum + ")");
         cell = row.getCell(5);
-        cell.setCellFormula("SUM(F"+4+":F"+rownum+")");
+        cell.setCellFormula("SUM(F" + 4 + ":F" + rownum + ")");
         cell = row.getCell(6);
-        cell.setCellFormula("SUM(G"+4+":G"+rownum+")");
+        cell.setCellFormula("SUM(G" + 4 + ":G" + rownum + ")");
 
     }
 
