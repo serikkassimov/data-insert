@@ -185,7 +185,8 @@
 				return this.data.initialized && (!equals(this.data.items, this.data.original));
 			},
 			editable: function() {
-				return (!isNonEmptyString(this.data.state.code)) || (this.data.state.code === 'NEW');
+				//return (!isNonEmptyString(this.data.state.code)) || (this.data.state.code === 'NEW');
+				return true;
 			}
 		}),
 		methods: {

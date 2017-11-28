@@ -28,7 +28,8 @@
 			</el-submenu>
 			<el-submenu index="/requests" v-if="isAllowed('/requests')">
 				<template slot="title">Заявки</template>
-				<el-menu-item index="/requests/expenses-request-affiliate" v-if="isAllowed('/requests/expenses-request-affiliate')">Заявка на расходы</el-menu-item>
+				<!-- <el-menu-item index="/requests/expenses-request-affiliate" v-if="isAllowed('/requests/expenses-request-affiliate')">Заявка на расходы</el-menu-item> -->
+				<el-menu-item index="/requests/outgoing-request-affiliate" v-if="isAllowed('/requests/outgoing-request-affiliate')">Заявка на расходы</el-menu-item>
 			</el-submenu>
 		</el-menu>
 	</div>
@@ -75,6 +76,7 @@
 		'/reports/x-incoming': createMeta(['ROLE_FILIAL_USER', 'ROLE_HQ'], 'page-views-reports-x-incoming'),
 		'/requests': createMeta(['ROLE_HQ', 'ROLE_FILIAL_USER']),
 		'/requests/expenses-request-affiliate': createMeta(['ROLE_FILIAL_USER'], 'page-views-requests-expenses-request-affiliate'),
+		'/requests/outgoing-request-affiliate': createMeta(['ROLE_FILIAL_USER'], 'page-views-requests-outgoing-request-affiliate'),
 		'/request-report': createMeta(['ROLE_ADMIN', 'ROLE_FILIAL_USER'], 'components-page-views-request-report')
 	};
 
