@@ -10,4 +10,5 @@ public class XIncomingDto extends BaseDto {
     public Boolean cash;
     
     public DictOrgDto org;
+    public Long transOrgId;
 }

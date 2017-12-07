@@ -43,10 +43,12 @@ public class BudgetNextChangeItemEntity extends BaseEntity {
     public static final String COL_CURRENCY_ID = "CURRENCY_ID";
     public static final String COL_STORE_TYPE_ID = "STORE_TYPE_ID";
     public static final String COL_BUDGET_TYPE_ID = "BUDGET_TYPE_ID";
+    public static final String COL_SUB_BUDGET_TYPE_ID = "SUB_BUDGET_TYPE_ID";
     public static final String COL_ITEM_VALUE = "ITEM_VALUE";
     public static final String COL_NOTE_ID = "NOTE_ID";
     public static final String PROP_CHANGE = "change";
     public static final String CONS_CH_CUR_ST_BUD = "CH_CUR_ST_BUD";
+    public static final String COL_ORG_ID = "ORG_ID";
     
     @ManyToOne(optional = false)
     @JoinColumn(
@@ -87,7 +89,17 @@ public class BudgetNextChangeItemEntity extends BaseEntity {
             )
     )
     private DictBudgetEntity budgetType;
-    
+
+    @ManyToOne(optional = false)
+    @JoinColumn(
+            name = COL_SUB_BUDGET_TYPE_ID, nullable = false,
+            foreignKey = @ForeignKey(
+                    name = FK + SEP + TABLE + SEP + COL_SUB_BUDGET_TYPE_ID,
+                    value = ConstraintMode.CONSTRAINT
+            )
+    )
+    private DictBudgetEntity subBudgetType;
+
     @Column(name = COL_ITEM_VALUE, nullable = false, precision = BUDGET_PRECISION, scale = BUDGET_SCALE)
     private Double itemValue;
     
@@ -100,6 +112,16 @@ public class BudgetNextChangeItemEntity extends BaseEntity {
             )
     )
     private NoteEntity note;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(
+            name = COL_ORG_ID, nullable = false,
+            foreignKey = @ForeignKey(
+                    name = FK + SEP + TABLE + SEP + COL_ORG_ID,
+                    value = ConstraintMode.CONSTRAINT
+            )
+    )
+    private DictOrgEntity org;
 
     public BudgetNextChangeEntity getChange() {
         return change;
@@ -148,4 +170,21 @@ public class BudgetNextChangeItemEntity extends BaseEntity {
     public void setNote(NoteEntity note) {
         this.note = note;
     }
+
+    public DictBudgetEntity getSubBudgetType() {
+        return subBudgetType;
+    }
+
+    public void setSubBudgetType(DictBudgetEntity subBudgetType) {
+        this.subBudgetType = subBudgetType;
+    }
+
+    public DictOrgEntity getOrg() {
+        return org;
+    }
+
+    public void setOrg(DictOrgEntity org) {
+        this.org = org;
+    }
+
 }

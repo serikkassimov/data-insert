@@ -376,6 +376,7 @@ public class Dtos {
             result.value = source.getValue();
             result.orderNumber = source.getOrderNumber();
             result.cash = source.getCash();
+            result.transOrgId = source.getTransOrg().getId();
         }
         return result;
     }

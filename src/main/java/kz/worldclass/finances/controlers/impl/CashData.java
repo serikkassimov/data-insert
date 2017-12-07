@@ -7,6 +7,7 @@ import kz.worldclass.finances.data.dto.results.cashreport.AffiliateGetDataResult
 import kz.worldclass.finances.data.dto.results.dict.*;
 import kz.worldclass.finances.data.dto.results.expensesrequest.GetAffiliateDataResult;
 import kz.worldclass.finances.data.dto.results.xincoming.GetDataResult;
+import kz.worldclass.finances.data.entity.BudgetBalanceEntity;
 import kz.worldclass.finances.data.entity.DictOrgEntity;
 import kz.worldclass.finances.services.*;
 import org.apache.poi.hpsf.SummaryInformation;
@@ -93,7 +94,7 @@ public class CashData extends AbstractRestController {
         HSSFSheet hssfSheet = null;
         HSSFSheet sheet = null;
 
-        List<BudgetHistoryItemDto> items = cashDataService.getHistoryItems(startDateCalendar.getTime(), endDateCalendar.getTime());
+        List<BudgetNextChangeItemDto> items = cashDataService.getNextItems(startDateCalendar.getTime(), endDateCalendar.getTime());
 
         sheet = book1.getSheetAt(0);
         hssfSheet = workbook.createSheet(sheet.getSheetName());
@@ -195,6 +196,7 @@ public class CashData extends AbstractRestController {
         HSSFRow row;
         Cell cell;
         sheet = hssfSheet;
+        BudgetBalanceEntity budgetBalanceEntity = new BudgetBalanceEntity();
         rownum = 7;
         ArrayList<Map<String, Object>> data = loadDataFor_4_Rep(startDateCalendar, endDateCalendar);
         ArrayList<Integer> rowsNumUpper = new ArrayList<>();
@@ -249,6 +251,14 @@ public class CashData extends AbstractRestController {
                         case 5:
                             cellCol = 13;
                             break;
+                    }
+                    String note = subchildren.get("note").toString().toLowerCase();
+                    if (note.contains("СПА".toLowerCase())) {
+                        cellCol++;
+                    }
+                    if (note.contains("кафе".toLowerCase())) {
+                        cellCol++;
+                        cellCol++;
                     }
                     cell = row.getCell(cellCol);
                     cell.setCellValue((Double) subchildren.get("item_value"));
@@ -899,7 +909,7 @@ public class CashData extends AbstractRestController {
         }
     }
 
-    private ArrayList<Map<String, Double>> getData(String storeTypeCode, Calendar startDateCalendar, Calendar endDateCalendar, List<DictBudgetDto> dictBudgets, List<BudgetHistoryItemDto> items, DictOrgDto orgDto) {
+    private ArrayList<Map<String, Double>> getData(String storeTypeCode, Calendar startDateCalendar, Calendar endDateCalendar, List<DictBudgetDto> dictBudgets, List<BudgetNextChangeItemDto> items, DictOrgDto orgDto) {
         Calendar current = new GregorianCalendar();
         current.setTimeInMillis(startDateCalendar.getTimeInMillis());
 
@@ -919,14 +929,14 @@ public class CashData extends AbstractRestController {
 
             for (DictBudgetDto dictBudget : dictBudgets) {
                 Double sum = 0D;
-                for (BudgetHistoryItemDto item : items) {
+                for (BudgetNextChangeItemDto item : items) {
                     if (
                             ((storeTypeCode == null) || (storeTypeCode.equals(item.storeType.code)))
                                     && (dictBudget.code.equals(item.budgetType.code))
-                                    && (item.history.changeDate >= currentMillis)
-                                    && (item.history.changeDate < nextMillis)
+                                    && (item.change.changeDate >= currentMillis)
+                                    && (item.change.changeDate < nextMillis)
                                     && (item.itemValue != null)
-                                    && (item.history.org.code.equals(orgDto.code))
+                                    && (item.change.org.code.equals(orgDto.code))
                             ) {
                         if (dictBudget.outgo) sum -= item.itemValue;
                         else sum += item.itemValue;
@@ -1007,7 +1017,7 @@ public class CashData extends AbstractRestController {
         return result;
     }
 
-    private void doSheet1(HSSFSheet sheet, Calendar startDateCalendar, Calendar endDateCalendar, DictOrgDto org, List<BudgetHistoryItemDto> items) {
+    private void doSheet1(HSSFSheet sheet, Calendar startDateCalendar, Calendar endDateCalendar, DictOrgDto org, List<BudgetNextChangeItemDto> items) {
         List<DictBudgetDto> dictBudgets = cashDataService.getEnabledIncomingLeafs();
         doIncomeRows(sheet, startDateCalendar, endDateCalendar, org, dictBudgets, items, 4, "CASH");
         doIncomeRows(sheet, startDateCalendar, endDateCalendar, org, dictBudgets, items, 41, "CASHLESS_BANK");
@@ -1016,7 +1026,7 @@ public class CashData extends AbstractRestController {
 
     }
 
-    private void doIncomeRows(HSSFSheet sheet, Calendar startDateCalendar, Calendar endDateCalendar, DictOrgDto org, List<DictBudgetDto> dictBudgets, List<BudgetHistoryItemDto> items, int rowmum, String type) {
+    private void doIncomeRows(HSSFSheet sheet, Calendar startDateCalendar, Calendar endDateCalendar, DictOrgDto org, List<DictBudgetDto> dictBudgets, List<BudgetNextChangeItemDto> items, int rowmum, String type) {
         ArrayList<Map<String, Double>> maps = getData(type, startDateCalendar, endDateCalendar, dictBudgets, items, org);
         HSSFRow row = null;
         HSSFCell cell = null;
@@ -1085,7 +1095,7 @@ public class CashData extends AbstractRestController {
 
         List<DictBudgetDto> dictBudgets = cashDataService.getEnabledIncomingLeafs();
 
-        List<BudgetHistoryItemDto> items = cashDataService.getHistoryItems(startDateCalendar.getTime(), endDateCalendar.getTime());
+        List<BudgetNextChangeItemDto> items = cashDataService.getNextItems(startDateCalendar.getTime(), endDateCalendar.getTime());
 
         // 1 строка
         int rownum = 0;
@@ -1225,6 +1235,48 @@ public class CashData extends AbstractRestController {
             response.setContentType("application/vnd.ms-excel");
             workbook.write(sout);
         } catch (IOException | RuntimeException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @RequestMapping(value = "/test")
+    public void report(
+
+    ) {
+        File file = new File("/home/serik/Рабочий стол/data");
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            ArrayList<Double> doubles = new ArrayList<>();
+            while ((line = br.readLine()) != null) {
+                Double aDouble = Double.parseDouble(line.replaceAll(",", "."));
+                doubles.add(aDouble);
+            }
+            for (int i = 0; i < doubles.size(); i++) {
+                ArrayList<Double> var = new ArrayList<>();
+                Double s = doubles.get(i);
+                for (int j = 0; j < doubles.size(); j++) {
+                    s = s  + doubles.get(j);
+                    var.add(doubles.get(j));
+                    if (s > 51430) {
+                      //  System.out.println(var.size());
+                        if (s == 51431) {
+                            System.out.println("=============");
+                            System.out.println(s);
+                            System.out.println(doubles.get(i));
+                            for (Double v : var) {
+                                System.out.print(v + ",");
+                            }
+                            System.out.println();
+                            System.out.println("=============");
+                        }
+                        var = new ArrayList<>();
+                        break;
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

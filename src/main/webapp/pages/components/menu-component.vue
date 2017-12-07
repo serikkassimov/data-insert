@@ -28,8 +28,8 @@
 			</el-submenu>
 			<el-submenu index="/requests" v-if="isAllowed('/requests')">
 				<template slot="title">Заявки</template>
-				<!-- <el-menu-item index="/requests/expenses-request-affiliate" v-if="isAllowed('/requests/expenses-request-affiliate')">Заявка на расходы</el-menu-item> -->
-				<el-menu-item index="/requests/outgoing-request-affiliate" v-if="isAllowed('/requests/outgoing-request-affiliate')">Заявка на расходы</el-menu-item>
+				<el-menu-item index="/requests/expenses-request-affiliate" v-if="isAllowed('/requests/expenses-request-affiliate')">Заявка на расходы</el-menu-item>
+				<!--<el-menu-item index="/requests/outgoing-request-affiliate" v-if="isAllowed('/requests/outgoing-request-affiliate')">Заявка на расходы</el-menu-item>-->
 			</el-submenu>
 		</el-menu>
 	</div>

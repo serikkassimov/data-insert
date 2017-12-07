@@ -4,10 +4,8 @@ import java.util.List;
 import kz.worldclass.finances.controlers.AbstractRestController;
 import static kz.worldclass.finances.controlers.AbstractRestController.APPLICATION_JSON;
 import static kz.worldclass.finances.controlers.AbstractRestController.APPLICATION_JSON_UTF_8;
-import kz.worldclass.finances.data.dto.entity.BudgetNextChangeDto;
-import kz.worldclass.finances.data.dto.entity.DictBudgetDto;
-import kz.worldclass.finances.data.dto.entity.DictBudgetStoreTypeDto;
-import kz.worldclass.finances.data.dto.entity.DictCurrencyDto;
+
+import kz.worldclass.finances.data.dto.entity.*;
 import kz.worldclass.finances.data.dto.results.expensesrequest.GetAffiliateDataResult;
 import kz.worldclass.finances.data.dto.results.expensesrequest.SaveAffiliateDataResult;
 import kz.worldclass.finances.services.ExpensesRequestService;
@@ -37,6 +35,11 @@ public class ExpensesRequestController extends AbstractRestController {
     @RequestMapping(value = "/dict/currencies", produces = APPLICATION_JSON_UTF_8)
     public List<DictCurrencyDto> dictCurrencies() {
         return service.getDictCurrencies();
+    }
+
+    @RequestMapping(value = "/dict/orgs", produces = APPLICATION_JSON_UTF_8)
+    public List<DictOrgDto> dictOrgs() {
+        return service.getDictOrgs();
     }
     
     @RequestMapping(value = "/affiliate/data/get", produces = APPLICATION_JSON_UTF_8)

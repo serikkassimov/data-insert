@@ -6,15 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import kz.worldclass.finances.dao.impl.BudgetNextChangeDao;
-import kz.worldclass.finances.dao.impl.BudgetNextChangeItemDao;
-import kz.worldclass.finances.dao.impl.DictBudgetDao;
-import kz.worldclass.finances.dao.impl.DictBudgetNextChangeStateDao;
-import kz.worldclass.finances.dao.impl.DictBudgetNextChangeTypeDao;
-import kz.worldclass.finances.dao.impl.DictBudgetStoreTypeDao;
-import kz.worldclass.finances.dao.impl.DictCurrencyDao;
-import kz.worldclass.finances.dao.impl.NoteDao;
-import kz.worldclass.finances.dao.impl.UserDao;
+
+import kz.worldclass.finances.dao.impl.*;
 import kz.worldclass.finances.data.dto.entity.*;
 import kz.worldclass.finances.data.dto.results.expensesrequest.GetAffiliateDataResult;
 import kz.worldclass.finances.data.dto.results.expensesrequest.SaveAffiliateDataResult;
@@ -52,6 +45,8 @@ public class ExpensesRequestService {
     private DictBudgetStoreTypeDao dictBudgetStoreTypeDao;
     @Autowired
     private DictCurrencyDao dictCurrencyDao;
+    @Autowired
+    private DictOrgDao dictOrgDao;
     @Autowired
     private NoteDao noteDao;
     @Autowired
@@ -97,7 +92,8 @@ public class ExpensesRequestService {
                 dto.currency = Dtos.less(entity.getCurrency());
                 dto.note = Dtos.less(entity.getNote());
                 dto.storeType = Dtos.less(entity.getStoreType());
-                
+                dto.budgetSubType = Dtos.less(entity.getSubBudgetType());
+                dto.org = Dtos.less(entity.getOrg());
                 List<BudgetNextChangeItemDto> itemDtos = map.get(dto.budgetType.id);
                 if (itemDtos == null) {
                     itemDtos = new ArrayList<>();
@@ -118,8 +114,10 @@ public class ExpensesRequestService {
         
         if (dto.changeDate == null) return SaveAffiliateDataResult.NO_DATE;
         Date changeDate = new Date(dto.changeDate);
-        
+
         Map<Long, DictBudgetEntity> budgetMap = new HashMap<>();
+        Map<Long, DictOrgEntity> orgMap = new HashMap<>();
+        Map<Long, DictBudgetEntity> subBudgetMap = new HashMap<>();
         Map<Long, DictCurrencyEntity> currencyMap = new HashMap<>();
         Map<Long, DictBudgetStoreTypeEntity> storeTypeMap = new HashMap<>();
         
@@ -128,6 +126,8 @@ public class ExpensesRequestService {
             for (BudgetNextChangeItemDto itemDto: dto.items) {
                 if (itemDto != null) {
                     if ((itemDto.budgetType == null) || (itemDto.budgetType.id == null)) return SaveAffiliateDataResult.NO_BUDGET;
+                    if ((itemDto.budgetSubType == null) || (itemDto.budgetSubType.id == null)) return SaveAffiliateDataResult.NO_BUDGET;
+                    if ((itemDto.org == null) || (itemDto.org.id == null)) return SaveAffiliateDataResult.NO_BUDGET;
                     if ((itemDto.currency == null) || (itemDto.currency.id == null)) return SaveAffiliateDataResult.NO_CURRENCY;
                     if ((itemDto.storeType == null) || (itemDto.storeType.id == null)) return SaveAffiliateDataResult.NO_STORE_TYPE;
                     if (itemDto.itemValue != null) {
@@ -135,16 +135,24 @@ public class ExpensesRequestService {
                         else if (itemDto.itemValue > 0D) {
                             DictBudgetEntity budgetEntity = dictBudgetDao.get(itemDto.budgetType.id);
                             if (budgetEntity == null) return SaveAffiliateDataResult.BUDGET_NOT_FOUND;
-                            
+
+                            DictBudgetEntity budgetSubEntity = dictBudgetDao.get(itemDto.budgetSubType.id);
+                            if (budgetSubEntity == null) return SaveAffiliateDataResult.BUDGET_NOT_FOUND;
+
                             DictCurrencyEntity currencyEntity = dictCurrencyDao.get(itemDto.currency.id);
                             if (currencyEntity == null) return SaveAffiliateDataResult.CURRENCY_NOT_FOUND;
+
+                            DictOrgEntity orgEntity = dictOrgDao.get(itemDto.org.id);
+                            if (orgEntity == null) return SaveAffiliateDataResult.ORG_NOT_FOUND;
                             
                             DictBudgetStoreTypeEntity storeTypeEntity = dictBudgetStoreTypeDao.get(itemDto.storeType.id);
                             if (storeTypeEntity == null) return SaveAffiliateDataResult.STORE_TYPE_NOT_FOUND;
                             
                             budgetMap.put(budgetEntity.getId(), budgetEntity);
+                            subBudgetMap.put(budgetSubEntity.getId(), budgetSubEntity);
                             currencyMap.put(currencyEntity.getId(), currencyEntity);
                             storeTypeMap.put(storeTypeEntity.getId(), storeTypeEntity);
+                            orgMap.put(orgEntity.getId(), orgEntity);
                             
                             changeItemDtos.add(itemDto);
                         }
@@ -205,7 +213,9 @@ public class ExpensesRequestService {
             changeItemEntity.setCurrency(currencyMap.get(changeItemDto.currency.id));
             changeItemEntity.setStoreType(storeTypeMap.get(changeItemDto.storeType.id));
             changeItemEntity.setItemValue(changeItemDto.itemValue);
-            
+            changeItemEntity.setSubBudgetType(subBudgetMap.get(changeItemDto.budgetSubType.id));
+            changeItemEntity.setOrg(orgMap.get(changeItemDto.org.id));
+
             NoteEntity noteEntity = changeItemEntity.getNote();
             
             if ((changeItemDto.note != null) && (changeItemDto.note.noteValue != null) && (!changeItemDto.note.noteValue.isEmpty())) {
@@ -234,5 +244,11 @@ public class ExpensesRequestService {
         }
         
         return SaveAffiliateDataResult.SUCCESS;
+    }
+
+    public List<DictOrgDto> getDictOrgs() {
+        List<DictOrgDto> result = new ArrayList<>();
+        for (DictOrgEntity entity: dictOrgDao.allEnabled()) result.add(Dtos.less(entity));
+        return result;
     }
 }

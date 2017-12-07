@@ -237,6 +237,8 @@ public class CashReportService {
             itemEntity.setCurrency(dictCurrencyMap.get(itemDto.currency.id));
             itemEntity.setStoreType(dictBudgetStoreTypeMap.get(itemDto.storeType.id));
             itemEntity.setItemValue(itemDto.itemValue);
+            itemEntity.setSubBudgetType(dictBudgetMap.get(itemDto.budgetType.id));
+            itemEntity.setOrg(orgEntity);
             budgetNextChangeItemDao.save(itemEntity);
         }
         

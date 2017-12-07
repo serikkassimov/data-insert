@@ -11,6 +11,7 @@ import kz.worldclass.finances.dao.impl.UserDao;
 import kz.worldclass.finances.dao.impl.XIncomingDao;
 import kz.worldclass.finances.data.dto.entity.Dtos;
 import kz.worldclass.finances.data.dto.entity.XIncomingDto;
+import kz.worldclass.finances.data.dto.results.expensesrequest.SaveAffiliateDataResult;
 import kz.worldclass.finances.data.dto.results.xincoming.GetDataResult;
 import kz.worldclass.finances.data.dto.results.xincoming.SaveDataResult;
 import kz.worldclass.finances.data.entity.DictOrgEntity;
@@ -71,10 +72,13 @@ public class XIncomingService {
                 xIncomingEntity = deletedMap.remove(xIncomingDto.id);
                 if (xIncomingEntity == null) return SaveDataResult.DATA_NOT_FOUND;
             }
+            DictOrgEntity transOrgEntity = dictOrgDao.get(xIncomingDto.transOrgId);
+            if (transOrgEntity == null) return SaveDataResult.ORG_NOT_FOUND;
             xIncomingEntity.setNote(xIncomingDto.note);
             xIncomingEntity.setOrderNumber(xIncomingDto.orderNumber);
             xIncomingEntity.setCash(xIncomingDto.cash);
             xIncomingEntity.setValue(xIncomingDto.value);
+            xIncomingEntity.setTransOrg(transOrgEntity);
             xIncomingDao.saveOrUpdate(xIncomingEntity);
         }
         

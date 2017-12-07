@@ -1,15 +1,8 @@
 package kz.worldclass.finances.data.entity;
 
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
+
 import static kz.worldclass.finances.data.entity.XIncomingEntity.*;
 import kz.worldclass.finances.data.entity.base.BaseEntity;
 
@@ -20,6 +13,7 @@ import kz.worldclass.finances.data.entity.base.BaseEntity;
 public class XIncomingEntity extends BaseEntity {
     public static final String TABLE = "X_INCOMING";
     public static final String COL_ORG_ID = "ORG_ID";
+    public static final String COL_TRANS_ORG_ID = "TRANS_ORG_ID";
     public static final String COL_DATE = "C_DATE";
     public static final String COL_NOTE = "NOTE";
     public static final String COL_VALUE = "C_VALUE";
@@ -45,6 +39,16 @@ public class XIncomingEntity extends BaseEntity {
     
     @Column(name = COL_CASH, nullable = false)
     private Boolean cash;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(
+            name = COL_TRANS_ORG_ID, nullable = false,
+            foreignKey = @ForeignKey(
+                    name = FK + SEP + TABLE + SEP + COL_TRANS_ORG_ID,
+                    value = ConstraintMode.CONSTRAINT
+            )
+    )
+    private DictOrgEntity transOrg;
 
     public DictOrgEntity getOrg() {
         return org;
@@ -93,4 +97,15 @@ public class XIncomingEntity extends BaseEntity {
     public void setCash(Boolean cash) {
         this.cash = cash;
     }
+
+    public DictOrgEntity getTransOrg() {
+        return transOrg;
+    }
+
+    public void setTransOrg(DictOrgEntity transOrg) {
+        this.transOrg = transOrg;
+    }
+
+
+
 }

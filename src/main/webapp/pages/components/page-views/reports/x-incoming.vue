@@ -22,24 +22,25 @@
 						<th>Сумма</th>
 						<th>Наличные/банк</th>
 						<th></th>
+						<th>Филиал</th>
 					</tr>
 				</thead>
 				<tbody style="overflow: scroll;">
 					<tr v-for="(item, index) in data.items" :key="index">
-						<th>{{index + 1}}</th>
-						<th>
+						<td>{{index + 1}}</td>
+						<td>
 							<el-input placeholder="Назначение" v-model="item.note"></el-input>
-						</th>
-						<th>
+						</td>
+						<td>
 							<el-input-number v-model="item.value"></el-input-number>
-						</th>
-						<th>
+						</td>
+						<td>
 							<el-select v-model="item.cash">
 								<el-option :value="true" :label="'Наличные'"></el-option>
 								<el-option :value="false" :label="'Банк'"></el-option>
 							</el-select>
-						</th>
-						<th>
+						</td>
+						<td>
 							<el-dropdown
 								@command="(command) => {
 									if (command === 'delete') deleteItem(index);
@@ -56,7 +57,12 @@
 									<el-dropdown-item command="delete">Удалить</el-dropdown-item>
 								</el-dropdown-menu>
 							</el-dropdown>
-						</th>
+						</td>
+						<td>
+							<el-select filterable v-model="item.transOrgId">
+								<el-option v-for="org in dict.org.items" :key="org.id" :label="'[' + org.code + '] ' + org.name" :value="org.id"></el-option>
+							</el-select>
+						</td>
 					</tr>
 				</tbody>
 			</table>
@@ -77,18 +83,29 @@
 			date.setSeconds(0);
 			date.setMinutes(0);
 			date.setHours(0);
-
 			return {
+                dict: {
+                    org: {
+                        items: [],
+                        loading: false
+                    }
+                },
 				data: {
 					date: date,
 					cash: true,
 					items: [],
 					original: [],
-					loading: false
+					loading: false,
 				}
 			};
 		},
 		computed: Vuex.mapState({
+            dictLoading: function() {
+                return this.dict.org.loading;
+            },
+            loading: function() {
+                return this.dictLoading || this.data.loading;
+            },
 			loading: function() {
 				return this.data.loading;
 			},
@@ -98,6 +115,7 @@
 		}),
 		methods: {
 			reloadAll: function() {
+                this.reloadOrgs();
 				this.reloadData();
 			},
 			reloadData: function() {
@@ -159,6 +177,28 @@
 					}
 				});
 			},
+            reloadOrgs: function() {
+                if (this.dict.org.loading) return;
+
+                this.dict.org.loading = true;
+                this.dict.org.items = [];
+
+                $.ajax({
+                    url:  WorldClassRestRoot + '/expenses-request/dict/orgs',
+                    dataType: 'json',
+                    context: this,
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error('error while loading orgs:', textStatus, ' - ', errorThrown);
+                        this.$notify.error({title: 'Ошибка', message: 'Не удалось загрузить организации'});
+                    },
+                    success: function(data, textStatus, jqXHR) {
+                        this.dict.org.items = data;
+                    },
+                    complete: function(jqXHR, textStatus) {
+                        this.dict.org.loading = false;
+                    }
+                });
+            },
 			deleteItem: function(index) {
 				if ((index >= 0) && (index < this.data.items.length)) this.data.items.splice(index, 1);
 			},
@@ -196,7 +236,8 @@
 					if (isComparableNumber(item.value)) {
 						var savedItem = {
 							value: item.value,
-							cash: item.cash
+							cash: item.cash,
+							transOrgId: item.transOrgId,
 						};
 						if (isNonEmptyString(item.note)) savedItem.note = item.note;
 						if (isComparableNumber(item.id)) savedItem.id = item.id;

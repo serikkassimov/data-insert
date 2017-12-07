@@ -5,19 +5,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import kz.worldclass.finances.dao.impl.BudgetHistoryItemDao;
-import kz.worldclass.finances.dao.impl.DictBudgetDao;
-import kz.worldclass.finances.dao.impl.DictOrgDao;
-import kz.worldclass.finances.dao.impl.UserDao;
-import kz.worldclass.finances.data.dto.entity.BudgetHistoryItemDto;
-import kz.worldclass.finances.data.dto.entity.DictBudgetDto;
-import kz.worldclass.finances.data.dto.entity.DictOrgDto;
-import kz.worldclass.finances.data.dto.entity.Dtos;
+
+import kz.worldclass.finances.dao.impl.*;
+import kz.worldclass.finances.data.dto.entity.*;
 import kz.worldclass.finances.data.dto.results.cashreport.AffiliateSaveDataResult;
-import kz.worldclass.finances.data.entity.BudgetHistoryItemEntity;
-import kz.worldclass.finances.data.entity.DictBudgetEntity;
-import kz.worldclass.finances.data.entity.DictOrgEntity;
-import kz.worldclass.finances.data.entity.UserEntity;
+import kz.worldclass.finances.data.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +25,8 @@ public class CashDataService {
     private DictOrgDao dictOrgDao ;
     @Autowired
     private BudgetHistoryItemDao budgetHistoryItemDao;
+    @Autowired
+    private BudgetNextChangeItemDao budgetNextChangeItemDao;
     @Autowired
     private UserDao userDao;
     
@@ -71,6 +65,22 @@ public class CashDataService {
             dto.history = Dtos.less(entity.getHistory());
             if (entity.getHistory() != null) {
                 dto.history.org = Dtos.less(entity.getHistory().getOrg());
+            }
+            dto.budgetType = Dtos.less(entity.getBudgetType());
+            dto.currency = Dtos.less(entity.getCurrency());
+            dto.storeType = Dtos.less(entity.getStoreType());
+        }
+        return result;
+    }
+
+    public List<BudgetNextChangeItemDto> getNextItems(Date startDate, Date endDate) {
+        List<BudgetNextChangeItemDto> result = new ArrayList<>();
+        for (BudgetNextChangeItemEntity entity: budgetNextChangeItemDao.fetchBetweenDates(CURRENCY_CODE_KZT, startDate, endDate)) {
+            BudgetNextChangeItemDto dto = Dtos.less(entity);
+            result.add(dto);
+            dto.change = Dtos.less(entity.getChange());
+            if (entity.getChange() != null) {
+                dto.change.org = Dtos.less(entity.getChange().getOrg());
             }
             dto.budgetType = Dtos.less(entity.getBudgetType());
             dto.currency = Dtos.less(entity.getCurrency());

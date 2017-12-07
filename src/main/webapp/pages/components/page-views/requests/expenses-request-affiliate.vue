@@ -31,6 +31,8 @@
 									<th :key="budgetStoreType.id + '-' + currency.id">{{currency.name}}</th>
 								</template>
 							</template>
+							<th rowspan="2" style="min-width: 200px;">Статья перевода</th>
+							<th rowspan="2" style="min-width: 200px;">Филиал перевода</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -64,6 +66,16 @@
 									</td>
 								</template>
 							</template>
+							<td>
+								<el-select filterable v-model="item.subBudgetId">
+									<el-option v-for="budget in dict.budget.items" :key="budget.id" :label="'[' + budget.code + '] ' + budget.name" :value="budget.id"></el-option>
+								</el-select>
+							</td>
+							<td>
+								<el-select filterable v-model="item.orgId">
+									<el-option v-for="org in dict.org.items" :key="org.id" :label="'[' + org.code + '] ' + org.name" :value="org.id"></el-option>
+								</el-select>
+							</td>
 						</tr>
 					</tbody>
 				</table>
@@ -98,7 +110,11 @@
 					currency: {
 						items: [],
 						loading: false
-					}
+					},
+                    org: {
+                        items: [],
+                        loading: false
+                    }
 				},
 				data: {
 					date: date,
@@ -111,7 +127,7 @@
 		},
 		computed: Vuex.mapState({
 			dictLoading: function() {
-				return this.dict.budget.loading || this.dict.budgetStoreType.loading || this.dict.currency.loading;
+				return this.dict.budget.loading || this.dict.budgetStoreType.loading || this.dict.currency.loading || this.dict.org.loading;
 			},
 			loading: function() {
 				return this.dictLoading || this.data.loading;
@@ -149,6 +165,7 @@
 				this.reloadBudgets();
 				this.reloadBudgetStoreTypes();
 				this.reloadCurrencies();
+				this.reloadOrgs();
 				this.reloadData();
 			},
             getCashReport: function () {
@@ -225,6 +242,29 @@
 					}
 				});
 			},
+            reloadOrgs: function() {
+                if (this.dict.org.loading) return;
+
+                this.dict.org.loading = true;
+                this.dict.org.items = [];
+
+                $.ajax({
+                    url: ajaxRoot + '/dict/orgs',
+                    dataType: 'json',
+                    context: this,
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error('error while loading orgs:', textStatus, ' - ', errorThrown);
+                        this.$notify.error({title: 'Ошибка', message: 'Не удалось загрузить организации'});
+                    },
+                    success: function(data, textStatus, jqXHR) {
+                        this.dict.org.items = data;
+                    },
+                    complete: function(jqXHR, textStatus) {
+                        this.dict.org.loading = false;
+                        this.initData();
+                    }
+                });
+            },
 			reloadData: function() {
 				if (this.data.loading) return;
 
@@ -265,6 +305,8 @@
 											item = {
 												id: dataItem.id,
 												budgetId: dataItem.budgetType.id,
+                                                subBudgetId: dataItem.budgetSubType.id,
+                                                orgId: dataItem.org.id,
 												values: {}
 											};
 											items.push(item);
@@ -309,6 +351,8 @@
 				var newItem = {
 					id: null,
 					budgetId: null,
+                    budgetSubId: null,
+                    orgId: null,
 					noteId: null,
 					note: null,
 					values: {}
@@ -363,8 +407,11 @@
 									currency: {id: currency.id},
 									storeType: {id: budgetStoreType.id},
 									budgetType: {id: item.budgetId},
+                                    budgetSubType: {id: item.subBudgetId},
+                                    org: {id: item.orgId},
 									note: {noteValue: item.note}
 								};
+								console.log("item", item);
 								nextChange.items.push(nextChangeItem);
 							}
 						}
