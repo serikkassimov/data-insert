@@ -51,6 +51,15 @@ public class XIncomingService {
         for (XIncomingEntity xIncomingEntity: xIncomingDao.fetchByOrgAndBetweenDate(userOrgEntity, begdate, enddate)) xIncomingDtos.add(Dtos.less(xIncomingEntity));
         return new GetDataResult(xIncomingDtos.toArray(new XIncomingDto[xIncomingDtos.size()]));
     }
+
+    public GetDataResult getDataTransOrg(Date begdate, Date enddate, long org) {
+        DictOrgEntity userOrgEntity = dictOrgDao.get(org);
+        if (userOrgEntity == null) return new GetDataResult(GetDataResult.Type.ORG_NOT_FOUND);
+
+        List<XIncomingDto> xIncomingDtos = new ArrayList<>();
+        for (XIncomingEntity xIncomingEntity: xIncomingDao.fetchByTransOrgAndBetweenDate(userOrgEntity, begdate, enddate)) xIncomingDtos.add(Dtos.less(xIncomingEntity));
+        return new GetDataResult(xIncomingDtos.toArray(new XIncomingDto[xIncomingDtos.size()]));
+    }
     
     public SaveDataResult saveData(Date date, List<XIncomingDto> dtos, String login) {
         UserEntity userEntity = userDao.fetchOneByLogin(login);

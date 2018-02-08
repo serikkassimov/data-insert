@@ -140,22 +140,22 @@ public class CashData extends AbstractRestController {
         HSSFRow row;
         Cell cell;
         sheet = hssfSheet;
-        GetDataResult result = xIncomingService.getData(startDateCalendar.getTime(), endDateCalendar.getTime(), 1L);
+        GetDataResult result = xIncomingService.getDataTransOrg(startDateCalendar.getTime(), endDateCalendar.getTime(), 1L);
         rownum = 7;
         fillCash(sheet, rownum, result);
         rownum = 12;
         fillNoCash(sheet, rownum, result);
-        result = xIncomingService.getData(startDateCalendar.getTime(), endDateCalendar.getTime(), 3L);
+        result = xIncomingService.getDataTransOrg(startDateCalendar.getTime(), endDateCalendar.getTime(), 3L);
         rownum = 39;
         fillCash(sheet, rownum, result);
         rownum = 34;
         fillNoCash(sheet, rownum, result);
-        result = xIncomingService.getData(startDateCalendar.getTime(), endDateCalendar.getTime(), 4L);
+        result = xIncomingService.getDataTransOrg(startDateCalendar.getTime(), endDateCalendar.getTime(), 4L);
         rownum = 60;
         fillCash(sheet, rownum, result);
         rownum = 61;
         fillNoCash(sheet, rownum, result);
-        result = xIncomingService.getData(startDateCalendar.getTime(), endDateCalendar.getTime(), 5L);
+        result = xIncomingService.getDataTransOrg(startDateCalendar.getTime(), endDateCalendar.getTime(), 5L);
         rownum = 83;
         fillCash(sheet, rownum, result);
         rownum = 84;
@@ -639,11 +639,11 @@ public class CashData extends AbstractRestController {
 
     private void addDBData(ArrayList<Map<String, Object>> res, Map<Long, Object> budRows, Calendar startDateCalendar, Calendar endDateCalendar) {
         Session session = sessionFactory.openSession();
-        String sql = "select\n" +
+        String sql = "select " +
                 "    nc.CHANGE_DATE,\n" +
-                "    nc.ORG_ID,\n" +
+                "    nci.ORG_ID,\n" +
                 "    nci.ITEM_VALUE,\n" +
-                "    nci.BUDGET_TYPE_ID,\n" +
+                "    nci.SUB_BUDGET_TYPE_ID,\n" +
                 "    n.NOTE_VALUE\n" +
                 "from\n" +
                 "    DICT_BUDGET_NEXT_CHANGE_TYPE dnct,\n" +
@@ -1041,9 +1041,10 @@ public class CashData extends AbstractRestController {
                 cell.setCellValue(date);
             }
 //35, 38, 34, 36, 41, 37, 40, 39
-            int i = 0;
-            for (i = 0; i < dictBudgets.size(); i++) {
-                switch (dictBudgets.get(i).id.intValue()) {
+            int idOfBud = 0;
+            for (int i = 0; i < dictBudgets.size(); i++) {
+                idOfBud = dictBudgets.get(i).id.intValue();
+                switch (idOfBud) {
                     case 35:
                         cell = row.getCell(1);
                         break;
@@ -1068,8 +1069,12 @@ public class CashData extends AbstractRestController {
                     case 39:
                         cell = row.getCell(8);
                         break;
+                    case 207:
+                        cell = row.getCell(9);
+                        break;
                 }
-                cell.setCellValue(dataRow.get(dictBudgets.get(i).code));
+                    cell.setCellValue(dataRow.get(dictBudgets.get(i).code));
+
             }
         }
     }
@@ -1255,10 +1260,10 @@ public class CashData extends AbstractRestController {
                 ArrayList<Double> var = new ArrayList<>();
                 Double s = doubles.get(i);
                 for (int j = 0; j < doubles.size(); j++) {
-                    s = s  + doubles.get(j);
+                    s = s + doubles.get(j);
                     var.add(doubles.get(j));
                     if (s > 51430) {
-                      //  System.out.println(var.size());
+                        //  System.out.println(var.size());
                         if (s == 51431) {
                             System.out.println("=============");
                             System.out.println(s);

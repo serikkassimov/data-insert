@@ -188,9 +188,9 @@
 					else next();
 				});
 
-				setInterval(function(){
-					store.dispatch('account/update');
-				}, 5000);
+//				setInterval(function(){
+//					store.dispatch('account/update');
+//				}, 5000);
 				store.dispatch('account/update');
 			}
 		};
